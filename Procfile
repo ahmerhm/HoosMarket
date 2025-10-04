@@ -1,1 +1,1 @@
-web: gunicorn project-b-16.wsgi
+web: gunicorn salty-shore-01968.wsgi
