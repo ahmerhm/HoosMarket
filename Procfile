@@ -1,1 +1,1 @@
-web: gunicorn salty-shore-01968.wsgi
+web: gunicorn app.wsgi
