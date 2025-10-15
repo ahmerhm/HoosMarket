@@ -1,0 +1,15 @@
+{% extends "account/base.html" %}
+{% load allauth socialaccount %}
+
+{% block content %}
+  <h1>Sign in</h1>
+
+  {# If you want username/password too #}
+  {% include "account/_login_form.html" %}
+
+  <hr>
+
+  {# Simple Google link (no elements API) #}
+  {% provider_login_url 'google' process='login' as google_url %}
+  <p><a href="{{ google_url }}">Continue with Google</a></p>
+{% endblock %}

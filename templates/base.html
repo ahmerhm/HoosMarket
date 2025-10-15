@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{% block title %}My App{% endblock %}</title>
+    <style>
+      body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0}
+      header{padding:12px 16px;border-bottom:1px solid #eee;display:flex;gap:12px;align-items:center}
+      main{max-width:840px;margin:24px auto;padding:0 16px}
+      .btn{display:inline-block;padding:10px 14px;border:1px solid #ccc;border-radius:8px;text-decoration:none}
+      .btn.primary{background:#111;color:#fff;border-color:#111}
+    </style>
+  </head>
+  <body>
+    <header>
+      <a class="btn" href="/">Home</a>
+      {% if user.is_authenticated %}
+        <span>Hi, {{ user.get_full_name|default:user.email|default:user.username }}!</span>
+        <a class="btn" href="{% url 'account_logout' %}">Log out</a>
+      {% else %}
+        <a class="btn primary" href="{% url 'account_login' %}">Log in</a>
+      {% endif %}
+    </header>
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>
