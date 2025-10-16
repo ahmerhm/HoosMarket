@@ -37,6 +37,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+]
+
+AUTHENTICATION_BACKENDS = [
+    "allauth.account.auth_backends.AuthenticationBackend"
 ]
 
 MIDDLEWARE = [
@@ -49,7 +57,21 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
+
+SOCIAL_ACCOUNT_PROVIDERS = {
+    "google": {
+        "APP": {
+            "client_id": "",
+            "secret": "",
+        },
+        "SCOPE": ["profile", "email",],
+        "AUTH_PARAMS": {"access_type": "online"},
+        "METHOD": "oauth2",
+        "VERIFIED_EMAIL": True, 
+    },
+}
 
 ROOT_URLCONF = "app.urls"
 
