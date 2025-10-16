@@ -1,8 +1,8 @@
 from django.shortcuts import render
 
-def about(request):
+def dashboard(request):
     context = {
         "title": "Website!",
         "message": "Dashboard page"
     }
-    return render(request, "about.html", context)
+    return render(request, "dashboard.html", context)
