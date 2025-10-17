@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "django.contrib.sites",
+    'app.apps.AppConfig',
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -73,6 +74,8 @@ SOCIALACCOUNT_PROVIDERS = {
 SITE_ID = 1
 
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
+
+ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000", "http://localhost:8000"]
 

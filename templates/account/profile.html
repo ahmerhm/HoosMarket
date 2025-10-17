@@ -1,0 +1,98 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Profile</title>
+  <style>
+    body { 
+      font-family: system-ui, sans-serif; 
+      background:#fafafa; 
+      display:grid; 
+      place-items:center; 
+      height:100vh; 
+      margin:0; 
+    }
+
+    .card { 
+      position: relative;
+      background:white; 
+      border:1px solid #ddd; 
+      border-radius:14px; 
+      padding:32px; 
+      width:400px; 
+      box-shadow:0 2px 8px rgba(0,0,0,.05); 
+    }
+
+    h1 { 
+      margin-bottom:12px; 
+      font-size:22px; 
+      text-align:center;
+    }
+
+    p { 
+      margin:6px 0; 
+    }
+
+    .avatar { 
+      width:80px; 
+      height:80px; 
+      border-radius:50%; 
+      background:#eee; 
+      margin:0 auto 16px auto; 
+    }
+
+    .btns { 
+      margin-top:20px; 
+      display:flex; 
+      gap:12px; 
+      justify-content:center; 
+    }
+
+    button, .logout-btn { 
+      border:none; 
+      padding:8px 16px; 
+      border-radius:8px; 
+      cursor:pointer; 
+      background:#111; 
+      color:white; 
+      text-decoration:none; 
+      font-weight:500;
+      transition: background 0.3s ease;
+    }
+
+    button:hover, .logout-btn:hover { 
+      background:#333; 
+    }
+
+    .logout-btn { 
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: #e53e3e;
+    }
+
+    .logout-btn:hover { 
+      background: #c53030;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <!-- Logout button (top-right corner) -->
+    <a href="{% url 'account_logout' %}" class="logout-btn">Log Out</a>
+
+    <div class="avatar"></div>
+    <h1>Hello, {{ user.first_name|default:user.username }}!</h1>
+    <p><strong>Name:</strong> {{ user.get_full_name }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Bio:</strong> Coming soon</p>
+    <p><strong>Status:</strong> Member</p>
+
+    <div class="btns">
+      <button>Messages</button>
+      <button>Posts</button>
+    </div>
+  </div>
+</body>
+</html>

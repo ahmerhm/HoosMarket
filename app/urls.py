@@ -26,11 +26,12 @@ def root(request):
     if request.user.is_authenticated:
         return redirect("dashboard")
     else:
-        return redirect("user_login")
+        return redirect("account_login")
 
 urlpatterns = [
     path("admin/", admin.site.urls, name="admin_login"),
     path("", root),
-    path("accounts/", include("allauth.urls"), name="user_login"),
-    path("dashboard/",views.dashboard, name="dashboard")
+    path("accounts/", include("allauth.urls")),
+    path("dashboard/",views.dashboard, name="dashboard"), 
+    path("myaccount/", views.profile, name="profile"),
 ]
