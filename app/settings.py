@@ -63,8 +63,6 @@ MIDDLEWARE = [
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
-        # "client_id": "646397880863-pco30vkqv60q3je5tk1m4tud0eau0bph.apps.googleusercontent.com",
-        # "secret": "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",
         "SCOPE": ["profile", "email",],
         "AUTH_PARAMS": {"access_type": "online"},
         "METHOD": "oauth2",
@@ -87,7 +85,7 @@ ROOT_URLCONF = "app.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"], 
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
