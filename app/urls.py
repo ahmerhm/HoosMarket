@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import path, include
+from . import views
 
 def root(request):
     return HttpResponse("Hello world")
@@ -25,4 +26,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", root),
     path("accounts/", include("allauth.urls")),
+    path("dashboard/",views.dashboard)
 ]
