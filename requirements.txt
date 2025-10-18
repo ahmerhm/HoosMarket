@@ -16,3 +16,4 @@ requests
 python3-openid
 pyjwt
 python3-saml
+cryptography
