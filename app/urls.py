@@ -17,12 +17,21 @@ Including another URLconf
 from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import path, include
+from . import views
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+
 
 def root(request):
-    return HttpResponse("Hello world")
+    if request.user.is_authenticated:
+        return redirect("dashboard")
+    else:
+        return redirect("account_login")
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("admin/", admin.site.urls, name="admin_login"),
     path("", root),
     path("accounts/", include("allauth.urls")),
+    path("dashboard/",views.dashboard, name="dashboard"), 
+    path("myaccount/", views.profile, name="profile"),
 ]

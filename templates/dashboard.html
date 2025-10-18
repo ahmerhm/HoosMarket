@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title|default:"Dashboard" }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #082d52;
+            color: white;
+            padding: 0.75rem 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .site-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #29b1f0;
+        }
+
+        .content {
+            height: calc(100vh - 70px); 
+            background-color: white;
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="site-name">Website Name!!</div>
+        <div class="nav-links">
+            <a href="/posts/">Posts</a>
+            <a href="/messages/">Messages</a>
+            <a href="/myaccount/">My Account</a>
+        </div>
+    </nav>
+
+    <div class="content">
+         <p>Posts will show up here.</p>
+    </div>
+
+</body>
+</html>
+
