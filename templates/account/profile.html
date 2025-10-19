@@ -78,15 +78,20 @@
   </style>
 </head>
 <body>
+  
   <div class="card">
     <!-- Logout button (top-right corner) -->
     <a href="{% url 'account_logout' %}" class="logout-btn">Log Out</a>
 
+    <!-- Edit Profile button (top-left corner) -->
+    <a href="{% url 'editProfile' %}" class="edit-btn">Edit Profile</a>
+    
     <div class="avatar"></div>
     <h1>Hello, {{ user.first_name|default:user.username }}!</h1>
     <p><strong>Name:</strong> {{ user.get_full_name }}</p>
     <p><strong>Email:</strong> {{ user.email }}</p>
-    <p><strong>Bio:</strong> Coming soon</p>
+    <p><strong>Bio:</strong> {{ profile.bio }}</p>
+    <p><strong>Interests:</strong> {{ profile.interests }}</p>
     <p><strong>Status:</strong> Member</p>
 
     <div class="btns">
@@ -94,5 +99,6 @@
       <button>Posts</button>
     </div>
   </div>
+
 </body>
 </html>

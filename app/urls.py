@@ -20,6 +20,7 @@ from django.urls import path, include
 from . import views
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
+from .views import edit_profile
 
 
 def root(request):
@@ -34,4 +35,6 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("dashboard/",views.dashboard, name="dashboard"), 
     path("myaccount/", views.profile, name="profile"),
+    path("myaccount/edit_profile/", edit_profile, name="editProfile"),
+    
 ]
