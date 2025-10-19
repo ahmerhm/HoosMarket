@@ -71,7 +71,7 @@ SOCIALACCOUNT_PROVIDERS = {
     },
 }
 
-SITE_ID = 1
+SITE_ID = int(os.environ.get("SITE_ID", 1))
 
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
 
