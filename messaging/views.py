@@ -13,7 +13,6 @@ User = get_user_model()
 
 @login_required
 def inbox(request):
-    # Prefetch messages & senders so unread counts don't N+1
     threads = (
         Thread.objects
         .filter(participants=request.user)
@@ -24,10 +23,8 @@ def inbox(request):
     for t in threads:
         other = next((p for p in t.participants.all() if p.id != request.user.id), None)
 
-        # Per-user read tracker (create if missing)
         tr, _ = ThreadRead.objects.get_or_create(thread=t, user=request.user)
 
-        # Unread = messages from others after my last_read_at
         unread_count = t.messages.exclude(sender=request.user).filter(created_at__gt=tr.last_read_at).count()
 
         rows.append({'thread': t, 'other': other, 'unread_count': unread_count})
@@ -58,14 +55,12 @@ def compose(request, user_id):
     if other.id == request.user.id:
         raise Http404()
 
-    # See if a thread already exists (do NOT create on GET).
     key = Thread._pair_key_for(request.user.id, other.id)
     thread = Thread.objects.filter(pair_key=key).first()
 
     if request.method == 'POST':
         form = MessageForm(request.POST)
         if form.is_valid():
-            # Ensure the thread exists now; create if needed.
             if not thread:
                 thread, _ = Thread.for_users(request.user, other)
             Message.objects.create(
@@ -80,8 +75,8 @@ def compose(request, user_id):
     messages_qs = thread.messages.select_related('sender') if thread else []
     title = f"Chat with @{other.username}"
     return render(request, 'messaging/thread.html', {
-        'thread': thread,           # may be None
-        'messages': messages_qs,    # empty if thread doesn't exist yet
+        'thread': thread,         
+        'messages': messages_qs,   
         'form': form,
         'other': other,
         'title': title,
@@ -122,7 +117,6 @@ def thread_detail(request, thread_id):
     messages_qs = thread.messages.select_related('sender')
     page_title = f"Chat with @{other.username}" if other else "Conversation"
 
-    # Mark as read for the current user (only if there are messages)
     if messages_qs.exists():
         tr, _ = ThreadRead.objects.get_or_create(thread=thread, user=request.user)
         tr.last_read_at = timezone.now()

@@ -1,4 +1,3 @@
-# messaging/context_processors.py
 from .models import Thread, ThreadRead
 
 def messaging_badge(request):
@@ -11,7 +10,6 @@ def messaging_badge(request):
         threads = (Thread.objects
                    .filter(participants=u)
                    .prefetch_related('messages', 'messages__sender'))
-        # compute total unread across threads
         from django.utils import timezone
         for t in threads:
             tr, _ = ThreadRead.objects.get_or_create(thread=t, user=u)
