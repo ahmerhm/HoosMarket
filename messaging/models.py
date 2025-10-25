@@ -1,13 +1,21 @@
 from django.conf import settings
 from django.db import models, transaction
+from django.utils import timezone
+from datetime import datetime, timezone as dt_timezone  # for a safe "very old" default
 
 User = settings.AUTH_USER_MODEL
+
+
+def epoch_aware():
+    """A safe 'very old' timestamp for last_read_at defaults."""
+    return datetime(1970, 1, 1, tzinfo=dt_timezone.utc)
+
 
 class Thread(models.Model):
     # Two participants for a simple 1:1 chat. Use M2M so you can grow later.
     participants = models.ManyToManyField(User, related_name='threads')
 
-    # NEW: unique key for (min_id:max_id). Enforces one thread per user pair.
+    # unique key for (min_id:max_id). Enforces one thread per user pair.
     pair_key = models.CharField(max_length=64, unique=True, blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -83,3 +91,19 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Msg {self.pk} by {self.sender}"
+
+
+class ThreadRead(models.Model):
+    """
+    Per-user "last read" marker for a thread.
+    Used to compute unread counts and show badges.
+    """
+    thread = models.ForeignKey(Thread, on_delete=models.CASCADE, related_name='reads')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='thread_reads')
+    last_read_at = models.DateTimeField(default=epoch_aware)
+
+    class Meta:
+        unique_together = ('thread', 'user')
+
+    def __str__(self):
+        return f"ThreadRead(thread={self.thread_id}, user={self.user_id}, last_read_at={self.last_read_at})"

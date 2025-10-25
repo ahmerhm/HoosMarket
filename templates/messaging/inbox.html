@@ -16,7 +16,7 @@
     .wrap {max-width:900px;margin:1.5rem auto;background:#fff;border:1px solid #eee;border-radius:8px;overflow:hidden}
     .header {display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;border-bottom:1px solid #eee}
     .list {list-style:none}
-    .item {padding:1rem 1.25rem;border-bottom:1px solid #f0f0f0}
+    .item {padding:1rem 1.25rem;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:.5rem}
     .item a {text-decoration:none;color:#082d52}
     .empty {padding:1rem 1.25rem;color:#666}
     .btn {display:inline-block;padding:.5rem .9rem;border-radius:6px;border:1px solid #082d52;text-decoration:none;background:#fff}
@@ -49,8 +49,21 @@
       <ul class="list">
         {% for row in rows %}
           <li class="item">
+            {% if row.unread_count > 0 %}
+              <span aria-label="unread"
+                    title="{{ row.unread_count }} unread"
+                    style="width:10px;height:10px;border-radius:50%;background:#e02424;display:inline-block"></span>
+            {% endif %}
             <a href="{% url 'messaging:thread' row.thread.id %}">
-              {% if row.other %}@{{ row.other.username }}{% else %}Conversation{% endif %}
+              {% if row.other %}
+                {% if row.unread_count > 0 %}
+                  <strong>@{{ row.other.username }}</strong>
+                {% else %}
+                  @{{ row.other.username }}
+                {% endif %}
+              {% else %}
+                Conversation
+              {% endif %}
             </a>
           </li>
         {% endfor %}

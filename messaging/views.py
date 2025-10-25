@@ -3,22 +3,37 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import Http404
 from django.views.decorators.http import require_POST
-from .models import Thread, Message
+from django.utils import timezone
+
+from .models import Thread, Message, ThreadRead
 from .forms import MessageForm
 
 User = get_user_model()
 
+
 @login_required
 def inbox(request):
-    threads = (Thread.objects
-               .filter(participants=request.user)
-               .prefetch_related('participants'))
+    # Prefetch messages & senders so unread counts don't N+1
+    threads = (
+        Thread.objects
+        .filter(participants=request.user)
+        .prefetch_related('participants', 'messages', 'messages__sender')
+    )
 
     rows = []
     for t in threads:
         other = next((p for p in t.participants.all() if p.id != request.user.id), None)
-        rows.append({'thread': t, 'other': other})
+
+        # Per-user read tracker (create if missing)
+        tr, _ = ThreadRead.objects.get_or_create(thread=t, user=request.user)
+
+        # Unread = messages from others after my last_read_at
+        unread_count = t.messages.exclude(sender=request.user).filter(created_at__gt=tr.last_read_at).count()
+
+        rows.append({'thread': t, 'other': other, 'unread_count': unread_count})
+
     return render(request, 'messaging/inbox.html', {'rows': rows, 'title': 'Messages'})
+
 
 @login_required
 def user_list(request):
@@ -31,6 +46,7 @@ def user_list(request):
     if q:
         users = users.filter(username__icontains=q)
     return render(request, "messaging/_user_list.html", {"users": users})
+
 
 @login_required
 def compose(request, user_id):
@@ -71,6 +87,7 @@ def compose(request, user_id):
         'title': title,
     })
 
+
 @login_required
 @require_POST
 def start_with(request):
@@ -80,6 +97,7 @@ def start_with(request):
     user_id = request.POST.get("user_id")
     other = get_object_or_404(User, pk=user_id)
     return redirect('messaging:compose', user_id=other.id)
+
 
 @login_required
 def thread_detail(request, thread_id):
@@ -103,6 +121,12 @@ def thread_detail(request, thread_id):
 
     messages_qs = thread.messages.select_related('sender')
     page_title = f"Chat with @{other.username}" if other else "Conversation"
+
+    # Mark as read for the current user (only if there are messages)
+    if messages_qs.exists():
+        tr, _ = ThreadRead.objects.get_or_create(thread=thread, user=request.user)
+        tr.last_read_at = timezone.now()
+        tr.save(update_fields=['last_read_at'])
 
     return render(request, 'messaging/thread.html', {
         'thread': thread,
