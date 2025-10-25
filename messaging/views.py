@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.http import Http404
 from .models import Thread, Message
 from .forms import StartThreadForm, MessageForm
+from django.views.decorators.http import require_POST
 
 User = get_user_model()
 
@@ -53,3 +54,29 @@ def thread_detail(request, thread_id):
         {'thread': thread, 'messages': messages_qs, 'form': form,
          'other_users': other_users, 'title': 'Conversation'}
     )
+
+
+User = get_user_model()
+
+@login_required
+def user_list(request):
+    """
+    Renders a partial with all users (except me), optionally filtered by ?q=.
+    This HTML is loaded into the modal via fetch().
+    """
+    q = request.GET.get("q", "").strip()
+    users = User.objects.exclude(pk=request.user.pk).order_by("username")
+    if q:
+        users = users.filter(username__icontains=q)
+    return render(request, "messaging/_user_list.html", {"users": users, "q": q})
+
+@login_required
+@require_POST
+def start_with(request):
+    """
+    Creates (or finds) a 1:1 thread with the selected user_id and redirects to it.
+    """
+    user_id = request.POST.get("user_id")
+    other = get_object_or_404(User, pk=user_id)
+    thread, _ = Thread.for_users(request.user, other)
+    return redirect("messaging:thread", thread_id=thread.id)

@@ -19,7 +19,14 @@
     .item {padding:1rem 1.25rem;border-bottom:1px solid #f0f0f0}
     .item a {text-decoration:none;color:#082d52}
     .empty {padding:1rem 1.25rem;color:#666}
-    .btn {display:inline-block;padding:.5rem .9rem;border-radius:6px;border:1px solid #082d52;text-decoration:none}
+    .btn {display:inline-block;padding:.5rem .9rem;border-radius:6px;border:1px solid #082d52;text-decoration:none;background:#fff}
+
+    /* Modal */
+    .modal-backdrop {position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:50}
+    .modal {width:min(720px, 92vw);background:#fff;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.2);overflow:hidden}
+    .modal-head {display:flex;justify-content:space-between;align-items:center;padding:.9rem 1rem;border-bottom:1px solid #eee}
+    .modal-body {padding:1rem}
+    .close {background:none;border:none;font-size:1.2rem;cursor:pointer}
   </style>
 </head>
 <body>
@@ -35,7 +42,7 @@
   <div class="wrap">
     <div class="header">
       <h2>Inbox</h2>
-      <a class="btn" href="{% url 'messaging:start' %}">Start conversation</a>
+      <button class="btn" id="open-user-picker">Start conversation</button>
     </div>
 
     {% if threads %}
@@ -44,11 +51,8 @@
           <li class="item">
             <a href="{% url 'messaging:thread' t.id %}">
               Thread #{{ t.id }} ·
-              {# list other participants (skip me) #}
               {% for p in t.participants.all %}
-                {% if p.id != request.user.id %}
-                  @{{ p.username }}
-                {% endif %}
+                {% if p.id != request.user.id %}@{{ p.username }}{% endif %}
               {% endfor %}
             </a>
           </li>
@@ -58,5 +62,85 @@
       <div class="empty">No conversations yet.</div>
     {% endif %}
   </div>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="user-modal">
+    <div class="modal">
+      <div class="modal-head">
+        <strong>Start a conversation</strong>
+        <button class="close" id="close-user-picker" aria-label="Close">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- STATIC search UI -->
+        <div style="display:flex;gap:.5rem;margin-bottom:.75rem">
+          <form id="user-search-form" style="flex:1">
+            <input
+              type="text"
+              id="user-search-input"
+              placeholder="Search username…"
+              style="width:100%;padding:.6rem;border:1px solid #ddd;border-radius:6px"
+            >
+          </form>
+          <button id="user-search-button" class="btn" type="button" style="padding:.55rem .9rem;background:#fff">
+            Search
+          </button>
+        </div>
+
+        <!-- RESULTS container -->
+        <div id="user-results">
+          <div style="padding:.5rem 0;color:#666">Loading users…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById('user-modal');
+    const resultsEl = document.getElementById('user-results');
+    const openBtn = document.getElementById('open-user-picker');
+    const closeBtn = document.getElementById('close-user-picker');
+    const inputEl = document.getElementById('user-search-input');
+    const formEl = document.getElementById('user-search-form');
+    const buttonEl = document.getElementById('user-search-button');
+
+    function openModal() {
+      modal.style.display = 'flex';
+      // Load ALL users initially, then focus input.
+      loadUsers('');
+      setTimeout(() => inputEl.focus(), 0);
+    }
+    function closeModal() {
+      modal.style.display = 'none';
+    }
+
+    async function loadUsers(q) {
+      const url = new URL("{% url 'messaging:user_list' %}", window.location.origin);
+      if (q) url.searchParams.set('q', q);
+      const res = await fetch(url, { credentials: 'same-origin' });
+      const html = await res.text();
+      resultsEl.innerHTML = html;
+    }
+
+    // Open/close behavior
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal(); // click backdrop to close
+    });
+
+    // Enter in the search input -> fetch filtered list (keeps focus)
+    formEl.addEventListener('submit', (e) => {
+      e.preventDefault();
+      loadUsers(inputEl.value.trim());
+      inputEl.focus();
+    });
+
+    // Search button does the same
+    buttonEl.addEventListener('click', () => {
+      loadUsers(inputEl.value.trim());
+      inputEl.focus();
+    });
+  </script>
 </body>
 </html>

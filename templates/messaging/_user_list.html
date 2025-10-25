@@ -1,0 +1,16 @@
+<ul style="list-style:none;max-height:45vh;overflow:auto;padding:0;margin:0">
+  {% for u in users %}
+    <li style="border-top:1px solid #f1f1f1;padding:.6rem .25rem;display:flex;justify-content:space-between;align-items:center">
+      <div>@{{ u.username }}</div>
+      <form method="post" action="{% url 'messaging:start_with' %}">
+        {% csrf_token %}
+        <input type="hidden" name="user_id" value="{{ u.id }}">
+        <button type="submit" style="padding:.35rem .65rem;border:1px solid #082d52;border-radius:6px;background:#fff;cursor:pointer">
+          Message
+        </button>
+      </form>
+    </li>
+  {% empty %}
+    <li style="padding:.6rem .25rem;color:#666">No users found.</li>
+  {% endfor %}
+</ul>
