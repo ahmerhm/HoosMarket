@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.google",
     "django.contrib.sites",
     'app.apps.AppConfig',
+    'messaging',
 ]
 
 AUTHENTICATION_BACKENDS = [
