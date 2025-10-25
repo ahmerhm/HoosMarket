@@ -45,15 +45,12 @@
       <button class="btn" id="open-user-picker">Start conversation</button>
     </div>
 
-    {% if threads %}
+    {% if rows %}
       <ul class="list">
-        {% for t in threads %}
+        {% for row in rows %}
           <li class="item">
-            <a href="{% url 'messaging:thread' t.id %}">
-              Thread #{{ t.id }} ·
-              {% for p in t.participants.all %}
-                {% if p.id != request.user.id %}@{{ p.username }}{% endif %}
-              {% endfor %}
+            <a href="{% url 'messaging:thread' row.thread.id %}">
+              {% if row.other %}@{{ row.other.username }}{% else %}Conversation{% endif %}
             </a>
           </li>
         {% endfor %}
