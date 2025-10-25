@@ -31,9 +31,11 @@ def start_thread(request):
 @login_required
 def thread_detail(request, thread_id):
     thread = get_object_or_404(Thread, pk=thread_id)
-    # Permission check: must be a participant
     if not thread.participants.filter(pk=request.user.pk).exists():
         raise Http404()
+
+    # find the other user in this 1:1 thread
+    other = thread.participants.exclude(pk=request.user.pk).first()
 
     if request.method == 'POST':
         form = MessageForm(request.POST)
@@ -48,11 +50,20 @@ def thread_detail(request, thread_id):
         form = MessageForm()
 
     messages_qs = thread.messages.select_related('sender')
-    other_users = thread.participants.exclude(pk=request.user.pk)
+
+    # nice page title like: "Chat with @alice"
+    page_title = f"Chat with @{other.username}" if other else "Conversation"
+
     return render(
-        request, 'messaging/thread.html',
-        {'thread': thread, 'messages': messages_qs, 'form': form,
-         'other_users': other_users, 'title': 'Conversation'}
+        request,
+        'messaging/thread.html',
+        {
+            'thread': thread,
+            'messages': messages_qs,
+            'form': form,
+            'other': other,                 # <-- pass single other user
+            'title': page_title,            # <-- better <title>
+        }
     )
 
 
