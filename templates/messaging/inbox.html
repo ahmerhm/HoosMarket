@@ -1,0 +1,168 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title|default:"Messages" }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {margin:0;padding:0;box-sizing:border-box}
+    body {font-family: Arial, Helvetica, sans-serif;background:#f8f9fa}
+    nav {display:flex;align-items:center;justify-content:space-between;background:#082d52;color:#fff;padding:.75rem 2rem;box-shadow:0 2px 5px rgba(0,0,0,.2)}
+    .site-name {font-size:1.5rem;font-weight:bold;letter-spacing:.5px}
+    .nav-links {display:flex;gap:1.5rem}
+    .nav-links a {color:#fff;text-decoration:none}
+    .nav-links a:hover {color:#29b1f0}
+    .wrap {max-width:900px;margin:1.5rem auto;background:#fff;border:1px solid #eee;border-radius:8px;overflow:hidden}
+    .header {display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;border-bottom:1px solid #eee}
+    .list {list-style:none}
+    .item {padding:1rem 1.25rem;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:.5rem}
+    .item a {text-decoration:none;color:#082d52}
+    .meta {color:#666;font-size:.9rem}
+    .empty {padding:1rem 1.25rem;color:#666}
+    .btn {display:inline-block;padding:.5rem .9rem;border-radius:6px;border:1px solid #082d52;text-decoration:none;background:#fff;cursor:pointer}
+
+    .modal-backdrop {position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:50}
+    .modal {width:min(720px, 92vw);background:#fff;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.2);overflow:hidden}
+    .modal-head {display:flex;justify-content:space-between;align-items:center;padding:.9rem 1rem;border-bottom:1px solid #eee}
+    .modal-body {padding:1rem}
+    .close {background:none;border:none;font-size:1.2rem;cursor:pointer}
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="site-name">Website Name!!</div>
+    <div class="nav-links">
+      <a href="/posts/">Posts</a>
+      <a href="{% url 'messaging:inbox' %}">Messages</a>
+      <a href="/myaccount/">My Account</a>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    <div class="header">
+      <h2>Inbox</h2>
+      <div style="display:flex;gap:.5rem">
+        <a href="#" class="btn" id="open-user-picker">Start conversation</a>
+        <a class="btn" href="{% url 'messaging:group_new' %}">New group</a>
+      </div>
+    </div>
+
+    {% if rows %}
+      <ul class="list">
+        {% for row in rows %}
+          <li class="item">
+            {% if row.unread_count > 0 %}
+              <span aria-label="unread"
+                    title="{{ row.unread_count }} unread"
+                    style="width:10px;height:10px;border-radius:50%;background:#e02424;display:inline-block"></span>
+            {% endif %}
+
+            <a href="{% url 'messaging:thread' row.thread.id %}">
+              {% if row.thread.is_group %}
+                <strong>{{ row.thread.name }}</strong>
+                <span class="meta">
+                  ·
+                  {% for p in row.thread.participants.all %}
+                    {% if p.id != request.user.id %}
+                      @{{ p.username }}{% if not forloop.last %}, {% endif %}
+                    {% endif %}
+                  {% endfor %}
+                </span>
+              {% else %}
+                {% if row.other %}
+                  {% if row.unread_count > 0 %}
+                    <strong>@{{ row.other.username }}</strong>
+                  {% else %}
+                    @{{ row.other.username }}
+                  {% endif %}
+                {% else %}
+                  Conversation
+                {% endif %}
+              {% endif %}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="empty">No conversations yet.</div>
+    {% endif %}
+  </div>
+
+  <div class="modal-backdrop" id="user-modal">
+    <div class="modal">
+      <div class="modal-head">
+        <strong>Start a conversation</strong>
+        <button class="close" id="close-user-picker" aria-label="Close">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div style="display:flex;gap:.5rem;margin-bottom:.75rem">
+          <form id="user-search-form" style="flex:1">
+            <input
+              type="text"
+              id="user-search-input"
+              placeholder="Search username…"
+              style="width:100%;padding:.6rem;border:1px solid #ddd;border-radius:6px"
+            >
+          </form>
+          <button id="user-search-button" class="btn" type="button" style="padding:.55rem .9rem;background:#fff">
+            Search
+          </button>
+        </div>
+
+        <div id="user-results">
+          <div style="padding:.5rem 0;color:#666">Loading users…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById('user-modal');
+    const resultsEl = document.getElementById('user-results');
+    const openBtn = document.getElementById('open-user-picker');
+    const closeBtn = document.getElementById('close-user-picker');
+    const inputEl = document.getElementById('user-search-input');
+    const formEl = document.getElementById('user-search-form');
+    const buttonEl = document.getElementById('user-search-button');
+
+    function openModal() {
+      modal.style.display = 'flex';
+      loadUsers('');
+      setTimeout(() => inputEl.focus(), 0);
+    }
+    function closeModal() {
+      modal.style.display = 'none';
+    }
+
+    async function loadUsers(q) {
+      const url = new URL("{% url 'messaging:user_list' %}", window.location.origin);
+      if (q) url.searchParams.set('q', q);
+      const res = await fetch(url, { credentials: 'same-origin' });
+      const html = await res.text();
+      resultsEl.innerHTML = html;
+    }
+
+    openBtn.addEventListener('click', (e) => {
+      e.preventDefault(); 
+      openModal();
+    });
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal(); 
+    });
+
+    formEl.addEventListener('submit', (e) => {
+      e.preventDefault();
+      loadUsers(inputEl.value.trim());
+      inputEl.focus();
+    });
+
+    buttonEl.addEventListener('click', () => {
+      loadUsers(inputEl.value.trim());
+      inputEl.focus();
+    });
+  </script>
+</body>
+</html>

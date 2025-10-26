@@ -1,20 +1,52 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Profile
 
 @login_required
 def dashboard(request):
-    # ensure a Profile exists for this user
     profile, _ = Profile.objects.get_or_create(user=request.user)
 
-    # get the role safely (default to member if not set)
-    role = getattr(profile, "status", "Member")  # or profile.role if you have that field
+    role = getattr(profile, "status", "Member")
 
-    if role.lower() == "organizer":
+    if str(role).lower() == "organizer":
         return render(request, "organizer_dashboard.html", {"profile": profile})
     else:
         return render(request, "dashboard.html", {"profile": profile})
 
 @login_required
 def profile(request):
-    return render(request, "account/profile.html", {"user": request.user})
+    """
+    GET: render profile page
+    POST: handle inline updates for name or bio from the profile page
+          (expects 'action' to be 'update_name' or 'update_bio')
+    """
+    profile_obj, _ = Profile.objects.get_or_create(user=request.user)
+
+    if request.method == "POST":
+        action = (request.POST.get("action") or "").strip()
+
+        if action == "update_name":
+            full = (request.POST.get("name") or "").strip()
+            if full:
+                parts = full.split(" ", 1)
+                first = parts[0]
+                last = parts[1] if len(parts) > 1 else ""
+                request.user.first_name = first
+                request.user.last_name = last
+                request.user.save(update_fields=["first_name", "last_name"])
+            return redirect("profile")
+
+        elif action == "update_bio":
+            profile_obj.bio = request.POST.get("bio") or ""
+            profile_obj.save(update_fields=["bio"])
+            return redirect("profile")
+
+
+    return render(
+        request,
+        "account/profile.html",
+        {
+            "user": request.user,
+            "profile": profile_obj,  
+        },
+    )

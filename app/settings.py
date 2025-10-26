@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.google",
     "django.contrib.sites",
     'app.apps.AppConfig',
+    'messaging',
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -95,6 +96,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "messaging.context_processors.messaging_badge",
             ],
         },
     },

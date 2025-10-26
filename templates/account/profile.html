@@ -5,94 +5,173 @@
   <meta charset="UTF-8">
   <title>User Profile</title>
   <style>
-    body { 
-      font-family: system-ui, sans-serif; 
-      background:#fafafa; 
-      display:grid; 
-      place-items:center; 
-      height:100vh; 
-      margin:0; 
+    :root { --ink:#082d52; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background:#fafafa;
+      display:grid;
+      place-items:center;
+      height:100vh;
+      margin:0;
     }
 
-    .card { 
+    .card {
       position: relative;
-      background:white; 
-      border:1px solid #ddd; 
-      border-radius:14px; 
-      padding:32px; 
-      width:400px; 
-      box-shadow:0 2px 8px rgba(0,0,0,.05); 
+      background:white;
+      border:1px solid #ddd;
+      border-radius:14px;
+      padding:32px;
+      width:420px;
+      box-shadow:0 2px 8px rgba(0,0,0,.05);
     }
 
-    h1 { 
-      margin-bottom:12px; 
-      font-size:22px; 
-      text-align:center;
+    h1 { margin-bottom:12px; font-size:22px; text-align:center; }
+    p  { margin:10px 0; }
+
+    .avatar {
+      width:84px; height:84px; border-radius:50%;
+      background:#eee; margin:0 auto 16px auto;
     }
 
-    p { 
-      margin:6px 0; 
+    .btn {
+      display:inline-block;
+      padding:.5rem .9rem;
+      border-radius:6px;
+      border:1px solid var(--ink);
+      background:#fff;
+      color:#111;
+      text-decoration:none;
+      cursor:pointer;
     }
+    .btn-row { margin-top:18px; display:flex; gap:.6rem; justify-content:center; }
 
-    .avatar { 
-      width:80px; 
-      height:80px; 
-      border-radius:50%; 
-      background:#eee; 
-      margin:0 auto 16px auto; 
+    .logout-btn {
+      position:absolute; top:16px; right:16px;
+      background:#e53e3e; color:#fff; border:none;
+      padding:8px 16px; border-radius:8px; text-decoration:none;
     }
+    .logout-btn:hover { background:#c53030; }
 
-    .btns { 
-      margin-top:20px; 
-      display:flex; 
-      gap:12px; 
-      justify-content:center; 
-    }
+    .edit-link { margin-left:8px; font-size:.9rem; color:#2563eb; text-decoration:none; }
+    .edit-link:hover { text-decoration:underline; }
 
-    button, .logout-btn { 
-      border:none; 
-      padding:8px 16px; 
-      border-radius:8px; 
-      cursor:pointer; 
-      background:#111; 
-      color:white; 
-      text-decoration:none; 
-      font-weight:500;
-      transition: background 0.3s ease;
+    .edit-row { margin-top:8px; display:none; gap:6px; }
+    .edit-row input[type="text"], .edit-row textarea {
+      width:100%; padding:.55rem; border:1px solid #ddd; border-radius:8px;
+      font:inherit;
     }
-
-    button:hover, .logout-btn:hover { 
-      background:#333; 
-    }
-
-    .logout-btn { 
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      background: #e53e3e;
-    }
-
-    .logout-btn:hover { 
-      background: #c53030;
-    }
+    .muted { color:#666; }
+    .inline-actions { display:flex; gap:8px; margin-top:8px; }
   </style>
 </head>
 <body>
   <div class="card">
-    <!-- Logout button (top-right corner) -->
     <a href="{% url 'account_logout' %}" class="logout-btn">Log Out</a>
 
     <div class="avatar"></div>
     <h1>Hello, {{ user.first_name|default:user.username }}!</h1>
-    <p><strong>Name:</strong> {{ user.get_full_name }}</p>
+
+    <p>
+      <strong>Name:</strong>
+      <span id="name-text">
+        {% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}
+      </span>
+      <a href="#" id="name-edit-toggle" class="edit-link">Edit</a>
+    </p>
+    <div id="name-edit-row" class="edit-row">
+      <input type="text" id="name-input"
+             value="{% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}"
+             placeholder="First Last" />
+      <div class="inline-actions">
+        <button class="btn" id="name-save">Save</button>
+        <button class="btn" id="name-cancel" type="button">Cancel</button>
+      </div>
+    </div>
+
     <p><strong>Email:</strong> {{ user.email }}</p>
-    <p><strong>Bio:</strong> Coming soon</p>
+
+    <p>
+      <strong>Bio:</strong>
+      <span id="bio-text">
+        {% if profile and profile.bio %}
+          {{ profile.bio }}
+        {% else %}
+          <span class="muted">Add a short bio</span>
+        {% endif %}
+      </span>
+      <a href="#" id="bio-edit-toggle" class="edit-link">Edit</a>
+    </p>
+    <div id="bio-edit-row" class="edit-row">
+      <textarea id="bio-input" rows="3" placeholder="Write something about yourself…">{% if profile and profile.bio %}{{ profile.bio }}{% endif %}</textarea>
+      <div class="inline-actions">
+        <button class="btn" id="bio-save">Save</button>
+        <button class="btn" id="bio-cancel" type="button">Cancel</button>
+      </div>
+    </div>
+
     <p><strong>Status:</strong> Member</p>
 
-    <div class="btns">
-      <button>Messages</button>
-      <button>Posts</button>
+    <div class="btn-row">
+      <a class="btn" href="{% url 'messaging:inbox' %}">Messages</a>
+      <a class="btn" href="/posts/">Posts</a>
     </div>
+
+    <form id="profile-form" method="post" action="{% url 'profile' %}" style="display:none">
+      {% csrf_token %}
+      <input type="hidden" name="action" id="action-field">
+      <input type="hidden" name="name" id="name-field">
+      <textarea name="bio" id="bio-field"></textarea>
+    </form>
   </div>
+
+  <script>
+    function toggle(el, show) { el.style.display = show ? 'block' : 'none'; }
+
+    const nameText   = document.getElementById('name-text');
+    const nameToggle = document.getElementById('name-edit-toggle');
+    const nameRow    = document.getElementById('name-edit-row');
+    const nameInput  = document.getElementById('name-input');
+    const nameSave   = document.getElementById('name-save');
+    const nameCancel = document.getElementById('name-cancel');
+
+    const bioText   = document.getElementById('bio-text');
+    const bioToggle = document.getElementById('bio-edit-toggle');
+    const bioRow    = document.getElementById('bio-edit-row');
+    const bioInput  = document.getElementById('bio-input');
+    const bioSave   = document.getElementById('bio-save');
+    const bioCancel = document.getElementById('bio-cancel');
+
+    const form       = document.getElementById('profile-form');
+    const actionFld  = document.getElementById('action-field');
+    const nameFld    = document.getElementById('name-field');
+    const bioFld     = document.getElementById('bio-field');
+
+    nameToggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggle(nameRow, true);
+      nameInput.focus();
+    });
+    nameCancel.addEventListener('click', () => toggle(nameRow, false));
+    nameSave.addEventListener('click', (e) => {
+      e.preventDefault();
+      actionFld.value = 'update_name';
+      nameFld.value   = nameInput.value.trim();
+      form.submit();
+    });
+
+    bioToggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggle(bioRow, true);
+      bioInput.focus();
+    });
+    bioCancel.addEventListener('click', () => toggle(bioRow, false));
+    bioSave.addEventListener('click', (e) => {
+      e.preventDefault();
+      actionFld.value = 'update_bio';
+      bioFld.value    = bioInput.value;
+      form.submit();
+    });
+  </script>
 </body>
 </html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{ title|default:"Conversation" }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:Arial,Helvetica,sans-serif;background:#f8f9fa}
+    nav{display:flex;align-items:center;justify-content:space-between;background:#082d52;color:#fff;padding:.75rem 2rem;box-shadow:0 2px 5px rgba(0,0,0,.2)}
+    .site-name{font-size:1.5rem;font-weight:bold;letter-spacing:.5px}
+    .nav-links{display:flex;gap:1.5rem}
+    .nav-links a{color:#fff;text-decoration:none}
+    .nav-links a:hover{color:#29b1f0}
+
+    .chat{max-width:900px;margin:1.5rem auto;background:#fff;border:1px solid #eee;border-radius:8px;overflow:hidden;display:flex;flex-direction:column;height:70vh}
+    .chat-head{display:flex;align-items:center;gap:.75rem;padding:.9rem 1rem;border-bottom:1px solid #eee;background:#fafafa}
+    .avatar{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:#e8f4ff;color:#082d52;font-weight:bold}
+    .name{font-size:1.05rem}
+    .sub{font-size:.85rem;color:#666}
+    .messages{padding:1rem;overflow:auto;flex:1}
+    .bubble{max-width:70%;padding:.6rem .8rem;border-radius:12px;margin:.25rem 0}
+    .me{background:#e8f4ff;margin-left:auto}
+    .them{background:#f2f2f2;margin-right:auto}
+    .meta{font-size:.8rem;color:#666;margin-bottom:.3rem}
+    form{display:flex;gap:.5rem;padding:.75rem;border-top:1px solid #eee}
+    textarea{flex:1;padding:.6rem}
+    .back{color:#082d52;text-decoration:none;border:1px solid #082d52;border-radius:6px;padding:.25rem .5rem;background:#fff}
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="site-name">Website Name!!</div>
+    <div class="nav-links">
+      <a href="/posts/">Posts</a>
+      <a href="{% url 'messaging:inbox' %}">Messages</a>
+      <a href="/myaccount/">My Account</a>
+    </div>
+  </nav>
+
+  <div class="chat">
+    <!-- Conversation header -->
+    <div class="chat-head">
+      <a class="back" href="{% url 'messaging:inbox' %}">← Inbox</a>
+      <div class="avatar">
+        {% if thread and thread.is_group %}
+          {{ thread.name|default:"?"|first|upper }}
+        {% elif other %}
+          {{ other.username|first|upper }}
+        {% else %}
+          ?
+        {% endif %}
+      </div>
+      <div>
+        <div class="name">
+          {% if thread and thread.is_group %}
+            {{ thread.name }}
+          {% else %}
+            {% if other %}@{{ other.username }}{% else %}Conversation{% endif %}
+          {% endif %}
+        </div>
+        <div class="sub" style="display:flex;flex-wrap:wrap;gap:.25rem;color:#666">
+          {% if thread and thread.is_group %}
+            {% for p in thread.participants.all %}
+              <span style="border:1px solid #eee;border-radius:999px;padding:.05rem .4rem;background:#fafafa">
+                @{{ p.username }}{% if p.id == request.user.id %} (you){% endif %}
+              </span>
+            {% endfor %}
+          {% else %}
+            Direct message
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="messages">
+      {% for m in messages %}
+        <div class="bubble {% if m.sender_id == request.user.id %}me{% else %}them{% endif %}">
+          <div class="meta">@{{ m.sender.username }} · {{ m.created_at|date:"M j, H:i" }}</div>
+          <div>{{ m.text|linebreaksbr }}</div>
+        </div>
+      {% empty %}
+        <p>No messages yet. Say hi!</p>
+      {% endfor %}
+    </div>
+
+    <form method="post">{% csrf_token %}
+      {{ form.text }}
+      <button type="submit">Send</button>
+    </form>
+  </div>
+</body>
+</html>
