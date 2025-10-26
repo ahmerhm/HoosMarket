@@ -6,7 +6,7 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 
 from .models import Thread, Message, ThreadRead
-from .forms import MessageForm
+from .forms import MessageForm, GroupCreateForm  # <-- added GroupCreateForm
 
 User = get_user_model()
 
@@ -21,11 +21,15 @@ def inbox(request):
 
     rows = []
     for t in threads:
+        # for DMs this will be "the other"; for groups it's fine if this is None
         other = next((p for p in t.participants.all() if p.id != request.user.id), None)
 
         tr, _ = ThreadRead.objects.get_or_create(thread=t, user=request.user)
-
-        unread_count = t.messages.exclude(sender=request.user).filter(created_at__gt=tr.last_read_at).count()
+        unread_count = (
+            t.messages.exclude(sender=request.user)
+            .filter(created_at__gt=tr.last_read_at)
+            .count()
+        )
 
         rows.append({'thread': t, 'other': other, 'unread_count': unread_count})
 
@@ -75,12 +79,33 @@ def compose(request, user_id):
     messages_qs = thread.messages.select_related('sender') if thread else []
     title = f"Chat with @{other.username}"
     return render(request, 'messaging/thread.html', {
-        'thread': thread,         
-        'messages': messages_qs,   
+        'thread': thread,
+        'messages': messages_qs,
         'form': form,
         'other': other,
         'title': title,
     })
+
+
+@login_required
+def group_new(request):
+    """
+    Create a new group chat: name + members (multi-select).
+    Appears in all selected members' inboxes immediately.
+    """
+    if request.method == "POST":
+        form = GroupCreateForm(request.POST, me=request.user)
+        if form.is_valid():
+            name = form.cleaned_data["name"].strip()
+            members = list(form.cleaned_data["members"])
+            thread = Thread.create_group(name=name, creator=request.user, members=members)
+            # Optional: initial system message, if you want:
+            # Message.objects.create(thread=thread, sender=request.user, text=f"{request.user.username} created the group")
+            return redirect("messaging:thread", thread_id=thread.id)
+    else:
+        form = GroupCreateForm(me=request.user)
+
+    return render(request, "messaging/group_new.html", {"form": form, "title": "New group"})
 
 
 @login_required
@@ -100,6 +125,8 @@ def thread_detail(request, thread_id):
     if not thread.participants.filter(pk=request.user.pk).exists():
         raise Http404()
 
+    # For DMs, 'other' is the other person; for groups, this will be None and your template
+    # should show thread.name + participants instead (as discussed previously).
     other = thread.participants.exclude(pk=request.user.pk).first()
 
     if request.method == 'POST':
@@ -115,8 +142,10 @@ def thread_detail(request, thread_id):
         form = MessageForm()
 
     messages_qs = thread.messages.select_related('sender')
-    page_title = f"Chat with @{other.username}" if other else "Conversation"
+    page_title = (f"Chat with @{other.username}" if (other and not thread.is_group) 
+                  else (thread.name or "Conversation"))
 
+    # Mark as read for the current user (only if there are messages)
     if messages_qs.exists():
         tr, _ = ThreadRead.objects.get_or_create(thread=thread, user=request.user)
         tr.last_read_at = timezone.now()

@@ -43,14 +43,32 @@
     <div class="chat-head">
       <a class="back" href="{% url 'messaging:inbox' %}">← Inbox</a>
       <div class="avatar">
-        {% if other %}{{ other.username|first|upper }}{% else %}?{% endif %}
+        {% if thread and thread.is_group %}
+          {{ thread.name|default:"?"|first|upper }}
+        {% elif other %}
+          {{ other.username|first|upper }}
+        {% else %}
+          ?
+        {% endif %}
       </div>
       <div>
         <div class="name">
-          {% if other %}@{{ other.username }}{% else %}Conversation{% endif %}
+          {% if thread and thread.is_group %}
+            {{ thread.name }}
+          {% else %}
+            {% if other %}@{{ other.username }}{% else %}Conversation{% endif %}
+          {% endif %}
         </div>
-        <div class="sub">
-          {% if other %}Direct message{% else %}Thread #{{ thread.id }}{% endif %}
+        <div class="sub" style="display:flex;flex-wrap:wrap;gap:.25rem;color:#666">
+          {% if thread and thread.is_group %}
+            {% for p in thread.participants.all %}
+              <span style="border:1px solid #eee;border-radius:999px;padding:.05rem .4rem;background:#fafafa">
+                @{{ p.username }}{% if p.id == request.user.id %} (you){% endif %}
+              </span>
+            {% endfor %}
+          {% else %}
+            Direct message
+          {% endif %}
         </div>
       </div>
     </div>
