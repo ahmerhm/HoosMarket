@@ -1,35 +1,35 @@
+# app/signals.py
+from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.contrib.auth.models import User
 from allauth.account.signals import user_logged_in
+
 from .models import Profile
 
-@receiver(post_save, sender=User)
-def create_or_update_user_profile(sender, instance, created, **kwargs):
-    """Create or update user profile whenever a User is saved."""
-    if created:
-        Profile.objects.create(user=instance)
-    else:
-        Profile.objects.get_or_create(user=instance)  
-        instance.profile.save()
+User = get_user_model()
 
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
 
-@receiver(user_logged_in)
+@receiver(post_save, sender=User, dispatch_uid="app_profile_ensure_one")
+def ensure_profile(sender, instance, created, **kwargs):
+    """
+    Idempotent: guarantees a Profile exists for every User.
+    Using get_or_create prevents UNIQUE constraint errors even if
+    the signal is accidentally registered twice.
+    """
+    Profile.objects.get_or_create(user=instance)
+
+
+@receiver(user_logged_in, dispatch_uid="app_assign_role_on_login")
 def assign_role_on_login(request, user, **kwargs):
-    role = request.GET.get("role")
+    """
+    Set role on login from ?role=... but never allow privilege escalation.
+    """
+    role = (request.GET.get("role") or "member").lower()
     profile, _ = Profile.objects.get_or_create(user=user)
 
-    # Prevent anyone from setting themselves as organizer
-    if role == "organizer":
-        # Only allow organizer role if admin pre-approved them
-        if user.is_staff or user.is_superuser:
-            profile.role = "organizer"
-        else:
-            profile.role = "member"  # downgrade to member automatically
+    if role == "organizer" and (user.is_staff or user.is_superuser):
+        profile.role = "organizer"
     else:
         profile.role = "member"
 
-    profile.save()
+    profile.save(update_fields=["role"])
