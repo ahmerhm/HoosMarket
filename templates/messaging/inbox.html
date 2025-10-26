@@ -20,9 +20,8 @@
     .item a {text-decoration:none;color:#082d52}
     .meta {color:#666;font-size:.9rem}
     .empty {padding:1rem 1.25rem;color:#666}
-    .btn {display:inline-block;padding:.5rem .9rem;border-radius:6px;border:1px solid #082d52;text-decoration:none;background:#fff}
+    .btn {display:inline-block;padding:.5rem .9rem;border-radius:6px;border:1px solid #082d52;text-decoration:none;background:#fff;cursor:pointer}
 
-    /* Modal */
     .modal-backdrop {position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:50}
     .modal {width:min(720px, 92vw);background:#fff;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.2);overflow:hidden}
     .modal-head {display:flex;justify-content:space-between;align-items:center;padding:.9rem 1rem;border-bottom:1px solid #eee}
@@ -44,7 +43,7 @@
     <div class="header">
       <h2>Inbox</h2>
       <div style="display:flex;gap:.5rem">
-        <button class="btn" id="open-user-picker">Start conversation</button>
+        <a href="#" class="btn" id="open-user-picker">Start conversation</a>
         <a class="btn" href="{% url 'messaging:group_new' %}">New group</a>
       </div>
     </div>
@@ -145,7 +144,10 @@
       resultsEl.innerHTML = html;
     }
 
-    openBtn.addEventListener('click', openModal);
+    openBtn.addEventListener('click', (e) => {
+      e.preventDefault(); 
+      openModal();
+    });
     closeBtn.addEventListener('click', closeModal);
     modal.addEventListener('click', (e) => {
       if (e.target === modal) closeModal(); 

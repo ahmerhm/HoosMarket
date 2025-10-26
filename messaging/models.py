@@ -12,14 +12,10 @@ def epoch_aware():
 
 
 class Thread(models.Model):
-    # Participants (works for DMs and groups)
     participants = models.ManyToManyField(User, related_name='threads')
 
-    # --- DM uniqueness (Only set for 1:1 threads) ---
-    # unique key for (min_id:max_id). Enforces one thread per user pair.
     pair_key = models.CharField(max_length=64, unique=True, blank=True, null=True)
 
-    # --- Group fields (NEW) ---
     is_group = models.BooleanField(default=False)
     name = models.CharField(max_length=120, blank=True, null=True)
     created_by = models.ForeignKey(
@@ -36,7 +32,6 @@ class Thread(models.Model):
             return f"Group: {self.name}"
         return f"Thread {self.pk}"
 
-    # ---------- DMs ----------
     @staticmethod
     def _pair_key_for(u1_id, u2_id):
         a, b = sorted([int(u1_id), int(u2_id)])
@@ -55,12 +50,10 @@ class Thread(models.Model):
 
         key = Thread._pair_key_for(user_a.id, user_b.id)
 
-        # 1) Fast path: already keyed DM thread
         existing = Thread.objects.filter(pair_key=key, is_group=False).first()
         if existing:
             return existing, False
 
-        # 2) Legacy fallback: find an old 1:1 thread (no pair_key yet)
         legacy = (
             Thread.objects
             .filter(is_group=False, participants=user_a)
@@ -71,9 +64,7 @@ class Thread(models.Model):
             .first()
         )
         if legacy:
-            # Backfill the pair_key so future lookups hit the fast path
             with transaction.atomic():
-                # If another request created a keyed thread meanwhile, reuse it.
                 already = Thread.objects.select_for_update().filter(pair_key=key, is_group=False).first()
                 if already:
                     return already, False
@@ -81,9 +72,7 @@ class Thread(models.Model):
                 legacy.save(update_fields=['pair_key'])
             return legacy, False
 
-        # 3) Create the DM thread (unique constraint prevents duplicates under concurrency)
         with transaction.atomic():
-            # Double-check no one created it in the meantime
             existing = Thread.objects.select_for_update().filter(pair_key=key, is_group=False).first()
             if existing:
                 return existing, False
@@ -91,7 +80,6 @@ class Thread(models.Model):
             t.participants.add(user_a, user_b)
         return t, True
 
-    # ---------- Groups ----------
     @staticmethod
     def create_group(name, creator, members):
         """
@@ -101,7 +89,6 @@ class Thread(models.Model):
         """
         with transaction.atomic():
             t = Thread.objects.create(is_group=True, name=name, created_by=creator)
-            # include creator
             t.participants.add(creator)
             for m in members:
                 if m.id != creator.id:
@@ -116,7 +103,7 @@ class Message(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['created_at']  # oldest -> newest for display
+        ordering = ['created_at']  
 
     def __str__(self):
         return f"Msg {self.pk} by {self.sender}"
