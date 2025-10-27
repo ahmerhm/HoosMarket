@@ -79,4 +79,5 @@ LOGGING = {
 
 #Heroku Settings
 django_on_heroku.settings(locals(), staticfiles=False)
-del DATABASES['default']['options']['sslmode']
+if 'options' in DATABASES['default']:
+    del DATABASES['default']['options']['sslmode']
