@@ -78,6 +78,6 @@ LOGGING = {
 """
 
 #Heroku Settings
-django_on_heroku.settings(locals(), staticfiles=False)
+django_on_heroku.settings(locals())
 if 'options' in DATABASES['default']:
     del DATABASES['default']['options']['sslmode']
