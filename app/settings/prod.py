@@ -36,9 +36,26 @@ AWS_HEADERS = {
     'Access-Control-Allow-Origin:': '*',
 }
 
-DEFAULT_FILE_STORAGE = 'storages.backend.s3boto3.S3Boto3Storage'
+#DEFAULT_FILE_STORAGE = 'storages.backend.s3boto3.S3Boto3Storage'
 
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'   
+#STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'  
+
+STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "location": "media", 
+                "file_overwrite": False,
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "location": "static", 
+                "default_acl": "public-read",
+            },
+        },
+    }
 
 STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
 
