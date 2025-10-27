@@ -21,7 +21,7 @@ Pillow
 
 python-decouple 
 django-extensions
-
+django-on-heroku
 #S3
 django-storages
 boto3
