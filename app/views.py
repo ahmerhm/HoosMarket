@@ -23,8 +23,13 @@ def profile(request):
     profile_obj, _ = Profile.objects.get_or_create(user=request.user)
 
     if request.method == "POST":
+        # if uploaded image 
+        if "image" in request.FILES:
+            profile_obj.avatar = request.FILES["image"]
+            profile_obj.save(update_fields=["avatar"])
+            return redirect("profile")
+        # if name updated
         action = (request.POST.get("action") or "").strip()
-
         if action == "update_name":
             full = (request.POST.get("name") or "").strip()
             if full:
@@ -36,6 +41,7 @@ def profile(request):
                 request.user.save(update_fields=["first_name", "last_name"])
             return redirect("profile")
 
+        #bio changes 
         elif action == "update_bio":
             profile_obj.bio = request.POST.get("bio") or ""
             profile_obj.save(update_fields=["bio"])

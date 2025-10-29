@@ -33,6 +33,35 @@
       width:84px; height:84px; border-radius:50%;
       background:#eee; margin:0 auto 16px auto;
     }
+    .avatar-upload {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 16px auto;
+    }
+
+    .avatar-preview {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background-color: #eee;
+      background-size: cover;
+      background-position: center;
+      color: #555;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+
+    .avatar-preview:hover {
+      background-color: #ddd;
+    }
 
     .btn {
       display:inline-block;
@@ -52,6 +81,15 @@
       padding:8px 16px; border-radius:8px; text-decoration:none;
     }
     .logout-btn:hover { background:#c53030; }
+    
+    .back-btn {
+      position:absolute; top:16px; left:16px;
+      background:#111; color:#fff; border:none;
+      padding:8px 16px; border-radius:8px; text-decoration:none;
+    }
+    .back-btn:hover { background:#111; }
+   
+
 
     .edit-link { margin-left:8px; font-size:.9rem; color:#2563eb; text-decoration:none; }
     .edit-link:hover { text-decoration:underline; }
@@ -67,9 +105,27 @@
 </head>
 <body>
   <div class="card">
+    <a href="/" class="back-btn">Back</a>
     <a href="{% url 'account_logout' %}" class="logout-btn">Log Out</a>
-
-    <div class="avatar"></div>
+    <div class="avatar-upload">
+      <form method="post" enctype="multipart/form-data" action="{% url 'profile' %}">
+        {% csrf_token %}
+        <input type="file" name="image" id="avatar-input" accept="image/*" style="display:none;">
+        
+        <label for="avatar-input" class="avatar-preview" id="avatarPreview"
+          style="background-image: {% if profile.avatar %}url('{{ profile.avatar.url }}'){% else %}none{% endif %};">
+          <span class="avatar-text" id="avatarText">
+            {% if profile.avatar %}
+              Change Picture
+            {% else %}
+              Select Picture
+            {% endif %}
+          </span>
+        </label>
+        
+        <button class="btn" type="submit" id="uploadBtn" style="display:none;">Upload</button>
+      </form>
+    </div>
     <h1>Hello, {{ user.first_name|default:user.username }}!</h1>
 
     <p>
@@ -127,26 +183,26 @@
 
   <script>
     function toggle(el, show) { el.style.display = show ? 'block' : 'none'; }
-
+  
     const nameText   = document.getElementById('name-text');
     const nameToggle = document.getElementById('name-edit-toggle');
     const nameRow    = document.getElementById('name-edit-row');
     const nameInput  = document.getElementById('name-input');
     const nameSave   = document.getElementById('name-save');
     const nameCancel = document.getElementById('name-cancel');
-
+  
     const bioText   = document.getElementById('bio-text');
     const bioToggle = document.getElementById('bio-edit-toggle');
     const bioRow    = document.getElementById('bio-edit-row');
     const bioInput  = document.getElementById('bio-input');
     const bioSave   = document.getElementById('bio-save');
     const bioCancel = document.getElementById('bio-cancel');
-
+  
     const form       = document.getElementById('profile-form');
     const actionFld  = document.getElementById('action-field');
     const nameFld    = document.getElementById('name-field');
     const bioFld     = document.getElementById('bio-field');
-
+  
     nameToggle.addEventListener('click', (e) => {
       e.preventDefault();
       toggle(nameRow, true);
@@ -159,7 +215,7 @@
       nameFld.value   = nameInput.value.trim();
       form.submit();
     });
-
+  
     bioToggle.addEventListener('click', (e) => {
       e.preventDefault();
       toggle(bioRow, true);
@@ -172,6 +228,27 @@
       bioFld.value    = bioInput.value;
       form.submit();
     });
+  
+    // Avatar preview + text handling
+    const avatarInput = document.getElementById('avatar-input');
+    const avatarPreview = document.getElementById('avatarPreview');
+    const avatarText = document.getElementById('avatarText');
+    const uploadBtn = document.getElementById('uploadBtn');
+  
+    if (avatarInput) {
+      avatarInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            avatarPreview.style.backgroundImage = `url('${e.target.result}')`;
+            avatarText.textContent = 'Uploading...';
+          };
+          reader.readAsDataURL(file);
+          uploadBtn.click(); // auto-submit immediately after selection
+        }
+      });
+    }
   </script>
 </body>
 </html>

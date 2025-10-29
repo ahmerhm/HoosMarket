@@ -30,6 +30,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['localhost','127.0.0.1','salty-shore-01968-bbd1b2057491.herokuapp.com']
 
 
+
 # Application definition
 
 INSTALLED_APPS = [
