@@ -33,6 +33,35 @@
       width:84px; height:84px; border-radius:50%;
       background:#eee; margin:0 auto 16px auto;
     }
+    .avatar-upload {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 16px auto;
+    }
+
+    .avatar-preview {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background-color: #eee;
+      background-size: cover;
+      background-position: center;
+      color: #555;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+
+    .avatar-preview:hover {
+      background-color: #ddd;
+    }
 
     .btn {
       display:inline-block;
@@ -78,7 +107,17 @@
   <div class="card">
     <a href="/" class="back-btn">Back</a>
     <a href="{% url 'account_logout' %}" class="logout-btn">Log Out</a>
-    <div class="avatar"></div>
+    <div class="avatar-upload">
+      <form method="post" enctype="multipart/form-data" action="{% url 'profile' %}">
+        {% csrf_token %}
+        <input type="file" name="image" id="avatar-input" accept="image/*" style="display:none;">
+        <label for="avatar-input" class="avatar-preview" id="avatarPreview"
+          style="background-image: {% if profile.image %}url('{{ profile.image.url }}'){% else %}none{% endif %};">
+          {% if not profile.image %}Select Picture{% endif %}
+        </label>
+        <button class="btn" type="submit" id="uploadBtn" style="display:none;">Upload</button>
+      </form>
+    </div>
     <h1>Hello, {{ user.first_name|default:user.username }}!</h1>
 
     <p>
@@ -181,6 +220,24 @@
       bioFld.value    = bioInput.value;
       form.submit();
     });
+    const avatarInput = document.getElementById('avatar-input');
+    const avatarPreview = document.getElementById('avatarPreview');
+    const uploadBtn = document.getElementById('uploadBtn');
+
+    if (avatarInput) {
+      avatarInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            avatarPreview.style.backgroundImage = `url('${e.target.result}')`;
+            avatarPreview.textContent = '';
+          };
+          reader.readAsDataURL(file);
+          uploadBtn.click(); // auto-submit immediately after selection
+        }
+      });
+    }
   </script>
 </body>
 </html>
