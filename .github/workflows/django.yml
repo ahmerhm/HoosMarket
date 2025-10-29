@@ -14,6 +14,12 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [3.9]
+        
+    env:
+      # Dummy environment variables for CI
+      SECRET_KEY: testsecret
+      DATABASE_URL: sqlite:///testdb.sqlite3
+      DEBUG: "True"
 
     steps:
     - uses: actions/checkout@v4
