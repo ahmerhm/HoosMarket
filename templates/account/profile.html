@@ -52,6 +52,15 @@
       padding:8px 16px; border-radius:8px; text-decoration:none;
     }
     .logout-btn:hover { background:#c53030; }
+    
+    .back-btn {
+      position:absolute; top:16px; left:16px;
+      background:#111; color:#fff; border:none;
+      padding:8px 16px; border-radius:8px; text-decoration:none;
+    }
+    .back-btn:hover { background:#111; }
+   
+
 
     .edit-link { margin-left:8px; font-size:.9rem; color:#2563eb; text-decoration:none; }
     .edit-link:hover { text-decoration:underline; }
@@ -67,8 +76,8 @@
 </head>
 <body>
   <div class="card">
+    <a href="/" class="back-btn">Back</a>
     <a href="{% url 'account_logout' %}" class="logout-btn">Log Out</a>
-
     <div class="avatar"></div>
     <h1>Hello, {{ user.first_name|default:user.username }}!</h1>
 
