@@ -111,10 +111,18 @@
       <form method="post" enctype="multipart/form-data" action="{% url 'profile' %}">
         {% csrf_token %}
         <input type="file" name="image" id="avatar-input" accept="image/*" style="display:none;">
+        
         <label for="avatar-input" class="avatar-preview" id="avatarPreview"
-          style="background-image: {% if profile.image %}url('{{ profile.image.url }}'){% else %}none{% endif %};">
-          {% if not profile.image %}Select Picture{% endif %}
+          style="background-image: {% if profile.avatar %}url('{{ profile.avatar.url }}'){% else %}none{% endif %};">
+          <span class="avatar-text" id="avatarText">
+            {% if profile.avatar %}
+              Change Picture
+            {% else %}
+              Select Picture
+            {% endif %}
+          </span>
         </label>
+        
         <button class="btn" type="submit" id="uploadBtn" style="display:none;">Upload</button>
       </form>
     </div>
@@ -175,26 +183,26 @@
 
   <script>
     function toggle(el, show) { el.style.display = show ? 'block' : 'none'; }
-
+  
     const nameText   = document.getElementById('name-text');
     const nameToggle = document.getElementById('name-edit-toggle');
     const nameRow    = document.getElementById('name-edit-row');
     const nameInput  = document.getElementById('name-input');
     const nameSave   = document.getElementById('name-save');
     const nameCancel = document.getElementById('name-cancel');
-
+  
     const bioText   = document.getElementById('bio-text');
     const bioToggle = document.getElementById('bio-edit-toggle');
     const bioRow    = document.getElementById('bio-edit-row');
     const bioInput  = document.getElementById('bio-input');
     const bioSave   = document.getElementById('bio-save');
     const bioCancel = document.getElementById('bio-cancel');
-
+  
     const form       = document.getElementById('profile-form');
     const actionFld  = document.getElementById('action-field');
     const nameFld    = document.getElementById('name-field');
     const bioFld     = document.getElementById('bio-field');
-
+  
     nameToggle.addEventListener('click', (e) => {
       e.preventDefault();
       toggle(nameRow, true);
@@ -207,7 +215,7 @@
       nameFld.value   = nameInput.value.trim();
       form.submit();
     });
-
+  
     bioToggle.addEventListener('click', (e) => {
       e.preventDefault();
       toggle(bioRow, true);
@@ -220,10 +228,13 @@
       bioFld.value    = bioInput.value;
       form.submit();
     });
+  
+    // Avatar preview + text handling
     const avatarInput = document.getElementById('avatar-input');
     const avatarPreview = document.getElementById('avatarPreview');
+    const avatarText = document.getElementById('avatarText');
     const uploadBtn = document.getElementById('uploadBtn');
-
+  
     if (avatarInput) {
       avatarInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
@@ -231,7 +242,7 @@
           const reader = new FileReader();
           reader.onload = (e) => {
             avatarPreview.style.backgroundImage = `url('${e.target.result}')`;
-            avatarPreview.textContent = '';
+            avatarText.textContent = 'Uploading...';
           };
           reader.readAsDataURL(file);
           uploadBtn.click(); // auto-submit immediately after selection
