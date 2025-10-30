@@ -60,6 +60,22 @@
             background-color: white;
             padding: 2rem;
         }
+
+        .btn.square {
+            background: #ffffff;
+            color: #000;
+            border: 2px solid #000;
+            border-radius: 0;
+            padding: 0.25rem 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn.square:hover {
+            background: #000000;
+            color: #fff;
+        }
+
     </style>
 </head>
 <body>
@@ -73,10 +89,152 @@
         </div>
     </nav>
 
-    <div class="content">
-         <p>Posts will show up here.</p>
+    <div class="wrap">
+    <div class="header" style="justify-content: center;margin-top:1.5rem;">
+        <h2 style="text-align:center;width:100%;color:#000000;">Create New Post</h2>
     </div>
+
+    <form method="POST" action="{% url 'newpost' %}" enctype="multipart/form-data" style="padding:1.5rem">
+
+      <div style="margin-bottom:1rem">
+        <label for="title" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000">Title</label>
+        <input 
+          type="text" 
+          id="title" 
+          name="title" 
+          required 
+          style="width:100%;padding:.6rem;border:1px solid #ddd;border-radius:6px"
+        >
+      </div>
+
+      <div style="margin-bottom:1rem">
+        <label for="price" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000">Price ($)</label>
+        <input 
+          type="number" 
+          id="price" 
+          name="price" 
+          step="0.01" 
+          min="0" 
+          required 
+          style="width:100%;padding:.6rem;border:1px solid #ddd;border-radius:6px"
+        >
+      </div>
+
+      <div style="margin-bottom:1rem">
+        <label for="description" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000">Description</label>
+        <textarea 
+          id="description" 
+          name="description" 
+          rows="5" 
+          required 
+          style="width:100%;padding:.6rem;border:1px solid #ddd;border-radius:6px;resize:vertical"
+        ></textarea>
+      </div>
+
+    <div style="margin-bottom:1.5rem;">
+      <label for="image" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000;">Upload Images</label>
+      <input 
+        type="file" 
+        id="image" 
+        name="images" 
+        accept="image/*" 
+        multiple 
+        required
+        style="padding:.4rem 0;">
+      <p style="font-size:.85rem;color:#666;margin-top:.3rem;">
+        You can select multiple images!
+      </p>
+
+      <div id="image-preview" 
+           style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;border:1px dashed #ccc;
+                  padding:10px;border-radius:6px;background:#fafafa;">
+        <p style="color:#666;">No images selected.</p>
+      </div>
+    </div>
+        <p style="font-size:.85rem;color:#666;margin-top:.3rem">You can select multiple images!</p>
+      </div>
+
+    <div style="text-align: center; margin-top: 1rem;">
+        <button type="submit" class="btn square">Create Post</button>
+    </div>
+
+    </form>
+  </div>
+
 
 </body>
 </html>
+
+<script>
+  const imageInput = document.getElementById('image');
+  const previewContainer = document.getElementById('image-preview');
+  let allFiles = [];
+
+  imageInput.addEventListener('change', function() {
+    const newFiles = Array.from(this.files);
+    allFiles = allFiles.concat(newFiles);
+    renderPreviews();
+  });
+
+  function renderPreviews() {
+    previewContainer.innerHTML = '';
+
+    if (allFiles.length === 0) {
+      previewContainer.innerHTML = '<p style="color:#666;">No images selected.</p>';
+      return;
+    }
+
+    allFiles.forEach((file, index) => {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const wrapper = document.createElement('div');
+        wrapper.style.position = 'relative';
+        wrapper.style.display = 'inline-block';
+
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.style.width = '100px';
+        img.style.height = '100px';
+        img.style.objectFit = 'cover';
+        img.style.border = '1px solid #ccc';
+        img.style.borderRadius = '4px';
+        img.style.marginRight = '10px';
+        img.style.marginBottom = '10px';
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.innerHTML = '×';
+        deleteBtn.style.position = 'absolute';
+        deleteBtn.style.top = '0';
+        deleteBtn.style.right = '0';
+        deleteBtn.style.background = 'rgba(0,0,0,0.6)';
+        deleteBtn.style.color = 'white';
+        deleteBtn.style.border = 'none';
+        deleteBtn.style.borderRadius = '0 4px 0 4px';
+        deleteBtn.style.cursor = 'pointer';
+        deleteBtn.style.fontSize = '16px';
+        deleteBtn.style.lineHeight = '1';
+        deleteBtn.style.width = '22px';
+        deleteBtn.style.height = '22px';
+        deleteBtn.style.padding = '0';
+        deleteBtn.title = 'Remove this image';
+
+        deleteBtn.addEventListener('click', () => {
+          allFiles.splice(index, 1);
+          renderPreviews();
+        });
+
+        wrapper.appendChild(img);
+        wrapper.appendChild(deleteBtn);
+        previewContainer.appendChild(wrapper);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  document.querySelector('form').addEventListener('submit', (e) => {
+    const dataTransfer = new DataTransfer();
+    allFiles.forEach(file => dataTransfer.items.add(file));
+    imageInput.files = dataTransfer.files;
+  });
+</script>
 
