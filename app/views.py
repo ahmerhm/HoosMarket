@@ -56,3 +56,7 @@ def profile(request):
             "profile": profile_obj,  
         },
     )
+
+@login_required
+def new_post(request):
+    return render(request, 'post/new_post.html')

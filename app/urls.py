@@ -35,7 +35,8 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("dashboard/",views.dashboard, name="dashboard"), 
     path("myaccount/", views.profile, name="profile"),
-    path("messages/", include(("messaging.urls", "messaging"), namespace="messaging"))
+    path("messages/", include(("messaging.urls", "messaging"), namespace="messaging")),
+    path("newpost/", views.new_post, name="newpost")
 ]
 
 if settings.DEBUG:
