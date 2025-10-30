@@ -95,6 +95,7 @@
     </div>
 
     <form method="POST" action="{% url 'newpost' %}" enctype="multipart/form-data" style="padding:1.5rem">
+        {% csrf_token %}
 
       <div style="margin-bottom:1rem">
         <label for="title" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000">Title</label>
@@ -149,9 +150,6 @@
            style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;border:1px dashed #ccc;
                   padding:10px;border-radius:6px;background:#fafafa;">
         <p style="color:#666;">No images selected.</p>
-      </div>
-    </div>
-        <p style="font-size:.85rem;color:#666;margin-top:.3rem">You can select multiple images!</p>
       </div>
 
     <div style="text-align: center; margin-top: 1rem;">

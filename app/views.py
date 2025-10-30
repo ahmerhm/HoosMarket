@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Profile
+from .models import Profile, Post, PostImages
 
 @login_required
 def dashboard(request):
@@ -59,4 +59,18 @@ def profile(request):
 
 @login_required
 def new_post(request):
+    if request.method == "POST":
+        post_title = request.POST.get("title")
+        post_price = request.POST.get("price")
+        post_description = request.POST.get("description")
+        post_images = request.FILES.getlist("images")
+
+        new_post_obj = Post.objects.create(user = request.user, title = post_title, price = post_price, description = post_description)
+
+        for image in post_images:
+            PostImages.objects.create(post=new_post_obj, image=image)
+
+        
+        return redirect("dashboard")
+    
     return render(request, 'post/new_post.html')
