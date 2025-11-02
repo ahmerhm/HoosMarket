@@ -5,27 +5,45 @@
   <title>{{ title|default:"Conversation" }}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
+    :root { --ink:#082d52; --accent:#29b1f0; --bg:#f8f9fa; --muted:#667085; }
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:Arial,Helvetica,sans-serif;background:#f8f9fa}
-    nav{display:flex;align-items:center;justify-content:space-between;background:#082d52;color:#fff;padding:.75rem 2rem;box-shadow:0 2px 5px rgba(0,0,0,.2)}
-    .site-name{font-size:1.5rem;font-weight:bold;letter-spacing:.5px}
-    .nav-links{display:flex;gap:1.5rem}
+    body{font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;background:var(--bg)}
+    nav{display:flex;align-items:center;justify-content:space-between;background:var(--ink);color:#fff;padding:.75rem 2rem;box-shadow:0 2px 5px rgba(0,0,0,.2)}
+    .site-name,
+    .site-name:visited {font-size:1.5rem;font-weight:700;letter-spacing:.25px;color:#fff;text-decoration:none}
+    .site-name:hover {color:var(--accent)}
+    .nav-links{display:flex;gap:1.25rem}
     .nav-links a{color:#fff;text-decoration:none}
-    .nav-links a:hover{color:#29b1f0}
+    .nav-links a:hover{color:var(--accent)}
 
-    .chat{max-width:900px;margin:1.5rem auto;background:#fff;border:1px solid #eee;border-radius:8px;overflow:hidden;display:flex;flex-direction:column;height:70vh}
-    .chat-head{display:flex;align-items:center;gap:.75rem;padding:.9rem 1rem;border-bottom:1px solid #eee;background:#fafafa}
-    .avatar{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:#e8f4ff;color:#082d52;font-weight:bold}
+    .chat{max-width:900px;margin:1.5rem auto;background:#fff;border:1px solid #eef2f7;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;height:72vh}
+    .chat-head{display:flex;align-items:center;gap:.75rem;padding:.9rem 1rem;border-bottom:1px solid #eef2f7;background:#fafafa}
+    .avatar{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:#e8f4ff;color:var(--ink);font-weight:700}
     .name{font-size:1.05rem}
-    .sub{font-size:.85rem;color:#666}
-    .messages{padding:1rem;overflow:auto;flex:1}
-    .bubble{max-width:70%;padding:.6rem .8rem;border-radius:12px;margin:.25rem 0}
+    .sub{font-size:.85rem;color:var(--muted)}
+    .messages{padding:1rem;overflow:auto;flex:1;background:#fdfdfd}
+    .bubble{max-width:70%;padding:.6rem .8rem;border-radius:14px;margin:.25rem 0;box-shadow:0 1px 0 rgba(0,0,0,.03)}
     .me{background:#e8f4ff;margin-left:auto}
-    .them{background:#f2f2f2;margin-right:auto}
-    .meta{font-size:.8rem;color:#666;margin-bottom:.3rem}
-    form{display:flex;gap:.5rem;padding:.75rem;border-top:1px solid #eee}
-    textarea{flex:1;padding:.6rem}
-    .back{color:#082d52;text-decoration:none;border:1px solid #082d52;border-radius:6px;padding:.25rem .5rem;background:#fff}
+    .them{background:#f3f4f6;margin-right:auto}
+    .meta{font-size:.78rem;color:#667085;margin-bottom:.3rem}
+    form{display:flex;gap:.5rem;padding:.75rem;border-top:1px solid #eef2f7;background:#fff}
+    textarea{flex:1;padding:.6rem;border:1px solid #e5e7eb;border-radius:10px;resize:vertical}
+    button[type="submit"]{background:var(--ink);color:#fff;border:none;border-radius:10px;padding:.6rem .9rem;cursor:pointer}
+    button[type="submit"]:hover{background:#0a3a6d}
+    .back{color:var(--ink);text-decoration:none;border:1px solid var(--ink);border-radius:999px;padding:.25rem .6rem;background:#fff}
+    
+    @media (prefers-color-scheme: dark) {
+      body{ background:#0b1220; color:#e5e7eb; }
+      .chat{ background:#0f172a; border-color:#1f2937; }
+      .chat-head{ background:#0f172a; border-bottom-color:#1f2937; }
+      .messages{ background:#0b1220; }
+      .meta{ color:#9aa4b2; }
+      .them{ background:#1f2937; }
+      .me{ background:#1e3a8a; color:#e0f2fe; }
+      textarea{ background:#0b1220; color:#e5e7eb; border-color:#334155; }
+      form{ border-top-color:#1f2937; background:#0f172a; }
+      .back{ border-color:#334155; color:#e5e7eb; background:#0f172a; }
+    }
   </style>
 </head>
 <body>
@@ -75,7 +93,7 @@
 
     <div class="messages">
       {% for m in messages %}
-        <div class="bubble {% if m.sender_id == request.user.id %}me{% else %}them{% endif %}">
+        <div class="bubble {% if m.sender_id == request.user.id %}me{% else %}them{% endif %}" title="{{ m.created_at|date:'D, M j, Y, g:i A' }}">
           <div class="meta">@{{ m.sender.username }} · {{ m.created_at|date:"M j, H:i" }}</div>
           <div>{{ m.text|linebreaksbr }}</div>
         </div>
@@ -89,5 +107,10 @@
       <button type="submit">Send</button>
     </form>
   </div>
+
+  <script>
+    const box = document.querySelector('.messages');
+    if (box) { box.scrollTop = box.scrollHeight; }
+  </script>
 </body>
 </html>

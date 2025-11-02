@@ -46,12 +46,22 @@
     }
     .btn-row { margin-top:18px; display:flex; gap:.6rem; justify-content:center; }
 
+    .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom: 8px; }
+
     .logout-btn {
-      position:absolute; top:16px; right:16px;
       background:#e53e3e; color:#fff; border:none;
-      padding:8px 16px; border-radius:8px; text-decoration:none;
+      padding:8px 14px; border-radius:8px; text-decoration:none;
     }
     .logout-btn:hover { background:#c53030; }
+    
+    .back-btn {
+      background:#f1f5f9; color:#111; border:1px solid #e2e8f0;
+      padding:8px 12px; border-radius:999px; text-decoration:none;
+      display:inline-flex; align-items:center; gap:6px;
+    }
+    .back-btn:hover { background:#e2e8f0; }
+   
+
 
     .edit-link { margin-left:8px; font-size:.9rem; color:#2563eb; text-decoration:none; }
     .edit-link:hover { text-decoration:underline; }
@@ -67,9 +77,29 @@
 </head>
 <body>
   <div class="card">
-    <a href="{% url 'account_logout' %}" class="logout-btn">Log Out</a>
-
-    <div class="avatar"></div>
+    <div class="topbar">
+      <a href="/" class="back-btn">← Back</a>
+      <a href="{% url 'account_logout' %}" class="logout-btn">Log Out</a>
+    </div>
+    <div class="avatar-upload">
+      <form method="post" enctype="multipart/form-data" action="{% url 'profile' %}">
+        {% csrf_token %}
+        <input type="file" name="image" id="avatar-input" accept="image/*" style="display:none;">
+        
+        <label for="avatar-input" class="avatar-preview" id="avatarPreview"
+          style="background-image: {% if profile.avatar %}url('{{ profile.avatar.url }}'){% else %}none{% endif %};">
+          <span class="avatar-text" id="avatarText">
+            {% if profile.avatar %}
+              Change Picture
+            {% else %}
+              Select Picture
+            {% endif %}
+          </span>
+        </label>
+        
+        <button class="btn" type="submit" id="uploadBtn" style="display:none;">Upload</button>
+      </form>
+    </div>
     <h1>Hello, {{ user.first_name|default:user.username }}!</h1>
 
     <p>
