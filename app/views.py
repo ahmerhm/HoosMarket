@@ -1,5 +1,19 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+
+from django.core.files.base import ContentFile
+from pathlib import Path
+from io import BytesIO
+from PIL import Image
+try:
+    # Enable Pillow to open HEIC/HEIF if pillow-heif is installed
+    from pillow_heif import register_heif_opener  # type: ignore
+    register_heif_opener()
+except Exception:
+    # Safe to ignore if library unavailable locally
+    pass
+
+
 from .models import Profile
 
 @login_required
@@ -23,6 +37,31 @@ def profile(request):
     profile_obj, _ = Profile.objects.get_or_create(user=request.user)
 
     if request.method == "POST":
+        # Handle avatar upload (convert HEIC/HEIF to JPEG for browser support)
+        if "image" in request.FILES:
+            uploaded = request.FILES["image"]
+            name = getattr(uploaded, "name", "avatar")
+            content_type = getattr(uploaded, "content_type", "")
+            ext = name.rsplit(".", 1)[-1].lower() if "." in name else ""
+
+            if ext in {"heic", "heif"} or content_type in {"image/heic", "image/heif"}:
+                try:
+                    img = Image.open(uploaded)
+                    if img.mode not in ("RGB", "L"):
+                        img = img.convert("RGB")
+                    buf = BytesIO()
+                    img.save(buf, format="JPEG", quality=90)
+                    buf.seek(0)
+                    new_name = f"{Path(name).stem}.jpg"
+                    profile_obj.avatar.save(new_name, ContentFile(buf.read()), save=True)
+                except Exception:
+                    profile_obj.avatar = uploaded
+                    profile_obj.save(update_fields=["avatar"])
+            else:
+                profile_obj.avatar = uploaded
+                profile_obj.save(update_fields=["avatar"])
+            return redirect("profile")
+
         action = (request.POST.get("action") or "").strip()
 
         if action == "update_name":
