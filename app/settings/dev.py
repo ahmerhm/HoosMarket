@@ -17,5 +17,5 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / 'media'
 
-if os.getenv("USE_S3", "true").lower() == "true":
-    from .prod import *
+# if os.getenv("USE_S3", "true").lower() == "true":
+#     from .prod import *

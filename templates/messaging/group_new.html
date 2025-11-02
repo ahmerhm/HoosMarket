@@ -5,33 +5,36 @@
   <title>{{ title|default:"New group" }}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
+    :root { --ink:#082d52; --accent:#29b1f0; --bg:#f8f9fa; --muted:#667085; }
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:Arial,Helvetica,sans-serif;background:#f8f9fa}
-    nav{display:flex;align-items:center;justify-content:space-between;background:#082d52;color:#fff;padding:.75rem 2rem;box-shadow:0 2px 5px rgba(0,0,0,.2)}
+    body{font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;background:var(--bg)}
+    nav{display:flex;align-items:center;justify-content:space-between;background:var(--ink);color:#fff;padding:.75rem 2rem;box-shadow:0 2px 5px rgba(0,0,0,.2)}
     .site-name,
-    .site-name:visited {
-      font-size: 1.5rem;
-      font-weight: bold;
-      letter-spacing: .5px;
-      color: white;
-      text-decoration: none;
-    }
-
-    .site-name:hover {
-      color: #29b1f0;
-    }
-    .nav-links{display:flex;gap:1.5rem}
+    .site-name:visited {font-size:1.5rem;font-weight:700;letter-spacing:.25px;color:#fff;text-decoration:none}
+    .site-name:hover {color:var(--accent)}
+    .nav-links{display:flex;gap:1.25rem}
     .nav-links a{color:#fff;text-decoration:none}
-    .nav-links a:hover{color:#29b1f0}
-    .wrap{max-width:900px;margin:1.5rem auto;background:#fff;border:1px solid #eee;border-radius:8px;overflow:hidden}
-    .header{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;border-bottom:1px solid #eee}
+    .nav-links a:hover{color:var(--accent)}
+    .wrap{max-width:900px;margin:1.5rem auto;background:#fff;border:1px solid #eef2f7;border-radius:14px;overflow:hidden}
+    .header{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;border-bottom:1px solid #eef2f7}
     .content{padding:1rem 1.25rem}
     .field{margin-bottom:1rem}
-    label{display:block;margin-bottom:.4rem}
-    input[type="text"]{width:100%;padding:.6rem;border:1px solid #ddd;border-radius:6px}
-    .members{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.4rem .8rem;padding:.5rem;border:1px solid #eee;border-radius:8px;max-height:45vh;overflow:auto}
-    .actions{display:flex;gap:.5rem;margin-top:1rem}
-    .btn{padding:.5rem .9rem;border:1px solid #082d52;border-radius:6px;background:#fff;cursor:pointer}
+    label{display:block;margin-bottom:.4rem;color:#111}
+    input[type="text"]{width:100%;padding:.6rem;border:1px solid #e5e7eb;border-radius:10px}
+    .members{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.5rem .8rem;padding:.6rem;border:1px solid #eef2f7;border-radius:12px;max-height:45vh;overflow:auto}
+    .actions{display:flex;gap:.6rem;margin-top:1rem}
+    .btn{padding:.55rem .95rem;border:1px solid var(--ink);border-radius:10px;background:#fff;cursor:pointer}
+    .btn.primary{background:var(--ink);color:#fff}
+    
+    @media (prefers-color-scheme: dark) {
+      body{ background:#0b1220; color:#e5e7eb; }
+      .wrap{ background:#0f172a; border-color:#1f2937; }
+      .header{ border-bottom-color:#1f2937; }
+      label{ color:#e5e7eb }
+      input[type="text"]{ background:#0b1220; color:#e5e7eb; border-color:#334155 }
+      .members{ border-color:#1f2937 }
+      .btn{ background:#0f172a; color:#e5e7eb; border-color:#334155 }
+    }
   </style>
 </head>
 <body>
@@ -60,7 +63,7 @@
           </div>
         </div>
         <div class="actions">
-          <button class="btn" type="submit">Create group</button>
+          <button class="btn primary" type="submit">Create group</button>
           <a class="btn" href="{% url 'messaging:inbox' %}">Cancel</a>
         </div>
       </form>

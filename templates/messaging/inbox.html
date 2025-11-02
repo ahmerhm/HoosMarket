@@ -6,38 +6,51 @@
   <title>{{ title|default:"Messages" }}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    :root { --ink:#082d52; --accent:#29b1f0; --bg:#f8f9fa; --muted:#667085; }
     * {margin:0;padding:0;box-sizing:border-box}
-    body {font-family: Arial, Helvetica, sans-serif;background:#f8f9fa}
-    nav {display:flex;align-items:center;justify-content:space-between;background:#082d52;color:#fff;padding:.75rem 2rem;box-shadow:0 2px 5px rgba(0,0,0,.2)}
+    body {font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;background:var(--bg)}
+    nav {display:flex;align-items:center;justify-content:space-between;background:var(--ink);color:#fff;padding:.75rem 2rem;box-shadow:0 2px 5px rgba(0,0,0,.2)}
     .site-name,
-    .site-name:visited {
-      font-size: 1.5rem;
-      font-weight: bold;
-      letter-spacing: .5px;
-      color: white;
-      text-decoration: none;
-    }
-
-    .site-name:hover {
-      color: #29b1f0;
-    }
-    .nav-links {display:flex;gap:1.5rem}
+    .site-name:visited {font-size: 1.5rem;font-weight: 700;letter-spacing:.25px;color:#fff;text-decoration:none}
+    .site-name:hover {color: var(--accent)}
+    .nav-links {display:flex;gap:1.25rem}
     .nav-links a {color:#fff;text-decoration:none}
-    .nav-links a:hover {color:#29b1f0}
-    .wrap {max-width:900px;margin:1.5rem auto;background:#fff;border:1px solid #eee;border-radius:8px;overflow:hidden}
-    .header {display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;border-bottom:1px solid #eee}
+    .nav-links a:hover {color:var(--accent)}
+
+    .wrap {max-width:900px;margin:1.5rem auto;background:#fff;border:1px solid #eef2f7;border-radius:14px;overflow:hidden}
+    .header {display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;border-bottom:1px solid #eef2f7}
     .list {list-style:none}
-    .item {padding:1rem 1.25rem;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:.5rem}
-    .item a {text-decoration:none;color:#082d52}
-    .meta {color:#666;font-size:.9rem}
-    .empty {padding:1rem 1.25rem;color:#666}
-    .btn {display:inline-block;padding:.5rem .9rem;border-radius:6px;border:1px solid #082d52;text-decoration:none;background:#fff;cursor:pointer}
+    .item {padding:.9rem 1rem;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:.75rem;transition:background .15s ease}
+    .item:hover {background:#fafafa}
+    .item a {text-decoration:none;color:var(--ink)}
+    .cell {display:flex;align-items:center;gap:.75rem;flex:1;min-width:0}
+    .avatar {width:38px;height:38px;border-radius:50%;background:#e8f4ff;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;font-weight:700}
+    .title {font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .meta {color:var(--muted);font-size:.9rem}
+    .badge {background:#e02424;color:#fff;border-radius:999px;padding:.1rem .45rem;font-size:.75rem;min-width:1.25rem;text-align:center}
+    .empty {padding:1rem 1.25rem;color:var(--muted)}
+    .btn {display:inline-block;padding:.5rem .9rem;border-radius:8px;border:1px solid var(--ink);text-decoration:none;background:#fff;cursor:pointer}
 
     .modal-backdrop {position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:50}
-    .modal {width:min(720px, 92vw);background:#fff;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.2);overflow:hidden}
-    .modal-head {display:flex;justify-content:space-between;align-items:center;padding:.9rem 1rem;border-bottom:1px solid #eee}
+    .modal {width:min(720px, 92vw);background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.2);overflow:hidden}
+    .modal-head {display:flex;justify-content:space-between;align-items:center;padding:.9rem 1rem;border-bottom:1px solid #eef2f7}
     .modal-body {padding:1rem}
     .close {background:none;border:none;font-size:1.2rem;cursor:pointer}
+    
+    @media (prefers-color-scheme: dark) {
+      body { background:#0b1220; color:#e5e7eb; }
+      .wrap { background:#0f172a; border-color:#1f2937; }
+      .header { border-bottom-color:#1f2937; }
+      .item { border-bottom-color:#1f2937; }
+      .item a { color:#e5e7eb; }
+      .item:hover { background:#111827; }
+      .meta, .empty { color:#9aa4b2; }
+      .avatar { background:#1e3a8a; color:#93c5fd; }
+      .btn { background:#0f172a; color:#e5e7eb; border-color:#334155; }
+      .modal { background:#0f172a; }
+      .modal-head { border-bottom-color:#1f2937; color:#e5e7eb; }
+      .modal-body { color:#e5e7eb; }
+    }
   </style>
 </head>
 <body>
@@ -63,35 +76,40 @@
       <ul class="list">
         {% for row in rows %}
           <li class="item">
-            {% if row.unread_count > 0 %}
-              <span aria-label="unread"
-                    title="{{ row.unread_count }} unread"
-                    style="width:10px;height:10px;border-radius:50%;background:#e02424;display:inline-block"></span>
-            {% endif %}
-
-            <a href="{% url 'messaging:thread' row.thread.id %}">
-              {% if row.thread.is_group %}
-                <strong>{{ row.thread.name }}</strong>
-                <span class="meta">
-                  ·
-                  {% for p in row.thread.participants.all %}
-                    {% if p.id != request.user.id %}
-                      @{{ p.username }}{% if not forloop.last %}, {% endif %}
-                    {% endif %}
-                  {% endfor %}
-                </span>
-              {% else %}
-                {% if row.other %}
-                  {% if row.unread_count > 0 %}
-                    <strong>@{{ row.other.username }}</strong>
-                  {% else %}
-                    @{{ row.other.username }}
-                  {% endif %}
+            <div class="cell">
+              <div class="avatar">
+                {% if row.thread.is_group %}
+                  {{ row.thread.name|default:"?"|first|upper }}
+                {% elif row.other %}
+                  {{ row.other.username|first|upper }}
                 {% else %}
-                  Conversation
+                  ?
                 {% endif %}
-              {% endif %}
-            </a>
+              </div>
+              <div style="min-width:0;display:flex;flex-direction:column;gap:.15rem">
+                <a class="title" href="{% url 'messaging:thread' row.thread.id %}">
+                  {% if row.thread.is_group %}
+                    {{ row.thread.name }}
+                  {% else %}
+                    {% if row.other %}@{{ row.other.username }}{% else %}Conversation{% endif %}
+                  {% endif %}
+                </a>
+                <div class="meta">
+                  {% if row.thread.is_group %}
+                    {% for p in row.thread.participants.all %}
+                      {% if p.id != request.user.id %}
+                        @{{ p.username }}{% if not forloop.last %}, {% endif %}
+                      {% endif %}
+                    {% endfor %}
+                  {% else %}
+                    Direct message
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            {% if row.unread_count > 0 %}
+              <span class="badge" title="{{ row.unread_count }} unread">{{ row.unread_count }}</span>
+            {% endif %}
           </li>
         {% endfor %}
       </ul>

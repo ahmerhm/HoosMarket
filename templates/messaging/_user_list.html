@@ -1,10 +1,15 @@
 <ul style="list-style:none;max-height:45vh;overflow:auto;padding:0;margin:0">
   {% for u in users %}
-    <li style="border-top:1px solid #f1f1f1;padding:.6rem .25rem;display:flex;justify-content:space-between;align-items:center">
-      <div>@{{ u.username }}</div>
+    <li style="border-top:1px solid #f1f1f1;padding:.55rem .4rem;display:flex;align-items:center;gap:.65rem">
+      <div style="width:34px;height:34px;border-radius:50%;background:#e8f4ff;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;font-weight:700">
+        {{ u.username|first|upper }}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">@{{ u.username }}</div>
+      </div>
       <a
         href="{% url 'messaging:compose' u.id %}"
-        style="padding:.35rem .65rem;border:1px solid #082d52;border-radius:6px;background:#fff;text-decoration:none;display:inline-block"
+        style="padding:.4rem .7rem;border:1px solid var(--ink);border-radius:999px;background:#fff;text-decoration:none;display:inline-block;white-space:nowrap"
       >
         Message
       </a>
@@ -12,4 +17,5 @@
   {% empty %}
     <li style="padding:.6rem .25rem;color:#666">No users found.</li>
   {% endfor %}
+  
 </ul>
