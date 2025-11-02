@@ -1,5 +1,4 @@
 from .base import *
-import os
 import django_on_heroku
 from decouple import config
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -22,8 +21,6 @@ AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
 AWS_DEFAULT_ACL = 'public-read'
-
-AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='us-east-1')
 
 #https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/put_object.html#
 AWS_S3_OBJECT_PARAMETERS = {

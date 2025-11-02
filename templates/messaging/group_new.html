@@ -8,18 +8,7 @@
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:Arial,Helvetica,sans-serif;background:#f8f9fa}
     nav{display:flex;align-items:center;justify-content:space-between;background:#082d52;color:#fff;padding:.75rem 2rem;box-shadow:0 2px 5px rgba(0,0,0,.2)}
-    .site-name,
-    .site-name:visited {
-      font-size: 1.5rem;
-      font-weight: bold;
-      letter-spacing: .5px;
-      color: white;
-      text-decoration: none;
-    }
-
-    .site-name:hover {
-      color: #29b1f0;
-    }
+    .site-name{font-size:1.5rem;font-weight:bold}
     .nav-links{display:flex;gap:1.5rem}
     .nav-links a{color:#fff;text-decoration:none}
     .nav-links a:hover{color:#29b1f0}
@@ -36,7 +25,7 @@
 </head>
 <body>
   <nav>
-    <a href="/dashboard/" class="site-name">Hoos Market</a>
+    <div class="site-name">Website Name!!</div>
     <div class="nav-links">
       <a href="/posts/">Posts</a>
       <a href="{% url 'messaging:inbox' %}">Messages</a>
