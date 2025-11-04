@@ -8,7 +8,8 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app', '0003_remove_profile_image_profile_avatar_and_more'),
+        #('app', '0003_remove_profile_image_profile_avatar_and_more'),
+        ('app', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
