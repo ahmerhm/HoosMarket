@@ -98,7 +98,7 @@
         {% csrf_token %}
 
       <div style="margin-bottom:1rem">
-        <label for="title" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000">Title</label>
+        <label for="title" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000">Title: <span style="color:red;">*</span></label>
         <input 
           type="text" 
           id="title" 
@@ -109,7 +109,7 @@
       </div>
 
       <div style="margin-bottom:1rem">
-        <label for="price" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000">Price ($)</label>
+        <label for="price" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000">Price: <span style="color:red;">*</span></label>
         <input 
           type="number" 
           id="price" 
@@ -122,7 +122,7 @@
       </div>
 
       <div style="margin-bottom:1rem">
-        <label for="description" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000">Description</label>
+        <label for="description" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000">Description: <span style="color:red;">*</span></label>
         <textarea 
           id="description" 
           name="description" 
@@ -133,14 +133,13 @@
       </div>
 
     <div style="margin-bottom:1.5rem;">
-      <label for="image" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000;">Upload Images</label>
+      <label for="image" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000;">Upload Images:</label>
       <input 
         type="file" 
         id="image" 
         name="images" 
         accept="image/*" 
         multiple 
-        required
         style="padding:.4rem 0;">
       <p style="font-size:.85rem;color:#666;margin-top:.3rem;">
         You can select multiple images!
@@ -151,6 +150,11 @@
                   padding:10px;border-radius:6px;background:#fafafa;">
         <p style="color:#666;">No images selected.</p>
       </div>
+    </div>
+
+    <p style="color:#000000;font-size:0.9rem;margin-bottom:1rem;">
+      <span style="color:red;">*</span> Required Field
+    </p>
 
     <div style="text-align: center; margin-top: 1rem;">
         <button type="submit" class="btn square">Create Post</button>

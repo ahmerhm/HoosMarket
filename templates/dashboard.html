@@ -68,7 +68,22 @@
     </nav>
 
     <div class="content">
-         <p>Posts will show up here.</p>
+         {% for post in posts %}
+    <div class="post" style="border:1px solid #ccc; padding:1rem; margin-bottom:1rem; border-radius:6px; background:#fafafa;">
+        <h3>{{ post.title }} - ${{ post.price }}</h3>
+        <p>{{ post.description }}</p>
+        {% if post.images.all %}
+        <div class="images" style="margin-top:0.5rem;">
+            {% for img in post.images.all %}
+                <img src="{{ img.image.url }}" alt="Post image" style="width:100px; height:100px; object-fit:cover; margin-right:5px;">
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+        {% empty %}
+    <p>No posts yet.</p>
+        {% endfor %}
+
     </div>
 
 </body>

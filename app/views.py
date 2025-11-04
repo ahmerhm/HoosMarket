@@ -8,10 +8,12 @@ def dashboard(request):
 
     role = getattr(profile, "status", "Member")
 
+    posts = Post.objects.all().order_by('-created_at')
+
     if str(role).lower() == "organizer":
-        return render(request, "organizer_dashboard.html", {"profile": profile})
+        return render(request, "organizer_dashboard.html", {"profile": profile, "posts": posts})
     else:
-        return render(request, "dashboard.html", {"profile": profile})
+        return render(request, "dashboard.html", {"profile": profile, "posts": posts})
 
 @login_required
 def profile(request):
