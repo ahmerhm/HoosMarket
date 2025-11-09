@@ -114,9 +114,6 @@ def new_post(request):
 @login_required
 @require_POST
 def delete_account(request):
-    """
-    Delete the current user's account, log them out, and redirect to login.
-    """
     from django.contrib.auth import logout
     user = request.user
     logout(request)
