@@ -15,6 +15,7 @@ class Profile(models.Model):
         on_delete=models.CASCADE,
         related_name="profile",
     )
+    name = models.CharField(max_length=100, blank=True, default="")
     bio = models.TextField(blank=True, default="")
     interests = models.CharField(max_length=255, blank=True)
     status = models.CharField(max_length=50, default="Member")

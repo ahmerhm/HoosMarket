@@ -98,7 +98,7 @@ class Thread(models.Model):
 
 class Message(models.Model):
     thread = models.ForeignKey(Thread, related_name='messages', on_delete=models.CASCADE)
-    sender = models.ForeignKey(User, related_name='messages_sent', on_delete=models.CASCADE)
+    sender = models.ForeignKey(User, related_name='messages_sent', on_delete=models.SET_NULL, null=True)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 

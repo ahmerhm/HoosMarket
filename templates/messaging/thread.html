@@ -94,7 +94,7 @@
     <div class="messages">
       {% for m in messages %}
         <div class="bubble {% if m.sender_id == request.user.id %}me{% else %}them{% endif %}" title="{{ m.created_at|date:'D, M j, Y, g:i A' }}">
-          <div class="meta">@{{ m.sender.username }} · {{ m.created_at|date:"M j, H:i" }}</div>
+          <div class="meta">{% if m.sender %}@{{ m.sender.username }}{% else %}user not found{% endif %} · {{ m.created_at|date:"M j, H:i" }}</div>
           <div>{{ m.text|linebreaksbr }}</div>
         </div>
       {% empty %}

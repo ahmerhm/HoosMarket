@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 
 from django.core.files.base import ContentFile
 from pathlib import Path
@@ -105,7 +106,19 @@ def new_post(request):
         for image in post_images:
             PostImages.objects.create(post=new_post_obj, image=image)
 
-        
+
         return redirect("dashboard")
-    
+
     return render(request, 'post/new_post.html')
+
+@login_required
+@require_POST
+def delete_account(request):
+    """
+    Delete the current user's account, log them out, and redirect to login.
+    """
+    from django.contrib.auth import logout
+    user = request.user
+    logout(request)
+    user.delete()
+    return redirect("account_login")

@@ -33,10 +33,11 @@ urlpatterns = [
     path("admin/", admin.site.urls, name="admin_login"),
     path("", root),
     path("accounts/", include("allauth.urls")),
-    path("dashboard/",views.dashboard, name="dashboard"), 
+    path("dashboard/",views.dashboard, name="dashboard"),
     path("myaccount/", views.profile, name="profile"),
     path("messages/", include(("messaging.urls", "messaging"), namespace="messaging")),
-    path("newpost/", views.new_post, name="newpost")
+    path("newpost/", views.new_post, name="newpost"),
+    path("delete-account/", views.delete_account, name="delete_account")
 ]
 
 if settings.DEBUG:
