@@ -119,3 +119,9 @@ def delete_account(request):
     logout(request)
     user.delete()
     return redirect("account_login")
+
+@login_required
+def my_posts(request):
+    posts = Post.objects.filter(user=request.user).order_by('-created_at')
+
+    return render(request, "post/my_posts.html", {"posts": posts})
