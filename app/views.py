@@ -1,5 +1,6 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseForbidden
 from django.views.decorators.http import require_POST
 
 from django.core.files.base import ContentFile
@@ -125,3 +126,26 @@ def my_posts(request):
     posts = Post.objects.filter(user=request.user).order_by('-created_at')
 
     return render(request, "post/my_posts.html", {"posts": posts})
+
+@login_required
+def delete_post(request):
+    role = getattr(profile, "status", "Member")
+
+    if str(role).lower() == "organizer":
+        if request.method == "POST":
+            post_id = request.POST.get("post_id")
+            post = get_object_or_404(Post, id=post_id)
+            post.delete()
+            return redirect("myposts")
+    else:
+        if request.method == "POST":
+            post_id = request.POST.get("post_id")
+            post = get_object_or_404(Post, id=post_id)
+
+            if post.user != request.user:
+                return HttpResponseForbidden("You are not the owner of this post")
+
+            post.delete()
+            return redirect("myposts")
+
+    return redirect("dashboard")
