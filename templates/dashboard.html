@@ -69,6 +69,21 @@
             margin-right:1rem;
             background-color:#404243;
         }
+
+        .message-btn {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem; 
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            transition: background-color 0.3s ease;
+        }
+        .message-btn:hover {
+            background-color: #29b1f0;
+        }
     </style>
 </head>
 <body>
@@ -131,6 +146,12 @@
 
         <h3 style="margin-bottom:.25rem;">{{ post.title }}</h3>
         <p>{{ post.description }}</p>
+
+        {% if post.user != request.user %}
+        <a href="{% url 'messaging:compose' post.user.id %}" class="message-btn">
+            Message
+        </a>
+        {% endif %}
 
     </div>
     {% empty %}
