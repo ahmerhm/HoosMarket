@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,6 +55,20 @@
             background-color: white;
             padding: 2rem;
         }
+
+        .avatar {
+            width:40px;
+            height:40px;
+            border-radius:50%;
+            background-size:cover;
+            background-position:center;
+            overflow:hidden;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            margin-right:1rem;
+            background-color:#404243;
+        }
     </style>
 </head>
 <body>
@@ -67,24 +82,64 @@
         </div>
     </nav>
 
-    <div class="content">
-         {% for post in posts %}
-    <div class="post" style="border:1px solid #ccc; padding:1rem; margin-bottom:1rem; border-radius:6px; background:#fafafa;">
-        <h3>{{ post.title }} - ${{ post.price }}</h3>
-        <p>{{ post.description }}</p>
-        {% if post.images.all %}
-        <div class="images" style="margin-top:0.5rem;">
-            {% for img in post.images.all %}
-                <img src="{{ img.image.url }}" alt="Post image" style="width:100px; height:100px; object-fit:cover; margin-right:5px;">
-            {% endfor %}
+<div class="content">
+
+    {% for post in posts %}
+    <div class="post" style="
+        border:2px solid #ccc;
+        padding:1rem;
+        margin-bottom:1.5rem;
+        border-radius:6px;
+        background:#fafafa;
+    ">
+
+        <div style="display:flex; align-items:center; margin-bottom:1rem;">
+
+            <div class="avatar"
+                {% if post.user.profile.avatar %}
+                    style="background-image:url('{{ post.user.profile.avatar.url }}');"
+                {% endif %}
+            >
+                {% if not post.user.profile.avatar %}
+                    <span style="font-size:2rem; opacity:0.4;">📷</span>
+                {% endif %}
+            </div>
+
+            <div>
+                <h3 style="margin:0;">
+                    {% if post.user.get_full_name %}
+                        {{ post.user.get_full_name }}
+                    {% else %}
+                        {{ post.user.username }}
+                    {% endif %}
+                </h3>
+            </div>
+
         </div>
+
+        <h3 style="margin:0 0 .5rem 0;">${{ post.price }}</h3>
+
+        {% if post.images.all %}
+            <div style="margin-bottom:.75rem;">
+                {% for img in post.images.all %}
+                    <img src="{{ img.image.url }}"
+                        alt="Post image"
+                        style="width:100px; height:100px; object-fit:cover; margin-right:5px; border-radius:4px;">
+                {% endfor %}
+            </div>
         {% endif %}
-    </div>
-        {% empty %}
-    <p>No posts yet.</p>
-        {% endfor %}
+
+        <h3 style="margin-bottom:.25rem;">{{ post.title }}</h3>
+        <p>{{ post.description }}</p>
 
     </div>
+    {% empty %}
+        <p>No posts yet.</p>
+    {% endfor %}
+
+</div>
+
+
 
 </body>
 </html>
