@@ -1,0 +1,174 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Welcome to Hoos Market</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root { --ink:#082d52; --muted:#64748b; --border:#e5e7eb; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background:#f8fafc;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:1.5rem;
+    }
+    .card {
+      width:100%;
+      max-width:620px;
+      background:#fff;
+      border-radius:14px;
+      border:1px solid var(--border);
+      padding:1.5rem 1.75rem 1.75rem;
+      box-shadow:0 2px 10px rgba(15,23,42,.06);
+    }
+    h1 { font-size:1.6rem; margin-bottom:.3rem; color:var(--ink); }
+    p.sub { color:var(--muted); margin-bottom:1rem; font-size:.95rem; }
+    h2 { font-size:1.05rem; margin:1rem 0 .4rem; color:#0f172a; }
+    .grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
+      gap:.35rem .75rem;
+      margin-top:.25rem;
+    }
+    label.checkbox {
+      display:flex;
+      align-items:flex-start;
+      gap:.4rem;
+      font-size:.9rem;
+      color:#0f172a;
+    }
+    label.checkbox input { margin-top:.15rem; }
+    .field { margin-top:.8rem; }
+    .field input[type="text"],
+    .field textarea {
+      width:100%;
+      border-radius:8px;
+      border:1px solid var(--border);
+      padding:.5rem .6rem;
+      font:inherit;
+    }
+    .field textarea { resize:vertical; min-height:70px; }
+    .norms {
+      margin-top:.9rem;
+      padding:.7rem .8rem;
+      border-radius:10px;
+      background:#f1f5f9;
+      font-size:.9rem;
+      color:#0f172a;
+    }
+    .norms ul { margin:.3rem 0 0 1.1rem; }
+    .norms li { margin-bottom:.15rem; }
+    .norms-ack {
+      margin-top:.6rem;
+      font-size:.9rem;
+      display:flex;
+      align-items:flex-start;
+      gap:.4rem;
+      color:#0f172a;
+    }
+    .error {
+      margin-bottom:.6rem;
+      padding:.4rem .6rem;
+      border-radius:8px;
+      background:#fef2f2;
+      color:#b91c1c;
+      font-size:.85rem;
+    }
+    .actions {
+      margin-top:1.2rem;
+      display:flex;
+      justify-content:flex-end;
+      gap:.5rem;
+    }
+    .btn {
+      padding:.5rem .95rem;
+      border-radius:8px;
+      border:1px solid var(--ink);
+      background:#fff;
+      color:var(--ink);
+      font-weight:500;
+      cursor:pointer;
+    }
+    .btn.primary {
+      background:var(--ink);
+      color:#fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>First-time setup</h1>
+    <p class="sub">
+      Let’s personalize your experience so we can surface the most relevant activities and posts.
+    </p>
+
+    {% if error %}
+      <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="{% url 'onboarding' %}">
+      {% csrf_token %}
+
+      <!-- Interests -->
+      <h2>What sustainability topics are you interested in?</h2>
+      <p class="sub" style="margin-bottom:.4rem;">
+        Pick a few that you’d like to see more of. You can change these later in your profile.
+      </p>
+      <div class="grid">
+        {% for key, label in SUSTAINABILITY_CHOICES %}
+          <label class="checkbox">
+            <input
+              type="checkbox"
+              name="interests"
+              value="{{ key }}"
+              {% if selected_interests and key in selected_interests %}checked{% endif %}
+            >
+            <span>{{ label }}</span>
+          </label>
+        {% endfor %}
+      </div>
+
+      <!-- Optional nickname -->
+      <div class="field">
+        <h2>Display name (optional)</h2>
+        <input
+          type="text"
+          name="nickname"
+          placeholder="Nickname / handle"
+          value="{% if nickname %}{{ nickname }}{% elif profile.nickname %}{{ profile.nickname }}{% elif user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}">
+      </div>
+
+      <!-- Optional bio -->
+      <div class="field">
+        <h2>Short bio (optional)</h2>
+        <textarea
+          name="bio"
+          placeholder="Tell others a bit about yourself, your interests, or what you’re looking for…">{% if bio %}{{ bio }}{% elif profile.bio %}{{ profile.bio }}{% endif %}</textarea>
+      </div>
+
+      <!-- Norms -->
+      <div class="norms">
+        <strong>Community norms</strong>
+        <ul>
+          <li>Be respectful and welcoming to all members.</li>
+          <li>Keep posts and messages relevant to sustainability and the community.</li>
+          <li>No spam, harassment, or discriminatory content.</li>
+        </ul>
+      </div>
+      <label class="norms-ack">
+        <input type="checkbox" name="accept_norms">
+        <span>I’ve read and agree to follow these community norms.</span>
+      </label>
+
+      <div class="actions">
+        <button type="submit" class="btn primary">Finish setup</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

@@ -34,6 +34,7 @@ urlpatterns = [
     path("", root),
     path("accounts/", include("allauth.urls")),
     path("dashboard/",views.dashboard, name="dashboard"),
+    path("setup/", views.onboarding, name="onboarding"),
     path("myaccount/", views.profile, name="profile"),
     path("messages/", include(("messaging.urls", "messaging"), namespace="messaging")),
     path("newpost/", views.new_post, name="newpost"),
