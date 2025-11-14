@@ -148,6 +148,7 @@
 
         <h3 style="margin-bottom:.25rem;">{{ post.title }}</h3>
         <p>{{ post.description }}</p>
+        <p>{{ post.category }}</p>
 
         <form method="POST" action="{% url 'delete_post' %}" style="margin-top:1rem;" onsubmit="return confirmDelete();">
             {% csrf_token %}

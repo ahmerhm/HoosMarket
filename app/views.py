@@ -100,9 +100,10 @@ def new_post(request):
         post_title = request.POST.get("title")
         post_price = request.POST.get("price")
         post_description = request.POST.get("description")
+        post_category = request.POST.get("category")
         post_images = request.FILES.getlist("images")
 
-        new_post_obj = Post.objects.create(user = request.user, title = post_title, price = post_price, description = post_description)
+        new_post_obj = Post.objects.create(user = request.user, title = post_title, price = post_price, description = post_description, category=post_category)
 
         for image in post_images:
             PostImages.objects.create(post=new_post_obj, image=image)

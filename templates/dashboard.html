@@ -146,6 +146,7 @@
 
         <h3 style="margin-bottom:.25rem;">{{ post.title }}</h3>
         <p>{{ post.description }}</p>
+        <p>{{ post.category }}</p>
 
         {% if post.user != request.user %}
         <a href="{% url 'messaging:compose' post.user.id %}" class="message-btn">
