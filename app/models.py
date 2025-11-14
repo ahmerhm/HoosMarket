@@ -24,6 +24,8 @@ class Profile(models.Model):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="member")
 
     nickname = models.CharField(max_length=64, blank=True, default="")
+    sustainability_interests = models.JSONField(default=list, blank=True)
+    onboarding_complete = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.get_username()

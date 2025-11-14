@@ -15,11 +15,87 @@ except Exception:
 
 from .models import Profile, Post, PostImages
 
+# ---- Sustainability interests master list ----
+SUSTAINABILITY_CHOICES = [
+    ("zero_waste", "Zero-waste & circular economy"),
+    ("food", "Sustainable food & agriculture"),
+    ("energy", "Energy & climate"),
+    ("transport", "Low-carbon transport & mobility"),
+    ("community", "Community events & volunteering"),
+    ("advocacy", "Advocacy, education & policy"),
+]
+
+
+@login_required
+def onboarding(request):
+    """
+    First-time setup:
+    - Pick sustainability interests
+    - (Optional) nickname + bio
+    - Confirm community norms
+    Runs only once per user (gated by profile.onboarding_complete).
+    """
+    profile_obj, _ = Profile.objects.get_or_create(user=request.user)
+
+    # If they've already completed onboarding, don't show again
+    if getattr(profile_obj, "onboarding_complete", False):
+        return redirect("dashboard")
+
+    if request.method == "POST":
+        interests = request.POST.getlist("interests")
+        nickname = (request.POST.get("nickname") or "").strip()
+        bio = request.POST.get("bio") or ""
+
+        # Norms checkbox must be ticked
+        if request.POST.get("accept_norms") != "on":
+            return render(
+                request,
+                "account/onboarding.html",
+                {
+                    "user": request.user,
+                    "profile": profile_obj,
+                    "SUSTAINABILITY_CHOICES": SUSTAINABILITY_CHOICES,
+                    "error": "Please review and accept the community norms to continue.",
+                    "selected_interests": interests,
+                    "nickname": nickname,
+                    "bio": bio,
+                },
+            )
+
+        # Save interests
+        profile_obj.sustainability_interests = interests
+
+        # Optional nickname + bio
+        if nickname:
+            profile_obj.nickname = nickname
+        if bio:
+            profile_obj.bio = bio
+
+        profile_obj.onboarding_complete = True
+        profile_obj.save()
+        return redirect("dashboard")
+
+    # GET
+    return render(
+        request,
+        "account/onboarding.html",
+        {
+            "user": request.user,
+            "profile": profile_obj,
+            "SUSTAINABILITY_CHOICES": SUSTAINABILITY_CHOICES,
+            "selected_interests": getattr(profile_obj, "sustainability_interests", []) or [],
+        },
+    )
+
 
 @login_required
 def dashboard(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
     role = getattr(profile, "status", "Member")
+
+    # If they haven't done first-time setup yet, send them there
+    if not getattr(profile, "onboarding_complete", False):
+        return redirect("onboarding")
 
     posts = Post.objects.all().order_by('-created_at')
     categories = Post._meta.get_field('category').choices
@@ -53,12 +129,13 @@ def profile(request):
     GET: render profile page
     POST:
       - handle avatar upload
-      - handle inline updates for nickname or bio from the profile page
-        (expects 'action' to be 'update_nickname' or 'update_bio')
+      - handle inline updates for nickname or bio
+      - handle updates for sustainability interests
     """
     profile_obj, _ = Profile.objects.get_or_create(user=request.user)
 
     if request.method == "POST":
+        # Avatar upload
         if "image" in request.FILES:
             uploaded = request.FILES["image"]
             name = getattr(uploaded, "name", "avatar")
@@ -85,7 +162,7 @@ def profile(request):
 
         action = (request.POST.get("action") or "").strip()
 
-        if action in ("update_nickname", "update_name"):  # support old action name just in case
+        if action in ("update_nickname", "update_name"):
             nickname = (request.POST.get("nickname") or request.POST.get("name") or "").strip()
             profile_obj.nickname = nickname
             profile_obj.save(update_fields=["nickname"])
@@ -96,12 +173,19 @@ def profile(request):
             profile_obj.save(update_fields=["bio"])
             return redirect("profile")
 
+        elif action == "update_interests":
+            interests = request.POST.getlist("interests")
+            profile_obj.sustainability_interests = interests
+            profile_obj.save(update_fields=["sustainability_interests"])
+            return redirect("profile")
+
     return render(
         request,
         "account/profile.html",
         {
             "user": request.user,
             "profile": profile_obj,
+            "SUSTAINABILITY_CHOICES": SUSTAINABILITY_CHOICES,
         },
     )
 

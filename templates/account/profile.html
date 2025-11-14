@@ -152,7 +152,6 @@
       </form>
     </div>
 
-    <!-- Greeting: nickname → Google full name → username -->
     <h1>
       Hello,
       {% if profile.nickname %}
@@ -164,7 +163,6 @@
       {% endif %}!
     </h1>
 
-    <!-- Display name (nickname / handle) -->
     <p>
       <strong>Display name (nickname):</strong>
       <span id="name-text">
@@ -211,6 +209,40 @@
       </div>
     </div>
 
+    <p>
+      <strong>Sustainability interests:</strong>
+      {% if profile.sustainability_interests %}
+        <ul style="margin:6px 0 0 18px; padding:0;">
+          {% for key, label in SUSTAINABILITY_CHOICES %}
+            {% if key in profile.sustainability_interests %}
+              <li>{{ label }}</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      {% else %}
+        <span class="muted">Add interests to help match you with relevant activities.</span>
+      {% endif %}
+    </p>
+
+    <form method="post" action="{% url 'profile' %}" style="margin-top:8px;">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="update_interests">
+      <div style="display:flex; flex-direction:column; gap:4px; font-size:0.9rem; margin-bottom:8px;">
+        {% for key, label in SUSTAINABILITY_CHOICES %}
+          <label>
+            <input
+              type="checkbox"
+              name="interests"
+              value="{{ key }}"
+              {% if profile.sustainability_interests and key in profile.sustainability_interests %}checked{% endif %}
+            >
+            {{ label }}
+          </label>
+        {% endfor %}
+      </div>
+      <button type="submit" class="btn">Save interests</button>
+    </form>
+
     <p><strong>Status:</strong> Member</p>
 
     <div class="btn-row">
@@ -222,11 +254,9 @@
       </form>
     </div>
 
-    <!-- Hidden form for inline profile updates -->
     <form id="profile-form" method="post" action="{% url 'profile' %}" style="display:none">
       {% csrf_token %}
       <input type="hidden" name="action" id="action-field">
-      <!-- send nickname to the view -->
       <input type="hidden" name="nickname" id="nickname-field">
       <textarea name="bio" id="bio-field"></textarea>
     </form>
@@ -254,7 +284,6 @@
     const nicknameFld = document.getElementById('nickname-field');
     const bioFld      = document.getElementById('bio-field');
 
-    // Avatar upload handling
     const avatarInput = document.getElementById('avatar-input');
     const avatarForm  = avatarInput ? avatarInput.closest('form') : null;
     if (avatarInput && avatarForm) {
@@ -265,7 +294,6 @@
       });
     }
 
-    // Nickname / display name editor
     nameToggle.addEventListener('click', (e) => {
       e.preventDefault();
       toggle(nameRow, true);
@@ -279,7 +307,6 @@
       form.submit();
     });
 
-    // Bio editor
     bioToggle.addEventListener('click', (e) => {
       e.preventDefault();
       toggle(bioRow, true);
