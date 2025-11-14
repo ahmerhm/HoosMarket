@@ -51,9 +51,38 @@
         }
 
         .content {
-            height: calc(100vh - 70px); 
+            height: calc(100vh - 70px);
             background-color: white;
             padding: 2rem;
+        }
+
+        .filters-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem 1.5rem;
+            align-items: flex-end;
+            margin-bottom: 1rem;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .search-input {
+            padding: 0.5rem 0.75rem;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            background-color: white;
+            color: #000000;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #29b1f0;
+            box-shadow: 0 0 5px rgba(41, 177, 240, 0.5);
         }
 
         .avatar {
@@ -76,7 +105,7 @@
             color: white;
             text-decoration: none;
             padding: 0.25rem 0.5rem;
-            font-size: 0.875rem; 
+            font-size: 0.875rem;
             border-radius: 4px;
             margin-top: 0.5rem;
             transition: background-color 0.3s ease;
@@ -91,7 +120,7 @@
             color: white;
             text-decoration: none;
             padding: 0.25rem 0.5rem;
-            font-size: 0.875rem; 
+            font-size: 0.875rem;
             border-radius: 4px;
             margin-top: 0.5rem;
             transition: background-color 0.3s ease;
@@ -101,13 +130,13 @@
         }
 
         .post-category {
-            font-size: 0.8rem;   
-            color: #777777;          
-            font-weight: 300;     
+            font-size: 0.8rem;
+            color: #777777;
+            font-weight: 300;
         }
 
-        #categoryForm {
-            margin-bottom: 1rem; 
+        #filterForm {
+            margin-bottom: 1rem;
         }
 
         .category-select {
@@ -118,7 +147,6 @@
             background-color: white;
             color: #000000;
             transition: border-color 0.3s, box-shadow 0.3s;
-            margin-left: 0.5rem;
             cursor: pointer;
         }
 
@@ -128,10 +156,25 @@
             box-shadow: 0 0 5px rgba(41, 177, 240, 0.5);
         }
 
-        label[for="category"] {
+        label[for="category"],
+        label[for="search"] {
             font-weight: 750;
-            margin-right: 0.5rem;
             color: #082d52;
+        }
+
+        .filter-submit {
+            padding: 0.5rem 0.9rem;
+            font-size: 0.95rem;
+            border-radius: 6px;
+            border: 1px solid #082d52;
+            background-color: #082d52;
+            color: #fff;
+            cursor: pointer;
+            align-self: flex-end;
+        }
+
+        .filter-submit:hover {
+            background-color: #0b3b7a;
         }
     </style>
 </head>
@@ -147,16 +190,35 @@
     </nav>
 
 <div class="content">
-    <form method="get" id="categoryForm">
-        <label for="category">Filter by category:</label>
-        <select name="category" id="category" class="category-select" onchange="document.getElementById('categoryForm').submit()">
-            <option value="">All</option>
-            {% for code, name in categories %}
-                <option value="{{ code }}" {% if selected_category == code %}selected{% endif %}>
-                    {{ name }}
-                </option>
-            {% endfor %}
-        </select>
+    <!-- One form handles BOTH search + category filter -->
+    <form method="get" id="filterForm">
+        <div class="filters-row">
+            <div class="field">
+                <label for="search">Search posts:</label>
+                <input
+                    type="text"
+                    id="search"
+                    name="q"
+                    class="search-input"
+                    placeholder="Search by title…"
+                    value="{{ search_query|default_if_none:'' }}"
+                >
+            </div>
+
+            <div class="field">
+                <label for="category">Filter by category:</label>
+                <select name="category" id="category" class="category-select">
+                    <option value="">All</option>
+                    {% for code, name in categories %}
+                        <option value="{{ code }}" {% if selected_category == code %}selected{% endif %}>
+                            {{ name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="filter-submit">Apply</button>
+        </div>
     </form>
 
     {% for post in posts %}
