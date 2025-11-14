@@ -81,7 +81,15 @@
                 {% if row.thread.is_group %}
                   {{ row.thread.name|default:"?"|first|upper }}
                 {% elif row.other %}
-                  {{ row.other.username|first|upper }}
+                  {% with nick=row.other.profile.nickname full=row.other.get_full_name %}
+                    {% if nick %}
+                      {{ nick|first|upper }}
+                    {% elif full %}
+                      {{ full|first|upper }}
+                    {% else %}
+                      {{ row.other.username|first|upper }}
+                    {% endif %}
+                  {% endwith %}
                 {% else %}
                   ?
                 {% endif %}
@@ -91,14 +99,35 @@
                   {% if row.thread.is_group %}
                     {{ row.thread.name }}
                   {% else %}
-                    {% if row.other %}@{{ row.other.username }}{% else %}Conversation{% endif %}
+                    {% if row.other %}
+                      {% with nick=row.other.profile.nickname full=row.other.get_full_name %}
+                        {% if nick %}
+                          {{ nick }}
+                        {% elif full %}
+                          {{ full }}
+                        {% else %}
+                          @{{ row.other.username }}
+                        {% endif %}
+                      {% endwith %}
+                    {% else %}
+                      Conversation
+                    {% endif %}
                   {% endif %}
                 </a>
                 <div class="meta">
                   {% if row.thread.is_group %}
                     {% for p in row.thread.participants.all %}
                       {% if p.id != request.user.id %}
-                        @{{ p.username }}{% if not forloop.last %}, {% endif %}
+                        {% with nick=p.profile.nickname full=p.get_full_name %}
+                          {% if nick %}
+                            @{{ nick }}
+                          {% elif full %}
+                            {{ full }}
+                          {% else %}
+                            @{{ p.username }}
+                          {% endif %}
+                        {% endwith %}
+                        {% if not forloop.last %}, {% endif %}
                       {% endif %}
                     {% endfor %}
                   {% else %}

@@ -107,8 +107,6 @@
       display:inline-flex; align-items:center; gap:6px;
     }
     .back-btn:hover { background:#e2e8f0; }
-   
-
 
     .edit-link { margin-left:8px; font-size:.9rem; color:#2563eb; text-decoration:none; }
     .edit-link:hover { text-decoration:underline; }
@@ -128,6 +126,7 @@
       <a href="/" class="back-btn">← Back</a>
       <a href="{% url 'account_logout' %}" class="logout-btn">Log Out</a>
     </div>
+
     <div class="avatar-upload">
       <form method="post" enctype="multipart/form-data" action="{% url 'profile' %}">
         {% csrf_token %}
@@ -152,19 +151,39 @@
         <button class="btn" type="submit" id="uploadBtn" style="display:none;">Upload</button>
       </form>
     </div>
-    <h1>Hello, {{ user.first_name|default:user.username }}!</h1>
 
+    <!-- Greeting: nickname → Google full name → username -->
+    <h1>
+      Hello,
+      {% if profile.nickname %}
+        {{ profile.nickname }}
+      {% elif user.get_full_name %}
+        {{ user.get_full_name }}
+      {% else %}
+        {{ user.username }}
+      {% endif %}!
+    </h1>
+
+    <!-- Display name (nickname / handle) -->
     <p>
-      <strong>Name:</strong>
+      <strong>Display name (nickname):</strong>
       <span id="name-text">
-        {% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}
+        {% if profile.nickname %}
+          {{ profile.nickname }}
+        {% elif user.get_full_name %}
+          {{ user.get_full_name }}
+        {% else %}
+          {{ user.username }}
+        {% endif %}
       </span>
       <a href="#" id="name-edit-toggle" class="edit-link">Edit</a>
     </p>
     <div id="name-edit-row" class="edit-row">
-      <input type="text" id="name-input"
-             value="{% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}"
-             placeholder="First Last" />
+      <input
+        type="text"
+        id="name-input"
+        value="{% if profile.nickname %}{{ profile.nickname }}{% elif user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}"
+        placeholder="Nickname / handle (optional)" />
       <div class="inline-actions">
         <button class="btn" id="name-save">Save</button>
         <button class="btn" id="name-cancel" type="button">Cancel</button>
@@ -203,10 +222,12 @@
       </form>
     </div>
 
+    <!-- Hidden form for inline profile updates -->
     <form id="profile-form" method="post" action="{% url 'profile' %}" style="display:none">
       {% csrf_token %}
       <input type="hidden" name="action" id="action-field">
-      <input type="hidden" name="name" id="name-field">
+      <!-- send nickname to the view -->
+      <input type="hidden" name="nickname" id="nickname-field">
       <textarea name="bio" id="bio-field"></textarea>
     </form>
   </div>
@@ -214,12 +235,12 @@
   <script>
     function toggle(el, show) { el.style.display = show ? 'block' : 'none'; }
 
-    const nameText   = document.getElementById('name-text');
-    const nameToggle = document.getElementById('name-edit-toggle');
-    const nameRow    = document.getElementById('name-edit-row');
-    const nameInput  = document.getElementById('name-input');
-    const nameSave   = document.getElementById('name-save');
-    const nameCancel = document.getElementById('name-cancel');
+    const nameText    = document.getElementById('name-text');
+    const nameToggle  = document.getElementById('name-edit-toggle');
+    const nameRow     = document.getElementById('name-edit-row');
+    const nameInput   = document.getElementById('name-input');
+    const nameSave    = document.getElementById('name-save');
+    const nameCancel  = document.getElementById('name-cancel');
 
     const bioText   = document.getElementById('bio-text');
     const bioToggle = document.getElementById('bio-edit-toggle');
@@ -228,14 +249,14 @@
     const bioSave   = document.getElementById('bio-save');
     const bioCancel = document.getElementById('bio-cancel');
 
-    const form       = document.getElementById('profile-form');
-    const actionFld  = document.getElementById('action-field');
-    const nameFld    = document.getElementById('name-field');
-    const bioFld     = document.getElementById('bio-field');
+    const form        = document.getElementById('profile-form');
+    const actionFld   = document.getElementById('action-field');
+    const nicknameFld = document.getElementById('nickname-field');
+    const bioFld      = document.getElementById('bio-field');
 
     // Avatar upload handling
     const avatarInput = document.getElementById('avatar-input');
-    const avatarForm = avatarInput.closest('form');
+    const avatarForm  = avatarInput ? avatarInput.closest('form') : null;
     if (avatarInput && avatarForm) {
       avatarInput.addEventListener('change', function() {
         if (this.files && this.files[0]) {
@@ -244,6 +265,7 @@
       });
     }
 
+    // Nickname / display name editor
     nameToggle.addEventListener('click', (e) => {
       e.preventDefault();
       toggle(nameRow, true);
@@ -252,11 +274,12 @@
     nameCancel.addEventListener('click', () => toggle(nameRow, false));
     nameSave.addEventListener('click', (e) => {
       e.preventDefault();
-      actionFld.value = 'update_name';
-      nameFld.value   = nameInput.value.trim();
+      actionFld.value   = 'update_nickname';
+      nicknameFld.value = nameInput.value.trim();
       form.submit();
     });
 
+    // Bio editor
     bioToggle.addEventListener('click', (e) => {
       e.preventDefault();
       toggle(bioRow, true);
@@ -269,8 +292,6 @@
       bioFld.value    = bioInput.value;
       form.submit();
     });
-
-
   </script>
 </body>
 </html>

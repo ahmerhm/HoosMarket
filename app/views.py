@@ -7,15 +7,13 @@ from pathlib import Path
 from io import BytesIO
 from PIL import Image
 try:
-    # Enable Pillow to open HEIC/HEIF if pillow-heif is installed
-    from pillow_heif import register_heif_opener  # type: ignore
+    from pillow_heif import register_heif_opener 
     register_heif_opener()
 except Exception:
-    # Safe to ignore if library unavailable locally
     pass
 
-
 from .models import Profile, Post, PostImages
+
 
 @login_required
 def dashboard(request):
@@ -30,17 +28,19 @@ def dashboard(request):
     else:
         return render(request, "dashboard.html", {"profile": profile, "posts": posts})
 
+
 @login_required
 def profile(request):
     """
     GET: render profile page
-    POST: handle inline updates for name or bio from the profile page
-          (expects 'action' to be 'update_name' or 'update_bio')
+    POST:
+      - handle avatar upload
+      - handle inline updates for nickname or bio from the profile page
+        (expects 'action' to be 'update_nickname' or 'update_bio')
     """
     profile_obj, _ = Profile.objects.get_or_create(user=request.user)
 
     if request.method == "POST":
-        # Handle avatar upload (convert HEIC/HEIF to JPEG for browser support)
         if "image" in request.FILES:
             uploaded = request.FILES["image"]
             name = getattr(uploaded, "name", "avatar")
@@ -67,15 +67,10 @@ def profile(request):
 
         action = (request.POST.get("action") or "").strip()
 
-        if action == "update_name":
-            full = (request.POST.get("name") or "").strip()
-            if full:
-                parts = full.split(" ", 1)
-                first = parts[0]
-                last = parts[1] if len(parts) > 1 else ""
-                request.user.first_name = first
-                request.user.last_name = last
-                request.user.save(update_fields=["first_name", "last_name"])
+        if action in ("update_nickname", "update_name"):  # support old action name just in case
+            nickname = (request.POST.get("nickname") or request.POST.get("name") or "").strip()
+            profile_obj.nickname = nickname
+            profile_obj.save(update_fields=["nickname"])
             return redirect("profile")
 
         elif action == "update_bio":
@@ -83,15 +78,15 @@ def profile(request):
             profile_obj.save(update_fields=["bio"])
             return redirect("profile")
 
-
     return render(
         request,
         "account/profile.html",
         {
             "user": request.user,
-            "profile": profile_obj,  
+            "profile": profile_obj,
         },
     )
+
 
 @login_required
 def new_post(request):
@@ -101,15 +96,20 @@ def new_post(request):
         post_description = request.POST.get("description")
         post_images = request.FILES.getlist("images")
 
-        new_post_obj = Post.objects.create(user = request.user, title = post_title, price = post_price, description = post_description)
+        new_post_obj = Post.objects.create(
+            user=request.user,
+            title=post_title,
+            price=post_price,
+            description=post_description,
+        )
 
         for image in post_images:
             PostImages.objects.create(post=new_post_obj, image=image)
 
-
         return redirect("dashboard")
 
     return render(request, 'post/new_post.html')
+
 
 @login_required
 @require_POST
