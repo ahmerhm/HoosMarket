@@ -90,6 +90,34 @@
             color: #777777;          
             font-weight: 300;     
         }
+
+        #categoryForm {
+            margin-bottom: 1rem; 
+        }
+
+        .category-select {
+            padding: 0.5rem 0.75rem;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            background-color: white;
+            color: #000000;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            margin-left: 0.5rem;
+            cursor: pointer;
+        }
+
+        .category-select:focus {
+            outline: none;
+            border-color: #29b1f0;
+            box-shadow: 0 0 5px rgba(41, 177, 240, 0.5);
+        }
+
+        label[for="category"] {
+            font-weight: 750;
+            margin-right: 0.5rem;
+            color: #082d52;
+        }
     </style>
 </head>
 <body>
@@ -104,6 +132,17 @@
     </nav>
 
 <div class="content">
+    <form method="get" id="categoryForm">
+        <label for="category">Filter by category:</label>
+        <select name="category" id="category" class="category-select" onchange="document.getElementById('categoryForm').submit()">
+            <option value="">All</option>
+            {% for code, name in categories %}
+                <option value="{{ code }}" {% if selected_category == code %}selected{% endif %}>
+                    {{ name }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
 
     {% for post in posts %}
     <div class="post" style="

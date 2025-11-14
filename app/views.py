@@ -25,11 +25,18 @@ def dashboard(request):
     role = getattr(profile, "status", "Member")
 
     posts = Post.objects.all().order_by('-created_at')
+    categories = Post._meta.get_field('category').choices
+    selected_category = request.GET.get('category', None)
+    if selected_category:
+        posts = posts.filter(category=selected_category)
+
 
     if str(role).lower() == "organizer":
-        return render(request, "organizer_dashboard.html", {"profile": profile, "posts": posts})
+        return render(request, "organizer_dashboard.html", {"profile": profile, "posts": posts, "selected_category": selected_category, 
+                                                            "categories":categories})
     else:
-        return render(request, "dashboard.html", {"profile": profile, "posts": posts})
+        return render(request, "dashboard.html", {"profile": profile, "posts": posts, "selected_category": selected_category, 
+                                                  "categories":categories})
 
 @login_required
 def profile(request):
