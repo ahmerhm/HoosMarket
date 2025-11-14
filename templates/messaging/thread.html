@@ -64,7 +64,15 @@
         {% if thread and thread.is_group %}
           {{ thread.name|default:"?"|first|upper }}
         {% elif other %}
-          {{ other.username|first|upper }}
+          {% with nick=other.profile.nickname full=other.get_full_name %}
+            {% if nick %}
+              {{ nick|first|upper }}
+            {% elif full %}
+              {{ full|first|upper }}
+            {% else %}
+              {{ other.username|first|upper }}
+            {% endif %}
+          {% endwith %}
         {% else %}
           ?
         {% endif %}
@@ -74,14 +82,35 @@
           {% if thread and thread.is_group %}
             {{ thread.name }}
           {% else %}
-            {% if other %}@{{ other.username }}{% else %}Conversation{% endif %}
+            {% if other %}
+              {% with nick=other.profile.nickname full=other.get_full_name %}
+                {% if nick %}
+                  {{ nick }}
+                {% elif full %}
+                  {{ full }}
+                {% else %}
+                  @{{ other.username }}
+                {% endif %}
+              {% endwith %}
+            {% else %}
+              Conversation
+            {% endif %}
           {% endif %}
         </div>
         <div class="sub" style="display:flex;flex-wrap:wrap;gap:.25rem;color:#666">
           {% if thread and thread.is_group %}
             {% for p in thread.participants.all %}
               <span style="border:1px solid #eee;border-radius:999px;padding:.05rem .4rem;background:#fafafa">
-                @{{ p.username }}{% if p.id == request.user.id %} (you){% endif %}
+                {% with nick=p.profile.nickname full=p.get_full_name %}
+                  {% if nick %}
+                    @{{ nick }}
+                  {% elif full %}
+                    {{ full }}
+                  {% else %}
+                    @{{ p.username }}
+                  {% endif %}
+                {% endwith %}
+                {% if p.id == request.user.id %} (you){% endif %}
               </span>
             {% endfor %}
           {% else %}
@@ -94,7 +123,23 @@
     <div class="messages">
       {% for m in messages %}
         <div class="bubble {% if m.sender_id == request.user.id %}me{% else %}them{% endif %}" title="{{ m.created_at|date:'D, M j, Y, g:i A' }}">
-          <div class="meta">{% if m.sender %}@{{ m.sender.username }}{% else %}user not found{% endif %} · {{ m.created_at|date:"M j, H:i" }}</div>
+          <div class="meta">
+            {% if m.sender %}
+              {% with nick=m.sender.profile.nickname full=m.sender.get_full_name %}
+                {% if nick %}
+                  @{{ nick }}
+                {% elif full %}
+                  {{ full }}
+                {% else %}
+                  @{{ m.sender.username }}
+                {% endif %}
+              {% endwith %}
+              {% if m.sender_id == request.user.id %} (you){% endif %}
+            {% else %}
+              user not found
+            {% endif %}
+             · {{ m.created_at|date:"M j, H:i" }}
+          </div>
           <div>{{ m.text|linebreaksbr }}</div>
         </div>
       {% empty %}

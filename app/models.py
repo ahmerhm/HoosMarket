@@ -15,6 +15,7 @@ class Profile(models.Model):
         on_delete=models.CASCADE,
         related_name="profile",
     )
+
     name = models.CharField(max_length=100, blank=True, default="")
     bio = models.TextField(blank=True, default="")
     interests = models.CharField(max_length=255, blank=True)
@@ -22,7 +23,24 @@ class Profile(models.Model):
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="member")
 
+    nickname = models.CharField(max_length=64, blank=True, default="")
+
     def __str__(self):
+        return self.user.get_username()
+
+    @property
+    def display_name(self) -> str:
+        """
+        Display priority:
+        1) nickname (if set)
+        2) Google name via Django User first_name/last_name
+        3) username
+        """
+        if self.nickname:
+            return self.nickname
+        full = self.user.get_full_name()
+        if full:
+            return full
         return self.user.get_username()
 
 
@@ -57,7 +75,7 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
-    
+
 
 class PostImages(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images')

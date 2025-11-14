@@ -1,12 +1,43 @@
 <ul style="list-style:none;max-height:45vh;overflow:auto;padding:0;margin:0">
   {% for u in users %}
     <li style="border-top:1px solid #f1f1f1;padding:.55rem .4rem;display:flex;align-items:center;gap:.65rem">
-      <div style="width:34px;height:34px;border-radius:50%;background:#e8f4ff;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;font-weight:700">
-        {{ u.username|first|upper }}
-      </div>
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">@{{ u.username }}</div>
-      </div>
+      {% with nick=u.profile.nickname full=u.get_full_name %}
+        {% if nick %}
+          {% with handle=nick %}
+            <div style="width:34px;height:34px;border-radius:50%;background:#e8f4ff;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;font-weight:700">
+              {{ handle|first|upper }}
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                @{{ handle }}
+              </div>
+            </div>
+          {% endwith %}
+        {% elif full %}
+          {% with handle=full %}
+            <div style="width:34px;height:34px;border-radius:50%;background:#e8f4ff;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;font-weight:700">
+              {{ handle|first|upper }}
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                {{ handle }}
+              </div>
+            </div>
+          {% endwith %}
+        {% else %}
+          {% with handle=u.username %}
+            <div style="width:34px;height:34px;border-radius:50%;background:#e8f4ff;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;font-weight:700">
+              {{ handle|first|upper }}
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                @{{ handle }}
+              </div>
+            </div>
+          {% endwith %}
+        {% endif %}
+      {% endwith %}
+
       <a
         href="{% url 'messaging:compose' u.id %}"
         style="padding:.4rem .7rem;border:1px solid var(--ink);border-radius:999px;background:#fff;text-decoration:none;display:inline-block;white-space:nowrap"
@@ -17,5 +48,4 @@
   {% empty %}
     <li style="padding:.6rem .25rem;color:#666">No users found.</li>
   {% endfor %}
-  
 </ul>
