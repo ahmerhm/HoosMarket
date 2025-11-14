@@ -132,6 +132,27 @@
         ></textarea>
       </div>
 
+    <div style="margin-bottom:1rem">
+      <label for="category" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000">
+          Category: <span style="color:red;">*</span>
+      </label>
+      <select 
+          id="category" 
+          name="category" 
+          required 
+          style="width:100%;padding:.6rem;border:1px solid #ddd;border-radius:6px"
+      >
+          <option value="" disabled selected>Select a category</option>
+          <option value="books">Books</option>
+          <option value="electronics">Electronics</option>
+          <option value="clothing">Clothing</option>
+          <option value="furniture">Furniture</option>
+          <option value="tickets">Tickets</option>
+          <option value="kitchen">Kitchen Items</option>
+          <option value="other">Other</option>
+      </select>
+    </div>
+
     <div style="margin-bottom:1.5rem;">
       <label for="image" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000;">Upload Images:</label>
       <input 

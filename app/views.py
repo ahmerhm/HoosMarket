@@ -1,5 +1,6 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseForbidden
 from django.views.decorators.http import require_POST
 
 from django.core.files.base import ContentFile
@@ -22,11 +23,18 @@ def dashboard(request):
     role = getattr(profile, "status", "Member")
 
     posts = Post.objects.all().order_by('-created_at')
+    categories = Post._meta.get_field('category').choices
+    selected_category = request.GET.get('category', None)
+    if selected_category:
+        posts = posts.filter(category=selected_category)
+
 
     if str(role).lower() == "organizer":
-        return render(request, "organizer_dashboard.html", {"profile": profile, "posts": posts})
+        return render(request, "organizer_dashboard.html", {"profile": profile, "posts": posts, "selected_category": selected_category, 
+                                                            "categories":categories})
     else:
-        return render(request, "dashboard.html", {"profile": profile, "posts": posts})
+        return render(request, "dashboard.html", {"profile": profile, "posts": posts, "selected_category": selected_category, 
+                                                  "categories":categories})
 
 
 @login_required
@@ -94,6 +102,7 @@ def new_post(request):
         post_title = request.POST.get("title")
         post_price = request.POST.get("price")
         post_description = request.POST.get("description")
+        post_category = request.POST.get("category")
         post_images = request.FILES.getlist("images")
 
         new_post_obj = Post.objects.create(
@@ -102,6 +111,7 @@ def new_post(request):
             price=post_price,
             description=post_description,
         )
+        new_post_obj = Post.objects.create(user = request.user, title = post_title, price = post_price, description = post_description, category=post_category)
 
         for image in post_images:
             PostImages.objects.create(post=new_post_obj, image=image)
@@ -119,3 +129,37 @@ def delete_account(request):
     logout(request)
     user.delete()
     return redirect("account_login")
+
+@login_required
+def my_posts(request):
+    posts = Post.objects.filter(user=request.user).order_by('-created_at')
+
+    return render(request, "post/my_posts.html", {"posts": posts})
+
+@login_required
+def delete_post(request):
+    role = getattr(profile, "status", "Member")
+
+    if str(role).lower() == "organizer":
+        if request.method == "POST":
+            post_id = request.POST.get("post_id")
+            post = get_object_or_404(Post, id=post_id)
+            post.delete()
+            return redirect("myposts")
+    else:
+        if request.method == "POST":
+            post_id = request.POST.get("post_id")
+            post = get_object_or_404(Post, id=post_id)
+
+            if post.user != request.user:
+                return HttpResponseForbidden("You are not the owner of this post")
+
+            post.delete()
+            return redirect("myposts")
+
+    return redirect("dashboard")
+
+@login_required
+def flag_post(request):
+    # Add functionality
+    return redirect("dashboard")

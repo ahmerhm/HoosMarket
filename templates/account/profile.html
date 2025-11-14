@@ -215,7 +215,7 @@
 
     <div class="btn-row">
       <a class="btn" href="{% url 'messaging:inbox' %}">Messages</a>
-      <a class="btn" href="/posts/">Posts</a>
+      <a class="btn" href="/myposts/">My Posts</a>
       <form method="post" action="{% url 'delete_account' %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.')">
         {% csrf_token %}
         <button type="submit" class="btn" style="background:#e53e3e; color:#fff; border:none;">Delete Account</button>
