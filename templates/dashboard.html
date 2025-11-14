@@ -84,6 +84,12 @@
         .message-btn:hover {
             background-color: #29b1f0;
         }
+
+        .post-category {
+            font-size: 0.8rem;   
+            color: #777777;          
+            font-weight: 300;     
+        }
     </style>
 </head>
 <body>
@@ -146,7 +152,7 @@
 
         <h3 style="margin-bottom:.25rem;">{{ post.title }}</h3>
         <p>{{ post.description }}</p>
-        <p>{{ post.category }}</p>
+        <p><span class="post-category">{{ post.get_category_display }}</span></p>
 
         {% if post.user != request.user %}
         <a href="{% url 'messaging:compose' post.user.id %}" class="message-btn">

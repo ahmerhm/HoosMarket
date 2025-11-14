@@ -80,7 +80,15 @@
         background:#e53e3e; color:#fff; border:none;
         padding:8px 14px; border-radius:8px; text-decoration:none;
         }
-        .delete-btn:hover { background:#c53030; }
+        
+        .delete-btn:hover { background:#c53030; 
+        }
+
+        .post-category {
+            font-size: 0.8rem;   
+            color: #777777;          
+            font-weight: 300;     
+        }
     </style>
 </head>
 <body>
@@ -148,7 +156,7 @@
 
         <h3 style="margin-bottom:.25rem;">{{ post.title }}</h3>
         <p>{{ post.description }}</p>
-        <p>{{ post.category }}</p>
+        <p><span class="post-category">{{ post.get_category_display }}</span></p>
 
         <form method="POST" action="{% url 'delete_post' %}" style="margin-top:1rem;" onsubmit="return confirmDelete();">
             {% csrf_token %}
