@@ -8,7 +8,7 @@ from pathlib import Path
 from io import BytesIO
 from PIL import Image
 try:
-    from pillow_heif import register_heif_opener 
+    from pillow_heif import register_heif_opener
     register_heif_opener()
 except Exception:
     pass
@@ -19,22 +19,32 @@ from .models import Profile, Post, PostImages
 @login_required
 def dashboard(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
-
     role = getattr(profile, "status", "Member")
 
     posts = Post.objects.all().order_by('-created_at')
     categories = Post._meta.get_field('category').choices
-    selected_category = request.GET.get('category', None)
+
+    selected_category = request.GET.get('category') or None
+    search_query = (request.GET.get('q') or "").strip()
+
     if selected_category:
         posts = posts.filter(category=selected_category)
 
+    if search_query:
+        posts = posts.filter(title__icontains=search_query)
+
+    context = {
+        "profile": profile,
+        "posts": posts,
+        "selected_category": selected_category,
+        "categories": categories,
+        "search_query": search_query,
+    }
 
     if str(role).lower() == "organizer":
-        return render(request, "organizer_dashboard.html", {"profile": profile, "posts": posts, "selected_category": selected_category, 
-                                                            "categories":categories})
+        return render(request, "organizer_dashboard.html", context)
     else:
-        return render(request, "dashboard.html", {"profile": profile, "posts": posts, "selected_category": selected_category, 
-                                                  "categories":categories})
+        return render(request, "dashboard.html", context)
 
 
 @login_required
@@ -105,7 +115,13 @@ def new_post(request):
         post_category = request.POST.get("category")
         post_images = request.FILES.getlist("images")
 
-        new_post_obj = Post.objects.create(user = request.user, title = post_title, price = post_price, description = post_description, category=post_category)
+        new_post_obj = Post.objects.create(
+            user=request.user,
+            title=post_title,
+            price=post_price,
+            description=post_description,
+            category=post_category,
+        )
 
         for image in post_images:
             PostImages.objects.create(post=new_post_obj, image=image)
@@ -124,36 +140,35 @@ def delete_account(request):
     user.delete()
     return redirect("account_login")
 
+
 @login_required
 def my_posts(request):
     posts = Post.objects.filter(user=request.user).order_by('-created_at')
-
     return render(request, "post/my_posts.html", {"posts": posts})
+
 
 @login_required
 def delete_post(request):
+    """
+    Organizers can delete any post.
+    Regular users can only delete their own posts.
+    """
+    profile, _ = Profile.objects.get_or_create(user=request.user)
     role = getattr(profile, "status", "Member")
 
-    if str(role).lower() == "organizer":
-        if request.method == "POST":
-            post_id = request.POST.get("post_id")
-            post = get_object_or_404(Post, id=post_id)
-            post.delete()
-            return redirect("myposts")
-    else:
-        if request.method == "POST":
-            post_id = request.POST.get("post_id")
-            post = get_object_or_404(Post, id=post_id)
+    if request.method == "POST":
+        post_id = request.POST.get("post_id")
+        post = get_object_or_404(Post, id=post_id)
 
-            if post.user != request.user:
-                return HttpResponseForbidden("You are not the owner of this post")
+        if str(role).lower() != "organizer" and post.user != request.user:
+            return HttpResponseForbidden("You are not the owner of this post")
 
-            post.delete()
-            return redirect("myposts")
+        post.delete()
+        return redirect("myposts")
 
     return redirect("dashboard")
 
+
 @login_required
 def flag_post(request):
-    # Add functionality
     return redirect("dashboard")
