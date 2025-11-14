@@ -85,6 +85,21 @@
             background-color: #29b1f0;
         }
 
+        .flag-btn {
+            display: inline-block;
+            background-color: #ff0000;
+            color: white;
+            text-decoration: none;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem; 
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            transition: background-color 0.3s ease;
+        }
+        .flag-btn:hover {
+            background-color: #c71313;
+        }
+
         .post-category {
             font-size: 0.8rem;   
             color: #777777;          
@@ -199,6 +214,12 @@
         </a>
         {% endif %}
 
+        {% if post.user != request.user %}
+        <a href="{% url 'flag_post' %}" class="flag-btn" onclick="return confirmFlag();">
+            Flag Post
+        </a>
+        {% endif %}
+
     </div>
     {% empty %}
         <p>No posts yet.</p>
@@ -207,6 +228,12 @@
 </div>
 
 
+
+<script>
+function confirmFlag() {
+    return confirm("Confirm that you want to flag this post");
+}
+</script>
 
 </body>
 </html>

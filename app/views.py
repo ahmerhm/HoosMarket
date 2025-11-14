@@ -157,3 +157,8 @@ def delete_post(request):
             return redirect("myposts")
 
     return redirect("dashboard")
+
+@login_required
+def flag_post(request):
+    # Add functionality
+    return redirect("dashboard")
