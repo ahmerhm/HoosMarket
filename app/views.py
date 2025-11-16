@@ -379,7 +379,7 @@ def suspended_page_view(request):
     if request.user.is_authenticated:
         if hasattr(request.user, 'profile') and request.user.profile.status == "Suspended":
             auth.logout(request)
-            return render(request, 'my_app/suspended.html')
+            return render(request, 'suspended.html')
         else:
             return redirect('dashboard')
-    return render(request, 'my_app/suspended.html')
+    return render(request, 'suspended.html')
