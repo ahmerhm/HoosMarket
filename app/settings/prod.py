@@ -20,7 +20,7 @@ AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
 
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
-AWS_DEFAULT_ACL = 'public-read'
+AWS_DEFAULT_ACL = 'public-read' 
 
 #https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/put_object.html#
 AWS_S3_OBJECT_PARAMETERS = {
