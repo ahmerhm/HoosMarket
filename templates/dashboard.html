@@ -279,7 +279,7 @@
         {% endif %}
 
         {% if post.user != request.user %}
-        <a href="{% url 'flag_post' %}" class="flag-btn" onclick="return confirmFlag();">
+        <a href="{% url 'flag_post' post.id %}" class="flag-btn" onclick="return confirmFlag();">
             Flag Post
         </a>
         {% endif %}

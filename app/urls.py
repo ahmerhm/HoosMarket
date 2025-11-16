@@ -1,39 +1,52 @@
-"""
-URL configuration for app project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
-from django.http import HttpResponse
 from django.urls import path, include
-from . import views
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
+from .views import admin_resolve_flag, admin_flag_post
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
+from . import views
+from .views import (
+    admin_dashboard,
+    admin_delete_post,
+    admin_suspend_user,
+    admin_restore_user,
+    admin_flag_post,
+    admin_resolve_flag,
+)
 
 def root(request):
     if request.user.is_authenticated:
         return redirect("dashboard")
-    else:
-        return redirect("account_login")
+    return redirect("account_login")
 
 urlpatterns = [
-    path("admin/", admin.site.urls, name="admin_login"),
+    # --- REAL Django admin ---
+    path("admin/", admin.site.urls),
+
+    # --- Custom Staff Login ---
+    path("admin-login/", auth_views.LoginView.as_view(
+        template_name="admin/login.html",
+        redirect_authenticated_user=True,
+    ), name="admin_login"),
+
+    # --- Custom Admin Dashboard (your admin panel) ---
+    path("admin-panel/", views.admin_dashboard, name="admin_dashboard"),
+
+    # Admin actions
+    path("admin-panel/delete-post/<int:post_id>/", 
+         views.admin_delete_post, name="admin_delete_post"),
+
+    path("admin-panel/suspend-user/<int:user_id>/", 
+         views.admin_suspend_user, name="admin_suspend_user"),
+
+    path("admin-panel/restore-user/<int:user_id>/", 
+         views.admin_restore_user, name="admin_restore_user"),
+
+    # Normal routes
     path("", root),
     path("accounts/", include("allauth.urls")),
-    path("dashboard/",views.dashboard, name="dashboard"),
+    path("dashboard/", views.dashboard, name="dashboard"),
     path("setup/", views.onboarding, name="onboarding"),
     path("myaccount/", views.profile, name="profile"),
     path("messages/", include(("messaging.urls", "messaging"), namespace="messaging")),
@@ -41,9 +54,24 @@ urlpatterns = [
     path("delete-account/", views.delete_account, name="delete_account"),
     path("myposts/", views.my_posts, name="myposts"),
     path("deletepost/", views.delete_post, name="delete_post"),
-    path("flagpost/", views.flag_post, name="flag_post")
+    path("flagpost/<int:post_id>/", views.flag_post, name="flag_post"),
+    path("admin-panel/resolve-flag/<int:flag_id>/", admin_resolve_flag, name="admin_resolve_flag"),
+    path("logout/", auth_views.LogoutView.as_view(
+        template_name="account/logout.html",
+        next_page="account_login"
+    ), name="logout"),
+    path(
+        "admin-panel/flag-post/<int:post_id>/",
+        admin_flag_post,
+        name="admin_flag_post",
+    ),
+
+    # Login redirect
+    path("after-login/", views.post_login_redirect, name="post_login_redirect"),
+    path("admin-panel/profile/", views.admin_profile, name="admin_profile"),
+
 ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root = settings.STATIC_ROOT)
-    urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

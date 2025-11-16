@@ -166,3 +166,7 @@ try:
         django_heroku.settings(locals())
 except ImportError:
     found = False
+
+# admin login path
+LOGIN_REDIRECT_URL = "/after-login/"
+LOGOUT_REDIRECT_URL = "/"
