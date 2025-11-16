@@ -13,8 +13,16 @@ try:
 except Exception:
     pass
 
-from .models import Profile, Post, PostImages
-
+from .models import Profile, Post, PostImages, PostFlag
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth import get_user_model
+from .models import *
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth import get_user_model
+User = get_user_model()
+# ------- admin-only decorator -------
+def admin_only(view_func):
+    return staff_member_required(view_func)
 # ---- Sustainability interests master list ----
 SUSTAINABILITY_CHOICES = [
     ("zero_waste", "Zero-waste & circular economy"),
@@ -252,7 +260,117 @@ def delete_post(request):
 
     return redirect("dashboard")
 
+@admin_only
+def admin_delete_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    post.delete()
+    return redirect("admin_dashboard")  # fixed
+
+
+@admin_only
+def admin_suspend_user(request, user_id):
+    profile = get_object_or_404(Profile, user__id=user_id)
+    profile.status = "Suspended"
+    profile.save()
+    return redirect("admin_dashboard")  # fixed
+
+
+@admin_only
+def admin_restore_user(request, user_id):
+    profile = get_object_or_404(Profile, user__id=user_id)
+    profile.status = "Member"
+    profile.save()
+    return redirect("admin_dashboard")  # fixed
+
 
 @login_required
-def flag_post(request):
+def post_login_redirect(request):
+    """
+    Redirect AFTER login:
+    - staff users → custom admin dashboard
+    - regular users → dashboard
+    """
+    if request.user.is_staff:
+        return redirect("admin_dashboard")
     return redirect("dashboard")
+
+@login_required
+def flag_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    # Prevent flagging your own post
+    if post.user == request.user:
+        return redirect("dashboard")
+
+    # Prevent duplicate flags
+    existing = PostFlag.objects.filter(post=post, flagged_by=request.user, resolved=False)
+    if existing.exists():
+        return redirect("dashboard")
+
+    PostFlag.objects.create(
+        post=post,
+        flagged_by=request.user,
+        reason="User flagged this post"
+    )
+    return redirect("dashboard")
+
+@admin_only
+def admin_resolve_flag(request, flag_id):
+    flag = get_object_or_404(PostFlag, id=flag_id)
+    flag.resolved = True
+    flag.save()
+    return redirect("admin_dashboard")
+
+@admin_only
+def admin_flag_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    # Prevent duplicate flags by admin
+    existing = PostFlag.objects.filter(post=post, flagged_by=request.user, resolved=False)
+    if existing.exists():
+        return redirect("admin_dashboard")
+
+    PostFlag.objects.create(
+        post=post,
+        flagged_by=request.user,
+        reason="Flagged by admin"
+    )
+    return redirect("admin_dashboard")
+
+
+def is_admin(user):
+    return user.is_staff or user.is_superuser
+
+@staff_member_required
+def admin_profile(request):
+    user = request.user
+    return render(request, "admin/admin_profile.html", {
+        "user": user,
+    })
+
+def admin_dashboard(request):
+
+    # --- All posts ---
+    posts = Post.objects.all().order_by("-created_at")
+
+    # --- Flagged posts ---
+    flags = PostFlag.objects.select_related("post", "flagged_by").order_by("-created_at")
+
+    # --- Stats ---
+    total_users = User.objects.count()
+    suspended_users = User.objects.filter(profile__status="Suspended").count()
+    total_posts = Post.objects.count()
+    flagged_posts = flags.count()
+
+    # --- Suspended user list (for your new section) ---
+    suspended_user_list = User.objects.filter(profile__status="Suspended")
+
+    return render(request, "admin/admin_dashboard.html", {
+        "posts": posts,
+        "flags": flags,
+        "total_users": total_users,
+        "suspended_users": suspended_users,
+        "total_posts": total_posts,
+        "flagged_posts": flagged_posts,
+        "suspended_user_list": suspended_user_list,
+    })

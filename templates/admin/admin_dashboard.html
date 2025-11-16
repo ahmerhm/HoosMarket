@@ -1,0 +1,318 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body { font-family: Arial, sans-serif; background:#f8f9fa; margin:0; }
+        nav { background:#082d52; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; }
+        .site-name { font-size:1.5rem; font-weight:bold; }
+        .content { padding:2rem; }
+
+        .section-title {
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #082d52;
+        }
+
+        .post-card, .flag-card {
+            background:#fff;
+            border:1px solid #ddd;
+            padding:1.25rem;
+            margin-bottom:1.5rem;
+            border-radius:6px;
+        }
+
+        .post-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        @media (max-width: 1000px) {
+            .post-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .post-grid {
+                grid-template-columns: repeat(1, 1fr);
+            }
+        }
+
+        .admin-controls { margin-top:1rem; }
+
+        .admin-btn {
+            display:inline-block;
+            padding:0.3rem 0.6rem;
+            margin-right:0.4rem;
+            border-radius:4px;
+            font-size:0.85rem;
+            text-decoration:none;
+            color:white;
+        }
+
+        .delete { background:#d9534f; }
+        .suspend { background:#f0ad4e; }
+        .restore { background:#5cb85c; }
+        .resolve { background:#0275d8; }
+
+         .flag-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 1000px) {
+            .flag-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .flag-grid { grid-template-columns: repeat(1, 1fr); }
+        }
+
+        .flag-card {
+            background: #fff5f5;
+            border: 1px solid #ffcccc;
+            padding: 1.25rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(255,0,0,0.08);
+        }
+
+        .flag-label {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #d9534f;
+            margin-bottom: .5rem;
+        }
+
+        .flag-thumb {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: .7rem;
+        }
+
+        .suspended-card {
+            background: #fff7e6;
+            border: 1px solid #ffd9a0;
+            padding: 1.25rem;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="site-name">Admin Panel</div>
+    <div>
+        <a href="/" style="color:white; text-decoration:none; margin-right:1rem;">Home</a>
+        <a href="{% url 'admin_profile' %}" 
+            style="color:white; text-decoration:none; margin-right:1rem;">
+            Admin Profile
+        </a>
+        <form method="post" action="{% url 'account_logout' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" style="background:none;border:none;color:white;cursor:pointer;">
+                Logout
+            </button>
+        </form>
+    </div>
+</nav>
+
+<div class="content">
+
+    <!-- ===================== -->
+    <!-- FLAGGED POSTS SECTION -->
+    <!-- ===================== -->
+     <div style="display:flex; gap:20px; margin-bottom:2rem;">
+        <div style="background:white; padding:1rem 1.5rem; border-radius:6px; border:1px solid #ddd;">
+            <h3>Total Users</h3>
+            <p style="font-size:1.2rem; font-weight:bold;">{{ total_users }}</p>
+        </div>
+
+        <div style="background:white; padding:1rem 1.5rem; border-radius:6px; border:1px solid #ddd;">
+            <h3>Suspended Users</h3>
+            <p style="font-size:1.2rem; font-weight:bold;">{{ suspended_users }}</p>
+        </div>
+
+        <div style="background:white; padding:1rem 1.5rem; border-radius:6px; border:1px solid #ddd;">
+            <h3>Total Posts</h3>
+            <p style="font-size:1.2rem; font-weight:bold;">{{ total_posts }}</p>
+        </div>
+
+        <div style="background:white; padding:1rem 1.5rem; border-radius:6px; border:1px solid #ddd;">
+            <h3>Flagged Posts</h3>
+            <p style="font-size:1.2rem; font-weight:bold;">{{ flagged_posts }}</p>
+        </div>
+    </div>
+    <h2 class="section-title">Flagged Posts</h2>
+
+    {% if flags %}
+    <div class="flag-grid">
+        {% for flag in flags %}
+        <div class="flag-card">
+
+            <div class="flag-label">🚩</div>
+
+            {% if flag.post.images.first %}
+                <img class="flag-thumb"
+                    src="{{ flag.post.images.first.image.url }}"
+                    alt="Flagged Image">
+            {% endif %}
+
+            <h3 style="margin:0 0 .5rem 0;">
+                <a href="/post/{{ flag.post.id }}/"
+                style="color:#c9302c; text-decoration:none;">
+                    {{ flag.post.title }}
+                </a>
+            </h3>
+
+            <p style="font-size:.9rem; margin-bottom:.4rem;">
+                <strong>Flagged by:</strong> {{ flag.flagged_by.username }}
+            </p>
+
+            <p style="font-size:.9rem; margin-bottom:.4rem;">
+                <strong>Reason:</strong> {{ flag.reason }}
+            </p>
+
+            <p style="font-size:.85rem; color:#666;">
+                {{ flag.created_at }}
+            </p>
+
+            <div class="admin-controls" style="margin-top:1rem;">
+                <a class="admin-btn delete"
+                href="{% url 'admin_delete_post' flag.post.id %}"
+                onclick="return confirm('Delete this flagged post?');">
+                    Delete Post
+                </a>
+
+                <a class="admin-btn resolve"
+                href="{% url 'admin_resolve_flag' flag.id %}">
+                    Mark Resolved
+                </a>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+        <p>No flagged posts.</p>
+    {% endif %}
+
+    <hr style="margin:2rem 0;">
+
+    <!-- ===================== -->
+    <!-- SUSPENDED USERS SECTION -->
+    <!-- ===================== -->
+    <h2 class="section-title">Suspended Users</h2>
+
+    {% if suspended_user_list %}
+    <div class="flag-grid">
+        {% for user in suspended_user_list %}
+        <div class="flag-card" style="background:#fff7e6; border-color:#ffd9a0;">
+            
+            <div class="flag-label" style="color:#e69500;">⚠️ Suspended User</div>
+
+            <h3 style="margin:0 0 .5rem 0;">
+                {{ user.profile.display_name }}
+            </h3>
+
+            <p style="font-size:.9rem; margin-bottom:.4rem;">
+                <strong>Username:</strong> {{ user.username }}
+            </p>
+
+            <p style="font-size:.9rem; margin-bottom:.4rem;">
+                <strong>Email:</strong> {{ user.email }}
+            </p>
+
+            <p style="font-size:.85rem; color:#666;">
+                <strong>Status:</strong> Suspended
+            </p>
+
+            <div class="admin-controls" style="margin-top:1rem;">
+                <a class="admin-btn restore"
+                href="{% url 'admin_restore_user' user.id %}">
+                    Restore User
+                </a>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+        <p>No suspended users.</p>
+    {% endif %}
+
+    <!-- ===================== -->
+    <!-- ALL POSTS SECTION -->
+    <!-- ===================== -->
+    <h2 class="section-title">All Posts</h2>
+
+    <div class="post-grid">
+    {% for post in posts %}
+    <div class="post-card">
+
+        <h3>${{ post.price }} — {{ post.title }}</h3>
+        <p>{{ post.description }}</p>
+        <p><strong>Category:</strong> {{ post.get_category_display }}</p>
+
+        {% if post.images.all %}
+        <div style="margin:0.5rem 0;">
+            {% for img in post.images.all %}
+                <img src="{{ img.image.url }}" width="100" height="100"
+                     style="object-fit:cover; border-radius:4px; margin-right:5px;">
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <p>
+            <strong>Posted by:</strong> 
+            {{ post.user.profile.display_name }}
+            (<em>Status: {{ post.user.profile.status }}</em>)
+        </p>
+
+        <div class="admin-controls">
+
+            <a class="admin-btn"
+                style="background:#0275d8;"
+                href="{% url 'admin_flag_post' post.id %}"
+                onclick="return confirm('Flag this post for review?');">
+                    Flag Post
+            </a>
+
+            <a class="admin-btn delete"
+               href="{% url 'admin_delete_post' post.id %}"
+               onclick="return confirm('Delete this post?');">
+               Delete Post
+            </a>
+
+            {% if post.user.profile.status != 'Suspended' %}
+            <a class="admin-btn suspend"
+               href="{% url 'admin_suspend_user' post.user.id %}"
+               onclick="return confirm('Suspend this user?');">
+               Suspend User
+            </a>
+            {% else %}
+            <a class="admin-btn restore"
+               href="{% url 'admin_restore_user' post.user.id %}">
+               Restore User
+            </a>
+            {% endif %}
+
+        </div>
+
+    </div>
+    {% endfor %}
+</div>
+</div>
+
+</body>
+</html>

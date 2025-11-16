@@ -184,20 +184,40 @@
     </form>
   </div>
 
-
-</body>
-</html>
-
 <script>
   const imageInput = document.getElementById('image');
   const previewContainer = document.getElementById('image-preview');
   let allFiles = [];
 
-  imageInput.addEventListener('change', function() {
-    const newFiles = Array.from(this.files);
-    allFiles = allFiles.concat(newFiles);
+  imageInput.addEventListener('change', async function () {
+    const newFiles = await Promise.all(
+        Array.from(this.files).map(async (file) => {
+            if (file.type === "image/heic" || file.name.toLowerCase().endsWith(".heic")) {
+                try {
+                    const converted = await heic2any({
+                        blob: file,
+                        toType: "image/jpeg",
+                        quality: 0.9
+                    });
+
+                    return new File(
+                        [converted],
+                        file.name.replace(/\.heic/i, ".jpg"),
+                        { type: "image/jpeg" }
+                    );
+                } catch (err) {
+                    console.error("HEIC conversion failed:", err);
+                    alert("Failed to convert HEIC. Please use PNG/JPG.");
+                    return null;
+                }
+            }
+            return file;
+        })
+    );
+
+    allFiles = allFiles.concat(newFiles.filter(f => f !== null));
     renderPreviews();
-  });
+});
 
   function renderPreviews() {
     previewContainer.innerHTML = '';
@@ -261,3 +281,5 @@
   });
 </script>
 
+</body>
+</html>

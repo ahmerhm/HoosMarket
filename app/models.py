@@ -82,3 +82,13 @@ class Post(models.Model):
 class PostImages(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='posts/')
+
+class PostFlag(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="flags")
+    flagged_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    reason = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+    resolved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Flag on {self.post.title} by {self.flagged_by.username}"
