@@ -1,8 +1,9 @@
 from django.contrib import admin
 from .models import Profile
 from messaging.models import Message
-from .models import Post
+from .models import Post, PostImages
 # Register your models here.
 admin.site.register(Profile)
 admin.site.register(Message)
 admin.site.register(Post)
+admin.site.register(PostImages)
