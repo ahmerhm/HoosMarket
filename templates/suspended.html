@@ -1,0 +1,26 @@
+{% extends "base.html" %} {% block title %}Account Suspended{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem;">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1>Account Suspended</h1>
+            
+            <p>You are seeing this page because your account has been suspended by an administrator.</p>
+            <p>You will not be able to log in or access any content while your account is suspended.</p>
+            
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-danger" role="alert">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+    
+            <p>If you wish to appeal this suspension, please contact support.</p>
+            
+            <a href="{% url 'homepage' %}" class="btn btn-primary">Return to Homepage</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

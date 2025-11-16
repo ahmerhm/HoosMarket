@@ -13,6 +13,7 @@ from .views import (
     admin_restore_user,
     admin_flag_post,
     admin_resolve_flag,
+    suspended_page_view,
 )
 
 def root(request):
@@ -69,6 +70,9 @@ urlpatterns = [
     # Login redirect
     path("after-login/", views.post_login_redirect, name="post_login_redirect"),
     path("admin-panel/profile/", views.admin_profile, name="admin_profile"),
+
+    #suspended user
+    path('suspended/', views.suspended_page_view, name='suspended_page'),
 
 ]
 

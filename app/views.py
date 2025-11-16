@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import auth
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from django.views.decorators.http import require_POST
-
 from django.core.files.base import ContentFile
 from pathlib import Path
 from io import BytesIO
@@ -374,3 +374,12 @@ def admin_dashboard(request):
         "flagged_posts": flagged_posts,
         "suspended_user_list": suspended_user_list,
     })
+
+def suspended_page_view(request):
+    if request.user.is_authenticated:
+        if hasattr(request.user, 'profile') and request.user.profile.status == "Suspended":
+            auth.logout(request)
+            return render(request, 'my_app/suspended.html')
+        else:
+            return redirect('dashboard')
+    return render(request, 'my_app/suspended.html')
