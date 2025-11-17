@@ -55,7 +55,7 @@
             background-color: white;
             padding: 2rem;
         }
-
+        
         .filters-row {
             display: flex;
             flex-wrap: wrap;
@@ -99,34 +99,46 @@
             background-color:#404243;
         }
 
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
         .message-btn {
-            display: inline-block;
-            background-color: #3498db;
+            background-color: transparent;
             color: white;
             text-decoration: none;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.875rem;
-            border-radius: 4px;
-            margin-top: 0.5rem;
-            transition: background-color 0.3s ease;
+            padding: 0.5rem;
+            font-size: 1.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            line-height: 30px;
+            border: none;
         }
         .message-btn:hover {
-            background-color: #29b1f0;
+            transform: scale(1.1);
         }
 
         .flag-btn {
-            display: inline-block;
-            background-color: #ff0000;
-            color: white;
+            background-color: transparent;
+            color: inherit;
             text-decoration: none;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.875rem;
-            border-radius: 4px;
-            margin-top: 0.5rem;
-            transition: background-color 0.3s ease;
+            padding: 0.5rem;
+            font-size: 1.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            line-height: 30px;
+            border: none;
         }
         .flag-btn:hover {
-            background-color: #c71313;
+            transform: scale(1.1);
         }
 
         .post-category {
@@ -283,15 +295,14 @@
         <p><span class="post-category">{{ post.get_category_display }}</span></p>
 
         {% if post.user != request.user %}
-        <a href="{% url 'messaging:compose' post.user.id %}" class="message-btn">
-            Message
-        </a>
-        {% endif %}
-
-        {% if post.user != request.user %}
-        <a href="{% url 'flag_post' post.id %}" class="flag-btn" onclick="return confirmFlag();">
-            Flag Post
-        </a>
+        <div class="action-buttons">
+            <a href="{% url 'messaging:compose' post.user.id %}" class="message-btn" title="Message">
+                💬
+            </a>
+            <a href="{% url 'flag_post' post.id %}" class="flag-btn" onclick="return confirmFlag();" title="Flag Post">
+                🚩
+            </a>
+        </div>
         {% endif %}
 
         </div>
