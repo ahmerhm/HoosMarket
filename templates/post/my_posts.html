@@ -81,13 +81,28 @@
         padding:8px 14px; border-radius:8px; text-decoration:none;
         }
         
-        .delete-btn:hover { background:#c53030; 
+        .delete-btn:hover { background:#c53030;
         }
 
         .post-category {
-            font-size: 0.8rem;   
-            color: #777777;          
-            font-weight: 300;     
+            font-size: 0.8rem;
+            color: #777777;
+            font-weight: 300;
+        }
+
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .post {
+            border: 2px solid #ccc;
+            padding: 1rem;
+            border-radius: 6px;
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
         }
     </style>
 </head>
@@ -109,14 +124,9 @@
 
 <div class="content">
 
-    {% for post in posts %}
-    <div class="post" style="
-        border:2px solid #ccc;
-        padding:1rem;
-        margin-bottom:1.5rem;
-        border-radius:6px;
-        background:#fafafa;
-    ">
+    <div class="posts-grid">
+        {% for post in posts %}
+        <div class="post">
 
         <div style="display:flex; align-items:center; margin-bottom:1rem;">
 
@@ -164,10 +174,11 @@
             <button type="submit" class="delete-btn">Delete</button>
         </form>
 
+        </div>
+        {% empty %}
+            <p>No posts yet.</p>
+        {% endfor %}
     </div>
-    {% empty %}
-        <p>No posts yet.</p>
-    {% endfor %}
 
 </div>
 
