@@ -89,7 +89,7 @@
                 {% elif full %}
                   {{ full }}
                 {% else %}
-                  @{{ other.username }}
+                  {{ other.username }}
                 {% endif %}
               {% endwith %}
             {% else %}
@@ -103,11 +103,11 @@
               <span style="border:1px solid #eee;border-radius:999px;padding:.05rem .4rem;background:#fafafa">
                 {% with nick=p.profile.nickname full=p.get_full_name %}
                   {% if nick %}
-                    @{{ nick }}
+                    {{ nick }}
                   {% elif full %}
                     {{ full }}
                   {% else %}
-                    @{{ p.username }}
+                    {{ p.username }}
                   {% endif %}
                 {% endwith %}
                 {% if p.id == request.user.id %} (you){% endif %}
@@ -127,11 +127,11 @@
             {% if m.sender %}
               {% with nick=m.sender.profile.nickname full=m.sender.get_full_name %}
                 {% if nick %}
-                  @{{ nick }}
+                  {{ nick }}
                 {% elif full %}
                   {{ full }}
                 {% else %}
-                  @{{ m.sender.username }}
+                  {{ m.sender.username }}
                 {% endif %}
               {% endwith %}
               {% if m.sender_id == request.user.id %} (you){% endif %}
