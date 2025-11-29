@@ -75,6 +75,13 @@ class Post(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
+    hidden_from = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        related_name="posts_hidden_from",
+        help_text="Users who should NOT be able to see this post.",
+    )
+
     def __str__(self):
         return self.title
 
@@ -82,6 +89,7 @@ class Post(models.Model):
 class PostImages(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='posts/')
+
 
 class PostFlag(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="flags")
