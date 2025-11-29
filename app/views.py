@@ -18,12 +18,14 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import get_user_model
 from .models import *
 from django.contrib.auth.decorators import user_passes_test
-from django.contrib.auth import get_user_model
+
 User = get_user_model()
-# ------- admin-only decorator -------
+
+
 def admin_only(view_func):
     return staff_member_required(view_func)
-# ---- Sustainability interests master list ----
+
+
 SUSTAINABILITY_CHOICES = [
     ("zero_waste", "Zero-waste & circular economy"),
     ("food", "Sustainable food & agriculture"),
@@ -45,7 +47,6 @@ def onboarding(request):
     """
     profile_obj, _ = Profile.objects.get_or_create(user=request.user)
 
-    # If they've already completed onboarding, don't show again
     if getattr(profile_obj, "onboarding_complete", False):
         return redirect("dashboard")
 
@@ -54,7 +55,6 @@ def onboarding(request):
         nickname = (request.POST.get("nickname") or "").strip()
         bio = request.POST.get("bio") or ""
 
-        # Norms checkbox must be ticked
         if request.POST.get("accept_norms") != "on":
             return render(
                 request,
@@ -70,10 +70,8 @@ def onboarding(request):
                 },
             )
 
-        # Save interests
         profile_obj.sustainability_interests = interests
 
-        # Optional nickname + bio
         if nickname:
             profile_obj.nickname = nickname
         if bio:
@@ -83,7 +81,6 @@ def onboarding(request):
         profile_obj.save()
         return redirect("dashboard")
 
-    # GET
     return render(
         request,
         "account/onboarding.html",
@@ -101,11 +98,13 @@ def dashboard(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
     role = getattr(profile, "status", "Member")
 
-    # If they haven't done first-time setup yet, send them there
     if not getattr(profile, "onboarding_complete", False):
         return redirect("onboarding")
 
     posts = Post.objects.all().order_by('-created_at')
+
+    posts = posts.exclude(hidden_from=request.user)
+
     categories = Post._meta.get_field('category').choices
 
     selected_category = request.GET.get('category') or None
@@ -143,7 +142,6 @@ def profile(request):
     profile_obj, _ = Profile.objects.get_or_create(user=request.user)
 
     if request.method == "POST":
-        # Avatar upload
         if "image" in request.FILES:
             uploaded = request.FILES["image"]
             name = getattr(uploaded, "name", "avatar")
@@ -207,6 +205,8 @@ def new_post(request):
         post_category = request.POST.get("category")
         post_images = request.FILES.getlist("images")
 
+        hidden_from_ids = request.POST.getlist("hidden_from")
+
         new_post_obj = Post.objects.create(
             user=request.user,
             title=post_title,
@@ -215,12 +215,17 @@ def new_post(request):
             category=post_category,
         )
 
+        if hidden_from_ids:
+            users_to_hide = User.objects.filter(id__in=hidden_from_ids)
+            new_post_obj.hidden_from.set(users_to_hide)
+
         for image in post_images:
             PostImages.objects.create(post=new_post_obj, image=image)
 
         return redirect("dashboard")
 
-    return render(request, 'post/new_post.html')
+    users = User.objects.exclude(id=request.user.id)
+    return render(request, 'post/new_post.html', {"users": users})
 
 
 @login_required
@@ -260,11 +265,12 @@ def delete_post(request):
 
     return redirect("dashboard")
 
+
 @admin_only
 def admin_delete_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     post.delete()
-    return redirect("admin_dashboard")  # fixed
+    return redirect("admin_dashboard")  
 
 
 @admin_only
@@ -272,7 +278,7 @@ def admin_suspend_user(request, user_id):
     profile = get_object_or_404(Profile, user__id=user_id)
     profile.status = "Suspended"
     profile.save()
-    return redirect("admin_dashboard")  # fixed
+    return redirect("admin_dashboard") 
 
 
 @admin_only
@@ -280,7 +286,7 @@ def admin_restore_user(request, user_id):
     profile = get_object_or_404(Profile, user__id=user_id)
     profile.status = "Member"
     profile.save()
-    return redirect("admin_dashboard")  # fixed
+    return redirect("admin_dashboard") 
 
 
 @login_required
@@ -294,15 +300,14 @@ def post_login_redirect(request):
         return redirect("admin_dashboard")
     return redirect("dashboard")
 
+
 @login_required
 def flag_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
 
-    # Prevent flagging your own post
     if post.user == request.user:
         return redirect("dashboard")
 
-    # Prevent duplicate flags
     existing = PostFlag.objects.filter(post=post, flagged_by=request.user, resolved=False)
     if existing.exists():
         return redirect("dashboard")
@@ -314,6 +319,7 @@ def flag_post(request, post_id):
     )
     return redirect("dashboard")
 
+
 @admin_only
 def admin_resolve_flag(request, flag_id):
     flag = get_object_or_404(PostFlag, id=flag_id)
@@ -321,11 +327,11 @@ def admin_resolve_flag(request, flag_id):
     flag.save()
     return redirect("admin_dashboard")
 
+
 @admin_only
 def admin_flag_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
 
-    # Prevent duplicate flags by admin
     existing = PostFlag.objects.filter(post=post, flagged_by=request.user, resolved=False)
     if existing.exists():
         return redirect("admin_dashboard")
@@ -341,6 +347,7 @@ def admin_flag_post(request, post_id):
 def is_admin(user):
     return user.is_staff or user.is_superuser
 
+
 @staff_member_required
 def admin_profile(request):
     user = request.user
@@ -348,21 +355,17 @@ def admin_profile(request):
         "user": user,
     })
 
-def admin_dashboard(request):
 
-    # --- All posts ---
+def admin_dashboard(request):
     posts = Post.objects.all().order_by("-created_at")
 
-    # --- Flagged posts ---
     flags = PostFlag.objects.select_related("post", "flagged_by").order_by("-created_at")
 
-    # --- Stats ---
     total_users = User.objects.count()
     suspended_users = User.objects.filter(profile__status="Suspended").count()
     total_posts = Post.objects.count()
     flagged_posts = flags.count()
 
-    # --- Suspended user list (for your new section) ---
     suspended_user_list = User.objects.filter(profile__status="Suspended")
 
     return render(request, "admin/admin_dashboard.html", {
@@ -374,6 +377,7 @@ def admin_dashboard(request):
         "flagged_posts": flagged_posts,
         "suspended_user_list": suspended_user_list,
     })
+
 
 def suspended_page_view(request):
     if request.user.is_authenticated:

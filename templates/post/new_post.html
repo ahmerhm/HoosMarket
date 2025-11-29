@@ -45,7 +45,7 @@
         }
 
         .nav-links a {
-            color: white
+            color: white;
             text-decoration: none;
             font-size: 1rem;
             transition: color 0.3s ease;
@@ -90,196 +90,236 @@
     </nav>
 
     <div class="wrap">
-    <div class="header" style="justify-content: center;margin-top:1.5rem;">
-        <h2 style="text-align:center;width:100%;color:#000000;">Create New Post</h2>
-    </div>
+      <div class="header" style="justify-content: center;margin-top:1.5rem;">
+          <h2 style="text-align:center;width:100%;color:#000000;">Create New Post</h2>
+      </div>
 
-    <form method="POST" action="{% url 'newpost' %}" enctype="multipart/form-data" style="padding:1.5rem">
+      <form method="POST" action="{% url 'newpost' %}" enctype="multipart/form-data" style="padding:1.5rem">
         {% csrf_token %}
 
-      <div style="margin-bottom:1rem">
-        <label for="title" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000">Title: <span style="color:red;">*</span></label>
-        <input 
-          type="text" 
-          id="title" 
-          name="title" 
-          required 
-          style="width:100%;padding:.6rem;border:1px solid #ddd;border-radius:6px"
-        >
-      </div>
+        <div style="margin-bottom:1rem">
+          <label for="title" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000">
+            Title: <span style="color:red;">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="title" 
+            name="title" 
+            required 
+            style="width:100%;padding:.6rem;border:1px solid #ddd;border-radius:6px"
+          >
+        </div>
 
-      <div style="margin-bottom:1rem">
-        <label for="price" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000">Price: <span style="color:red;">*</span></label>
-        <input 
-          type="number" 
-          id="price" 
-          name="price" 
-          step="0.01" 
-          min="0" 
-          required 
-          style="width:100%;padding:.6rem;border:1px solid #ddd;border-radius:6px"
-        >
-      </div>
+        <div style="margin-bottom:1rem">
+          <label for="price" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000">
+            Price: <span style="color:red;">*</span>
+          </label>
+          <input 
+            type="number" 
+            id="price" 
+            name="price" 
+            step="0.01" 
+            min="0" 
+            required 
+            style="width:100%;padding:.6rem;border:1px solid #ddd;border-radius:6px"
+          >
+        </div>
 
-      <div style="margin-bottom:1rem">
-        <label for="description" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000">Description: <span style="color:red;">*</span></label>
-        <textarea 
-          id="description" 
-          name="description" 
-          rows="5" 
-          required 
-          style="width:100%;padding:.6rem;border:1px solid #ddd;border-radius:6px;resize:vertical"
-        ></textarea>
-      </div>
+        <div style="margin-bottom:1rem">
+          <label for="description" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000">
+            Description: <span style="color:red;">*</span>
+          </label>
+          <textarea 
+            id="description" 
+            name="description" 
+            rows="5" 
+            required 
+            style="width:100%;padding:.6rem;border:1px solid #ddd;border-radius:6px;resize:vertical"
+          ></textarea>
+        </div>
 
-    <div style="margin-bottom:1rem">
-      <label for="category" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000">
-          Category: <span style="color:red;">*</span>
-      </label>
-      <select 
-          id="category" 
-          name="category" 
-          required 
-          style="width:100%;padding:.6rem;border:1px solid #ddd;border-radius:6px"
-      >
-          <option value="" disabled selected>Select a category</option>
-          <option value="books">Books</option>
-          <option value="electronics">Electronics</option>
-          <option value="clothing">Clothing</option>
-          <option value="furniture">Furniture</option>
-          <option value="tickets">Tickets</option>
-          <option value="kitchen">Kitchen Items</option>
-          <option value="other">Other</option>
-      </select>
+        <div style="margin-bottom:1rem">
+          <label for="category" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000">
+              Category: <span style="color:red;">*</span>
+          </label>
+          <select 
+              id="category" 
+              name="category" 
+              required 
+              style="width:100%;padding:.6rem;border:1px solid #ddd;border-radius:6px"
+          >
+              <option value="" disabled selected>Select a category</option>
+              <option value="books">Books</option>
+              <option value="electronics">Electronics</option>
+              <option value="clothing">Clothing</option>
+              <option value="furniture">Furniture</option>
+              <option value="tickets">Tickets</option>
+              <option value="kitchen">Kitchen Items</option>
+              <option value="other">Other</option>
+          </select>
+        </div>
+
+        {% if users %}
+        <div style="margin-bottom:1.5rem;">
+          <label style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000;">
+            Hide this post from (optional):
+          </label>
+          <div style="
+              max-height:200px;
+              overflow-y:auto;
+              border:1px solid #ddd;
+              border-radius:6px;
+              padding:.6rem;
+              background:#f9fafb;
+          ">
+            {% for u in users %}
+              <label style="display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:0.9rem;color:#111;">
+                <input type="checkbox" name="hidden_from" value="{{ u.id }}">
+                {% if u.profile.nickname %}
+                  {{ u.profile.nickname }}
+                {% elif u.get_full_name %}
+                  {{ u.get_full_name }}
+                {% else %}
+                  {{ u.username }}
+                {% endif %}
+              </label>
+            {% endfor %}
+          </div>
+          <p style="font-size:.8rem;color:#666;margin-top:.3rem;">
+            By default, your post is visible to everyone. Check any users you <strong>do not</strong> want to see this post.
+          </p>
+        </div>
+        {% endif %}
+
+        <div style="margin-bottom:1.5rem;">
+          <label for="image" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000;">
+            Upload Images:
+          </label>
+          <input 
+            type="file" 
+            id="image" 
+            name="images" 
+            accept="image/*" 
+            multiple 
+            style="padding:.4rem 0;">
+          <p style="font-size:.85rem;color:#666;margin-top:.3rem;">
+            You can select multiple images!
+          </p>
+
+          <div id="image-preview" 
+              style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;border:1px dashed #ccc;
+                    padding:10px;border-radius:6px;background:#fafafa;">
+            <p style="color:#666;">No images selected.</p>
+          </div>
+        </div>
+
+        <p style="color:#000000;font-size:0.9rem;margin-bottom:1rem;">
+          <span style="color:red;">*</span> Required Field
+        </p>
+
+        <div style="text-align: center; margin-top: 1rem;">
+            <button type="submit" class="btn square">Create Post</button>
+        </div>
+
+      </form>
     </div>
 
-    <div style="margin-bottom:1.5rem;">
-      <label for="image" style="display:block;font-weight:bold;margin-bottom:.3rem;color:#000000;">Upload Images:</label>
-      <input 
-        type="file" 
-        id="image" 
-        name="images" 
-        accept="image/*" 
-        multiple 
-        style="padding:.4rem 0;">
-      <p style="font-size:.85rem;color:#666;margin-top:.3rem;">
-        You can select multiple images!
-      </p>
+    <script>
+      const imageInput = document.getElementById('image');
+      const previewContainer = document.getElementById('image-preview');
+      let allFiles = [];
 
-      <div id="image-preview" 
-           style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;border:1px dashed #ccc;
-                  padding:10px;border-radius:6px;background:#fafafa;">
-        <p style="color:#666;">No images selected.</p>
-      </div>
-    </div>
+      imageInput.addEventListener('change', async function () {
+        const newFiles = await Promise.all(
+            Array.from(this.files).map(async (file) => {
+                if (file.type === "image/heic" || file.name.toLowerCase().endsWith(".heic")) {
+                    try {
+                        const converted = await heic2any({
+                            blob: file,
+                            toType: "image/jpeg",
+                            quality: 0.9
+                        });
 
-    <p style="color:#000000;font-size:0.9rem;margin-bottom:1rem;">
-      <span style="color:red;">*</span> Required Field
-    </p>
-
-    <div style="text-align: center; margin-top: 1rem;">
-        <button type="submit" class="btn square">Create Post</button>
-    </div>
-
-    </form>
-  </div>
-
-<script>
-  const imageInput = document.getElementById('image');
-  const previewContainer = document.getElementById('image-preview');
-  let allFiles = [];
-
-  imageInput.addEventListener('change', async function () {
-    const newFiles = await Promise.all(
-        Array.from(this.files).map(async (file) => {
-            if (file.type === "image/heic" || file.name.toLowerCase().endsWith(".heic")) {
-                try {
-                    const converted = await heic2any({
-                        blob: file,
-                        toType: "image/jpeg",
-                        quality: 0.9
-                    });
-
-                    return new File(
-                        [converted],
-                        file.name.replace(/\.heic/i, ".jpg"),
-                        { type: "image/jpeg" }
-                    );
-                } catch (err) {
-                    console.error("HEIC conversion failed:", err);
-                    alert("Failed to convert HEIC. Please use PNG/JPG.");
-                    return null;
+                        return new File(
+                            [converted],
+                            file.name.replace(/\.heic/i, ".jpg"),
+                            { type: "image/jpeg" }
+                        );
+                    } catch (err) {
+                        console.error("HEIC conversion failed:", err);
+                        alert("Failed to convert HEIC. Please use PNG/JPG.");
+                        return null;
+                    }
                 }
-            }
-            return file;
-        })
-    );
+                return file;
+            })
+        );
 
-    allFiles = allFiles.concat(newFiles.filter(f => f !== null));
-    renderPreviews();
-});
+        allFiles = allFiles.concat(newFiles.filter(f => f !== null));
+        renderPreviews();
+      });
 
-  function renderPreviews() {
-    previewContainer.innerHTML = '';
+      function renderPreviews() {
+        previewContainer.innerHTML = '';
 
-    if (allFiles.length === 0) {
-      previewContainer.innerHTML = '<p style="color:#666;">No images selected.</p>';
-      return;
-    }
+        if (allFiles.length === 0) {
+          previewContainer.innerHTML = '<p style="color:#666;">No images selected.</p>';
+          return;
+        }
 
-    allFiles.forEach((file, index) => {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const wrapper = document.createElement('div');
-        wrapper.style.position = 'relative';
-        wrapper.style.display = 'inline-block';
+        allFiles.forEach((file, index) => {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const wrapper = document.createElement('div');
+            wrapper.style.position = 'relative';
+            wrapper.style.display = 'inline-block';
 
-        const img = document.createElement('img');
-        img.src = e.target.result;
-        img.style.width = '100px';
-        img.style.height = '100px';
-        img.style.objectFit = 'cover';
-        img.style.border = '1px solid #ccc';
-        img.style.borderRadius = '4px';
-        img.style.marginRight = '10px';
-        img.style.marginBottom = '10px';
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.style.width = '100px';
+            img.style.height = '100px';
+            img.style.objectFit = 'cover';
+            img.style.border = '1px solid #ccc';
+            img.style.borderRadius = '4px';
+            img.style.marginRight = '10px';
+            img.style.marginBottom = '10px';
 
-        const deleteBtn = document.createElement('button');
-        deleteBtn.innerHTML = '×';
-        deleteBtn.style.position = 'absolute';
-        deleteBtn.style.top = '0';
-        deleteBtn.style.right = '0';
-        deleteBtn.style.background = 'rgba(0,0,0,0.6)';
-        deleteBtn.style.color = 'white';
-        deleteBtn.style.border = 'none';
-        deleteBtn.style.borderRadius = '0 4px 0 4px';
-        deleteBtn.style.cursor = 'pointer';
-        deleteBtn.style.fontSize = '16px';
-        deleteBtn.style.lineHeight = '1';
-        deleteBtn.style.width = '22px';
-        deleteBtn.style.height = '22px';
-        deleteBtn.style.padding = '0';
-        deleteBtn.title = 'Remove this image';
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerHTML = '×';
+            deleteBtn.style.position = 'absolute';
+            deleteBtn.style.top = '0';
+            deleteBtn.style.right = '0';
+            deleteBtn.style.background = 'rgba(0,0,0,0.6)';
+            deleteBtn.style.color = 'white';
+            deleteBtn.style.border = 'none';
+            deleteBtn.style.borderRadius = '0 4px 0 4px';
+            deleteBtn.style.cursor = 'pointer';
+            deleteBtn.style.fontSize = '16px';
+            deleteBtn.style.lineHeight = '1';
+            deleteBtn.style.width = '22px';
+            deleteBtn.style.height = '22px';
+            deleteBtn.style.padding = '0';
+            deleteBtn.title = 'Remove this image';
 
-        deleteBtn.addEventListener('click', () => {
-          allFiles.splice(index, 1);
-          renderPreviews();
+            deleteBtn.addEventListener('click', () => {
+              allFiles.splice(index, 1);
+              renderPreviews();
+            });
+
+            wrapper.appendChild(img);
+            wrapper.appendChild(deleteBtn);
+            previewContainer.appendChild(wrapper);
+          };
+          reader.readAsDataURL(file);
         });
+      }
 
-        wrapper.appendChild(img);
-        wrapper.appendChild(deleteBtn);
-        previewContainer.appendChild(wrapper);
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  document.querySelector('form').addEventListener('submit', (e) => {
-    const dataTransfer = new DataTransfer();
-    allFiles.forEach(file => dataTransfer.items.add(file));
-    imageInput.files = dataTransfer.files;
-  });
-</script>
+      document.querySelector('form').addEventListener('submit', (e) => {
+        const dataTransfer = new DataTransfer();
+        allFiles.forEach(file => dataTransfer.items.add(file));
+        imageInput.files = dataTransfer.files;
+      });
+    </script>
 
 </body>
 </html>
