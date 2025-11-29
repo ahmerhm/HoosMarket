@@ -4,29 +4,35 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-class UserChoiceField(forms.ModelMultipleChoiceField):
+def display_name(user):
     """
-    Show each user using:
-      - @nickname if profile.nickname is set
-      - full name if available
-      - @username as a final fallback
+    Prefer:
+    1) profile.nickname
+    2) user.get_full_name()  (Google name)
+    3) user.username
+    (No @ anywhere.)
     """
-    def label_from_instance(self, obj):
-        profile = getattr(obj, "profile", None)
-        nick = getattr(profile, "nickname", "") if profile else ""
-        full = obj.get_full_name()
+    profile = getattr(user, "profile", None)
+    nick = getattr(profile, "nickname", "") if profile else ""
+    full = user.get_full_name()
 
-        if nick:
-            return f"@{nick}"
-        elif full:
-            return full
-        return f"@{obj.username}"
+    if nick:
+        return nick
+    if full:
+        return full
+    return user.username
 
 
 class GroupCreateForm(forms.Form):
-    name = forms.CharField(max_length=120, label="Group name")
-    members = UserChoiceField(
-        queryset=User.objects.none(), 
+    name = forms.CharField(
+        max_length=120,
+        label="Group name",
+        widget=forms.TextInput(attrs={
+            "placeholder": "Group name",
+        }),
+    )
+    members = forms.ModelMultipleChoiceField(
+        queryset=User.objects.none(),
         required=True,
         widget=forms.CheckboxSelectMultiple,
         label="Add members",
@@ -40,7 +46,10 @@ class GroupCreateForm(forms.Form):
         if me is not None:
             qs = qs.exclude(pk=me.pk)
 
-        self.fields["members"].queryset = qs.order_by("username")
+        qs = qs.select_related("profile").order_by("username")
+        self.fields["members"].queryset = qs
+
+        self.fields["members"].label_from_instance = display_name
 
 
 class StartThreadForm(forms.Form):
@@ -48,7 +57,11 @@ class StartThreadForm(forms.Form):
 
 
 class MessageForm(forms.Form):
-    text = forms.CharField(widget=forms.Textarea(attrs={
-        "rows": 3,
-        "placeholder": "Write a message..."
-    }))
+    text = forms.CharField(
+        widget=forms.Textarea(
+            attrs={
+                "rows": 3,
+                "placeholder": "Write a message...",
+            }
+        )
+    )

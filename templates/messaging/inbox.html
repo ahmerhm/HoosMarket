@@ -106,7 +106,7 @@
                         {% elif full %}
                           {{ full }}
                         {% else %}
-                          @{{ row.other.username }}
+                          {{ row.other.username }}
                         {% endif %}
                       {% endwith %}
                     {% else %}
@@ -120,11 +120,11 @@
                       {% if p.id != request.user.id %}
                         {% with nick=p.profile.nickname full=p.get_full_name %}
                           {% if nick %}
-                            @{{ nick }}
+                            {{ nick }}
                           {% elif full %}
                             {{ full }}
                           {% else %}
-                            @{{ p.username }}
+                            {{ p.username }}
                           {% endif %}
                         {% endwith %}
                         {% if not forloop.last %}, {% endif %}

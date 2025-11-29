@@ -11,6 +11,24 @@ from .forms import MessageForm, GroupCreateForm
 User = get_user_model()
 
 
+def _display_name(user):
+    """
+    Prefer:
+    1) profile.nickname (if present)
+    2) user.get_full_name()
+    3) user.username
+    """
+    profile = getattr(user, "profile", None)
+    nick = getattr(profile, "nickname", "") if profile else ""
+    full = user.get_full_name()
+
+    if nick:
+        return nick
+    if full:
+        return full
+    return user.username
+
+
 @login_required
 def inbox(request):
     threads = (
@@ -51,7 +69,7 @@ def user_list(request):
     users = (
         User.objects
         .exclude(pk=request.user.pk)
-        .select_related("profile") 
+        .select_related("profile")
         .order_by("username")
     )
     if q:
@@ -88,10 +106,13 @@ def compose(request, user_id):
 
     messages_qs = (
         thread.messages
-        .select_related('sender', 'sender__profile')  
+        .select_related('sender', 'sender__profile')
         if thread else []
     )
-    title = f"Chat with @{other.username}"
+
+    display = _display_name(other)
+    title = f"Chat with {display}"
+
     return render(request, 'messaging/thread.html', {
         'thread': thread,
         'messages': messages_qs,
@@ -151,8 +172,12 @@ def thread_detail(request, thread_id):
         form = MessageForm()
 
     messages_qs = thread.messages.select_related('sender', 'sender__profile')
-    page_title = (f"Chat with @{other.username}" if (other and not thread.is_group)
-                  else (thread.name or "Conversation"))
+
+    if other and not thread.is_group:
+        display = _display_name(other)
+        page_title = f"Chat with {display}"
+    else:
+        page_title = thread.name or "Conversation"
 
     if messages_qs.exists():
         tr, _ = ThreadRead.objects.get_or_create(thread=thread, user=request.user)
