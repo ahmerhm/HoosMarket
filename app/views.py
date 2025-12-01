@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from django.views.decorators.http import require_POST
 from django.core.files.base import ContentFile
+from django.conf import settings
+from django.urls import reverse
 from pathlib import Path
 from io import BytesIO
 from PIL import Image
@@ -34,6 +36,18 @@ SUSTAINABILITY_CHOICES = [
     ("community", "Community events & volunteering"),
     ("advocacy", "Advocacy, education & policy"),
 ]
+
+def admin_google_login(request):
+    """
+    Entry-point for admins/moderators.
+
+    We just redirect them to the Google provider login used by allauth,
+    but we set ?next= to the admin dashboard so that after login they
+    land on /admin-panel/.
+    """
+    next_url = reverse("admin_dashboard")
+    google_login_path = "/accounts/google/login/"
+    return redirect(f"{google_login_path}?next={next_url}")
 
 
 @login_required
@@ -302,10 +316,18 @@ def admin_restore_user(request, user_id):
 def post_login_redirect(request):
     """
     Redirect AFTER login:
-    - staff users → custom admin dashboard
-    - regular users → dashboard
+    - If the user's email is in MODERATOR_EMAILS, automatically mark them as staff.
+    - Staff users → custom admin dashboard
+    - Regular users → member dashboard
     """
-    if request.user.is_staff:
+    user = request.user
+
+    moderator_emails = getattr(settings, "MODERATOR_EMAILS", [])
+    if user.email and user.email.lower() in moderator_emails and not user.is_staff:
+        user.is_staff = True
+        user.save(update_fields=["is_staff"])
+
+    if user.is_staff:
         return redirect("admin_dashboard")
     return redirect("dashboard")
 

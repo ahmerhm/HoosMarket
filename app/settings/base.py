@@ -51,6 +51,7 @@ INSTALLED_APPS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend"
 ]
 
@@ -157,6 +158,12 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MODERATOR_EMAILS = [
+    e.strip().lower()
+    for e in os.environ.get("MODERATOR_EMAILS", "").split(",")
+    if e.strip()
+]
 
 # Activate Django-Heroku.
 # Use this code to avoid the psycopg2 / django-heroku error!  

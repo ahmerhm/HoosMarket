@@ -14,6 +14,7 @@ from .views import (
     admin_flag_post,
     admin_resolve_flag,
     suspended_page_view,
+    admin_google_login,
 )
 
 def root(request):
@@ -26,10 +27,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
 
     # --- Custom Staff Login ---
-    path("admin-login/", auth_views.LoginView.as_view(
-        template_name="admin/login.html",
-        redirect_authenticated_user=True,
-    ), name="admin_login"),
+    path("admin-login/", admin_google_login, name="admin_login"),
 
     # --- Custom Admin Dashboard (your admin panel) ---
     path("admin-panel/", views.admin_dashboard, name="admin_dashboard"),
