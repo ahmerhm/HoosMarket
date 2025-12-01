@@ -8,6 +8,9 @@ from django.conf import settings
 from pathlib import Path
 from io import BytesIO
 from PIL import Image
+from allauth.account.models import EmailAddress
+from allauth.socialaccount.models import SocialAccount
+from django.contrib import messages
 
 try:
     from pillow_heif import register_heif_opener
@@ -262,10 +265,11 @@ def new_post(request):
 @login_required
 @require_POST
 def delete_account(request):
-    from django.contrib.auth import logout
     user = request.user
-    logout(request)
+    EmailAddress.objects.filter(user=user).delete()
+    SocialAccount.objects.filter(user=user).delete()
     user.delete()
+    messages.success(request, "Your account has been deleted.")
     return redirect("account_login")
 
 
