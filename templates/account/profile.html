@@ -181,7 +181,9 @@
         type="text"
         id="name-input"
         value="{% if profile.nickname %}{{ profile.nickname }}{% elif user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}"
-        placeholder="Nickname / handle (optional)" />
+        placeholder="Nickname / handle (optional)"
+        maxlength="64" />
+      <small class="muted">Max 64 characters.</small>
       <div class="inline-actions">
         <button class="btn" id="name-save">Save</button>
         <button class="btn" id="name-cancel" type="button">Cancel</button>
@@ -303,7 +305,8 @@
     nameSave.addEventListener('click', (e) => {
       e.preventDefault();
       actionFld.value   = 'update_nickname';
-      nicknameFld.value = nameInput.value.trim();
+      // Hard cap at 64 chars before sending to server
+      nicknameFld.value = nameInput.value.trim().slice(0, 64);
       form.submit();
     });
 
