@@ -245,7 +245,15 @@
       <button type="submit" class="btn">Save interests</button>
     </form>
 
-    <p><strong>Status:</strong> Member</p>
+    <p>
+      <strong>Status:</strong>
+      {% if user.is_staff %}
+        Admin
+      {% else %}
+        Member
+      {% endif %}
+    </p>
+
 
     <div class="btn-row">
       <a class="btn" href="{% url 'messaging:inbox' %}">Messages</a>

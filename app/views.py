@@ -5,10 +5,10 @@ from django.http import HttpResponseForbidden
 from django.views.decorators.http import require_POST
 from django.core.files.base import ContentFile
 from django.conf import settings
-from django.urls import reverse
 from pathlib import Path
 from io import BytesIO
 from PIL import Image
+
 try:
     from pillow_heif import register_heif_opener
     register_heif_opener()
@@ -18,14 +18,37 @@ except Exception:
 from .models import Profile, Post, PostImages, PostFlag
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import get_user_model
-from .models import *
-from django.contrib.auth.decorators import user_passes_test
 
 User = get_user_model()
 
 
 def admin_only(view_func):
+    """Decorator for views that only staff (admins) can access."""
     return staff_member_required(view_func)
+
+
+def is_moderator_email(email: str) -> bool:
+    """
+    Check whether an email is in the MODERATOR_EMAILS from settings.
+
+    Handles both:
+    - MODERATOR_EMAILS = "a@x.com, b@y.com"   (string)
+    - MODERATOR_EMAILS = ["a@x.com", "b@y.com"] (list/tuple)
+    """
+    if not email:
+        return False
+
+    raw = getattr(settings, "MODERATOR_EMAILS", [])
+
+    if isinstance(raw, str):
+        allowed = [e.strip().lower() for e in raw.split(",") if e.strip()]
+    else:
+        allowed = [str(e).strip().lower() for e in raw]
+
+    print("DEBUG MODERATOR_EMAILS:", allowed, "| checking:", email)
+
+    return email.strip().lower() in allowed
+
 
 
 SUSTAINABILITY_CHOICES = [
@@ -36,18 +59,6 @@ SUSTAINABILITY_CHOICES = [
     ("community", "Community events & volunteering"),
     ("advocacy", "Advocacy, education & policy"),
 ]
-
-def admin_google_login(request):
-    """
-    Entry-point for admins/moderators.
-
-    We just redirect them to the Google provider login used by allauth,
-    but we set ?next= to the admin dashboard so that after login they
-    land on /admin-panel/.
-    """
-    next_url = reverse("admin_dashboard")
-    google_login_path = "/accounts/google/login/"
-    return redirect(f"{google_login_path}?next={next_url}")
 
 
 @login_required
@@ -120,7 +131,6 @@ def dashboard(request):
         return redirect("onboarding")
 
     posts = Post.objects.all().order_by('-created_at')
-
     posts = posts.exclude(hidden_from=request.user)
 
     categories = Post._meta.get_field('category').choices
@@ -188,11 +198,9 @@ def profile(request):
 
         if action in ("update_nickname", "update_name"):
             nickname = (request.POST.get("nickname") or request.POST.get("name") or "").strip()
-
             max_len = Profile._meta.get_field("nickname").max_length or 64
             if nickname:
                 nickname = nickname[:max_len]
-
             profile_obj.nickname = nickname
             profile_obj.save(update_fields=["nickname"])
             return redirect("profile")
@@ -289,47 +297,28 @@ def delete_post(request):
     return redirect("dashboard")
 
 
-@admin_only
-def admin_delete_post(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    post.delete()
-    return redirect("admin_dashboard")  
-
-
-@admin_only
-def admin_suspend_user(request, user_id):
-    profile = get_object_or_404(Profile, user__id=user_id)
-    profile.status = "Suspended"
-    profile.save()
-    return redirect("admin_dashboard") 
-
-
-@admin_only
-def admin_restore_user(request, user_id):
-    profile = get_object_or_404(Profile, user__id=user_id)
-    profile.status = "Member"
-    profile.save()
-    return redirect("admin_dashboard") 
-
-
 @login_required
 def post_login_redirect(request):
     """
-    Redirect AFTER login:
-    - If the user's email is in MODERATOR_EMAILS, automatically mark them as staff.
-    - Staff users → custom admin dashboard
-    - Regular users → member dashboard
+    After any successful login:
+
+    - If the user's email is in MODERATOR_EMAILS, mark them as staff (admin).
+    - If not, and they are staff (but not superuser), demote them back.
+    - Then send everyone to the regular dashboard.
+    Admin powers are controlled purely by user.is_staff.
     """
     user = request.user
+    is_mod = is_moderator_email(user.email)
 
-    moderator_emails = getattr(settings, "MODERATOR_EMAILS", [])
-    if user.email and user.email.lower() in moderator_emails and not user.is_staff:
+    if is_mod and not user.is_staff:
         user.is_staff = True
         user.save(update_fields=["is_staff"])
+    elif not is_mod and user.is_staff and not user.is_superuser:
+        user.is_staff = False
+        user.save(update_fields=["is_staff"])
 
-    if user.is_staff:
-        return redirect("admin_dashboard")
     return redirect("dashboard")
+
 
 
 @login_required
@@ -349,6 +338,37 @@ def flag_post(request, post_id):
         reason="User flagged this post"
     )
     return redirect("dashboard")
+
+@admin_only
+def admin_delete_post(request, post_id):
+    """
+    Admins can delete any post from the admin panel.
+    """
+    post = get_object_or_404(Post, id=post_id)
+    post.delete()
+    return redirect("admin_dashboard")
+
+
+@admin_only
+def admin_suspend_user(request, user_id):
+    """
+    Admins can suspend a user. This sets profile.status = 'Suspended'.
+    """
+    profile = get_object_or_404(Profile, user__id=user_id)
+    profile.status = "Suspended"
+    profile.save()
+    return redirect("admin_dashboard")
+
+
+@admin_only
+def admin_restore_user(request, user_id):
+    """
+    Admins can restore a suspended user back to 'Member' status.
+    """
+    profile = get_object_or_404(Profile, user__id=user_id)
+    profile.status = "Member"
+    profile.save()
+    return redirect("admin_dashboard")
 
 
 @admin_only
@@ -379,7 +399,7 @@ def is_admin(user):
     return user.is_staff or user.is_superuser
 
 
-@staff_member_required
+@admin_only
 def admin_profile(request):
     user = request.user
     return render(request, "admin/admin_profile.html", {
@@ -387,9 +407,9 @@ def admin_profile(request):
     })
 
 
+@admin_only
 def admin_dashboard(request):
     posts = Post.objects.all().order_by("-created_at")
-
     flags = PostFlag.objects.select_related("post", "flagged_by").order_by("-created_at")
 
     total_users = User.objects.count()
