@@ -55,6 +55,10 @@ def onboarding(request):
         nickname = (request.POST.get("nickname") or "").strip()
         bio = request.POST.get("bio") or ""
 
+        max_len = Profile._meta.get_field("nickname").max_length or 64
+        if nickname:
+            nickname = nickname[:max_len]
+
         if request.POST.get("accept_norms") != "on":
             return render(
                 request,
@@ -170,6 +174,11 @@ def profile(request):
 
         if action in ("update_nickname", "update_name"):
             nickname = (request.POST.get("nickname") or request.POST.get("name") or "").strip()
+
+            max_len = Profile._meta.get_field("nickname").max_length or 64
+            if nickname:
+                nickname = nickname[:max_len]
+
             profile_obj.nickname = nickname
             profile_obj.save(update_fields=["nickname"])
             return redirect("profile")
