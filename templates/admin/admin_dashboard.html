@@ -233,18 +233,39 @@
                 {{ flag.created_at }}
             </p>
 
-            <div class="admin-controls" style="margin-top:1rem;">
+            <div class="admin-controls" style="margin-top:1rem; display:flex; flex-wrap:wrap; gap:0.4rem;">
+
+                <a class="admin-btn"
+                style="background:#5bc0de;"
+                href="{% url 'admin_edit_post' flag.post.id %}">
+                    Edit Post
+                </a>
+
                 <a class="admin-btn delete"
-                   href="{% url 'admin_delete_post' flag.post.id %}"
-                   onclick="return confirm('Delete this flagged post?');">
+                href="{% url 'admin_delete_post' flag.post.id %}"
+                onclick="return confirm('Delete this flagged post?');">
                     Delete Post
                 </a>
 
+                {% if flag.post.user.profile.status != 'Suspended' %}
+                    <a class="admin-btn suspend"
+                    href="{% url 'admin_suspend_user' flag.post.user.id %}"
+                    onclick="return confirm('Suspend this user?');">
+                        Suspend User
+                    </a>
+                {% else %}
+                    <a class="admin-btn restore"
+                    href="{% url 'admin_restore_user' flag.post.user.id %}">
+                        Restore User
+                    </a>
+                {% endif %}
+
                 <a class="admin-btn resolve"
-                   href="{% url 'admin_resolve_flag' flag.id %}">
+                href="{% url 'admin_resolve_flag' flag.id %}">
                     Mark Resolved
                 </a>
             </div>
+
 
         </div>
         {% endfor %}

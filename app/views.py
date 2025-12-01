@@ -376,6 +376,30 @@ def admin_restore_user(request, user_id):
 
 
 @admin_only
+def admin_edit_post(request, post_id):
+    """
+    Admin can edit a post's title and description.
+    Used especially for flagged posts, but works for any post.
+    """
+    post = get_object_or_404(Post, id=post_id)
+
+    if request.method == "POST":
+        title = (request.POST.get("title") or "").strip()
+        description = request.POST.get("description") or ""
+
+        if not title:
+            messages.error(request, "Title is required.")
+        else:
+            post.title = title
+            post.description = description
+            post.save(update_fields=["title", "description"])
+            messages.success(request, "Post updated successfully.")
+            return redirect("admin_dashboard")
+
+    return render(request, "admin/edit_post.html", {"post": post})
+
+
+@admin_only
 def admin_resolve_flag(request, flag_id):
     flag = get_object_or_404(PostFlag, id=flag_id)
     flag.resolved = True

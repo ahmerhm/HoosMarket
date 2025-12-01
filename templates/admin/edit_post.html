@@ -1,0 +1,199 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Post</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background:#f8f9fa; 
+            margin:0; 
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #082d52;
+            color: white;
+            padding: 0.75rem 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .site-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .site-name a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .site-name a:hover {
+            color: #29b1f0;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #29b1f0;
+        }
+
+        .content {
+            max-width: 700px;
+            margin: 2rem auto;
+            background:#fff;
+            padding:1.5rem 2rem;
+            border-radius:8px;
+            border:1px solid #ddd;
+        }
+
+        h1 {
+            margin-top:0;
+            margin-bottom:1rem;
+            color:#082d52;
+            font-size:1.6rem;
+        }
+
+        .field {
+            margin-bottom:1rem;
+        }
+
+        .field label {
+            display:block;
+            font-weight:bold;
+            margin-bottom:0.3rem;
+            color:#000;
+        }
+
+        .field input[type="text"],
+        .field textarea {
+            width:100%;
+            padding:.6rem;
+            border:1px solid #ddd;
+            border-radius:6px;
+            font:inherit;
+        }
+
+        .field textarea {
+            resize:vertical;
+            min-height:120px;
+        }
+
+        .btn-row {
+            margin-top:1rem;
+            display:flex;
+            gap:.75rem;
+        }
+
+        .btn {
+            display:inline-block;
+            padding:.5rem 1rem;
+            border-radius:6px;
+            border:1px solid #082d52;
+            background:#082d52;
+            color:#fff;
+            text-decoration:none;
+            cursor:pointer;
+            font-size:.95rem;
+        }
+
+        .btn.secondary {
+            background:#fff;
+            color:#082d52;
+        }
+
+        .message {
+            padding:.5rem .75rem;
+            margin-bottom:1rem;
+            border-radius:4px;
+            font-size:.9rem;
+        }
+
+        .message.error {
+            background:#f8d7da;
+            color:#721c24;
+            border:1px solid #f5c6cb;
+        }
+
+        .message.success {
+            background:#d4edda;
+            color:#155724;
+            border:1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="site-name">
+        <a href="/" class="site-link">Hoos Market</a>
+    </div>
+    <div class="nav-links">
+        <a href="{% url 'newpost' %}">New Post</a>
+        <a href="{% url 'messaging:inbox' %}">Messages</a>
+        <a href="/myaccount/">My Account</a>
+        {% if user.is_staff %}
+            <a href="{% url 'admin_dashboard' %}">Review content</a>
+        {% endif %}
+    </div>
+</nav>
+
+<div class="content">
+    <h1>Edit Post</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="field">
+            <label for="title">Title</label>
+            <input
+                type="text"
+                id="title"
+                name="title"
+                value="{{ post.title }}"
+                maxlength="255"
+                required
+            >
+        </div>
+
+        <div class="field">
+            <label for="description">Description</label>
+            <textarea
+                id="description"
+                name="description"
+                rows="5"
+            >{{ post.description }}</textarea>
+        </div>
+
+        <div class="btn-row">
+            <button type="submit" class="btn">Save Changes</button>
+            <a href="{% url 'admin_dashboard' %}" class="btn secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>
