@@ -7,10 +7,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
-        body { font-family: Arial, sans-serif; background:#f8f9fa; margin:0; }
-        nav { background:#082d52; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; }
-        .site-name { font-size:1.5rem; font-weight:bold; }
-        .content { padding:2rem; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background:#f8f9fa; 
+            margin:0; 
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #082d52;
+            color: white;
+            padding: 0.75rem 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .site-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #29b1f0;
+        }
+
+        .content { 
+            padding:2rem; 
+        }
 
         .section-title {
             margin-bottom: 1rem;
@@ -33,6 +70,7 @@
             gap: 1.5rem;
             margin-top: 1rem;
         }
+
         @media (max-width: 1000px) {
             .post-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -45,7 +83,9 @@
             }
         }
 
-        .admin-controls { margin-top:1rem; }
+        .admin-controls { 
+            margin-top:1rem; 
+        }
 
         .admin-btn {
             display:inline-block;
@@ -62,7 +102,7 @@
         .restore { background:#5cb85c; }
         .resolve { background:#0275d8; }
 
-         .flag-grid {
+        .flag-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 1.5rem;
@@ -70,10 +110,15 @@
         }
 
         @media (max-width: 1000px) {
-            .flag-grid { grid-template-columns: repeat(2, 1fr); }
+            .flag-grid { 
+                grid-template-columns: repeat(2, 1fr); 
+            }
         }
+
         @media (max-width: 600px) {
-            .flag-grid { grid-template-columns: repeat(1, 1fr); }
+            .flag-grid { 
+                grid-template-columns: repeat(1, 1fr); 
+            }
         }
 
         .flag-card {
@@ -110,28 +155,20 @@
 <body>
 
 <nav>
-    <div class="site-name">Admin Panel</div>
-    <div>
-        <a href="/" style="color:white; text-decoration:none; margin-right:1rem;">Home</a>
-        <a href="{% url 'admin_profile' %}" 
-            style="color:white; text-decoration:none; margin-right:1rem;">
-            Admin Profile
-        </a>
-        <form method="post" action="{% url 'account_logout' %}" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" style="background:none;border:none;color:white;cursor:pointer;">
-                Logout
-            </button>
-        </form>
+    <div class="site-name">Hoos Market</div>
+    <div class="nav-links">
+        <a href="{% url 'newpost' %}">New Post</a>
+        <a href="{% url 'messaging:inbox' %}">Messages</a>
+        <a href="/myaccount/">My Account</a>
+        {% if user.is_staff %}
+            <a href="{% url 'admin_dashboard' %}">Review content</a>
+        {% endif %}
     </div>
 </nav>
 
 <div class="content">
 
-    <!-- ===================== -->
-    <!-- FLAGGED POSTS SECTION -->
-    <!-- ===================== -->
-     <div style="display:flex; gap:20px; margin-bottom:2rem;">
+    <div style="display:flex; gap:20px; margin-bottom:2rem; flex-wrap: wrap;">
         <div style="background:white; padding:1rem 1.5rem; border-radius:6px; border:1px solid #ddd;">
             <h3>Total Users</h3>
             <p style="font-size:1.2rem; font-weight:bold;">{{ total_users }}</p>
@@ -158,18 +195,17 @@
     <div class="flag-grid">
         {% for flag in flags %}
         <div class="flag-card">
-
             <div class="flag-label">🚩</div>
 
             {% if flag.post.images.first %}
                 <img class="flag-thumb"
-                    src="{{ flag.post.images.first.image.url }}"
-                    alt="Flagged Image">
+                     src="{{ flag.post.images.first.image.url }}"
+                     alt="Flagged Image">
             {% endif %}
 
             <h3 style="margin:0 0 .5rem 0;">
                 <a href="/post/{{ flag.post.id }}/"
-                style="color:#c9302c; text-decoration:none;">
+                   style="color:#c9302c; text-decoration:none;">
                     {{ flag.post.title }}
                 </a>
             </h3>
@@ -188,13 +224,13 @@
 
             <div class="admin-controls" style="margin-top:1rem;">
                 <a class="admin-btn delete"
-                href="{% url 'admin_delete_post' flag.post.id %}"
-                onclick="return confirm('Delete this flagged post?');">
+                   href="{% url 'admin_delete_post' flag.post.id %}"
+                   onclick="return confirm('Delete this flagged post?');">
                     Delete Post
                 </a>
 
                 <a class="admin-btn resolve"
-                href="{% url 'admin_resolve_flag' flag.id %}">
+                   href="{% url 'admin_resolve_flag' flag.id %}">
                     Mark Resolved
                 </a>
             </div>
@@ -202,23 +238,18 @@
         </div>
         {% endfor %}
     </div>
-
     {% else %}
         <p>No flagged posts.</p>
     {% endif %}
 
     <hr style="margin:2rem 0;">
 
-    <!-- ===================== -->
-    <!-- SUSPENDED USERS SECTION -->
-    <!-- ===================== -->
     <h2 class="section-title">Suspended Users</h2>
 
     {% if suspended_user_list %}
     <div class="flag-grid">
         {% for user in suspended_user_list %}
         <div class="flag-card" style="background:#fff7e6; border-color:#ffd9a0;">
-            
             <div class="flag-label" style="color:#e69500;">⚠️ Suspended User</div>
 
             <h3 style="margin:0 0 .5rem 0;">
@@ -239,7 +270,7 @@
 
             <div class="admin-controls" style="margin-top:1rem;">
                 <a class="admin-btn restore"
-                href="{% url 'admin_restore_user' user.id %}">
+                   href="{% url 'admin_restore_user' user.id %}">
                     Restore User
                 </a>
             </div>
@@ -251,67 +282,65 @@
         <p>No suspended users.</p>
     {% endif %}
 
-    <!-- ===================== -->
-    <!-- ALL POSTS SECTION -->
-    <!-- ===================== -->
+
     <h2 class="section-title">All Posts</h2>
 
     <div class="post-grid">
-    {% for post in posts %}
-    <div class="post-card">
+        {% for post in posts %}
+        <div class="post-card">
 
-        <h3>${{ post.price }} — {{ post.title }}</h3>
-        <p>{{ post.description }}</p>
-        <p><strong>Category:</strong> {{ post.get_category_display }}</p>
+            <h3>${{ post.price }} — {{ post.title }}</h3>
+            <p>{{ post.description }}</p>
+            <p><strong>Category:</strong> {{ post.get_category_display }}</p>
 
-        {% if post.images.all %}
-        <div style="margin:0.5rem 0;">
-            {% for img in post.images.all %}
-                <img src="{{ img.image.url }}" width="100" height="100"
-                     style="object-fit:cover; border-radius:4px; margin-right:5px;">
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <p>
-            <strong>Posted by:</strong> 
-            {{ post.user.profile.display_name }}
-            (<em>Status: {{ post.user.profile.status }}</em>)
-        </p>
-
-        <div class="admin-controls">
-
-            <a class="admin-btn"
-                style="background:#0275d8;"
-                href="{% url 'admin_flag_post' post.id %}"
-                onclick="return confirm('Flag this post for review?');">
-                    Flag Post
-            </a>
-
-            <a class="admin-btn delete"
-               href="{% url 'admin_delete_post' post.id %}"
-               onclick="return confirm('Delete this post?');">
-               Delete Post
-            </a>
-
-            {% if post.user.profile.status != 'Suspended' %}
-            <a class="admin-btn suspend"
-               href="{% url 'admin_suspend_user' post.user.id %}"
-               onclick="return confirm('Suspend this user?');">
-               Suspend User
-            </a>
-            {% else %}
-            <a class="admin-btn restore"
-               href="{% url 'admin_restore_user' post.user.id %}">
-               Restore User
-            </a>
+            {% if post.images.all %}
+            <div style="margin:0.5rem 0;">
+                {% for img in post.images.all %}
+                    <img src="{{ img.image.url }}" width="100" height="100"
+                         style="object-fit:cover; border-radius:4px; margin-right:5px;">
+                {% endfor %}
+            </div>
             {% endif %}
 
-        </div>
+            <p>
+                <strong>Posted by:</strong> 
+                {{ post.user.profile.display_name }}
+                (<em>Status: {{ post.user.profile.status }}</em>)
+            </p>
 
+            <div class="admin-controls">
+
+                <a class="admin-btn"
+                   style="background:#0275d8;"
+                   href="{% url 'admin_flag_post' post.id %}"
+                   onclick="return confirm('Flag this post for review?');">
+                    Flag Post
+                </a>
+
+                <a class="admin-btn delete"
+                   href="{% url 'admin_delete_post' post.id %}"
+                   onclick="return confirm('Delete this post?');">
+                   Delete Post
+                </a>
+
+                {% if post.user.profile.status != 'Suspended' %}
+                <a class="admin-btn suspend"
+                   href="{% url 'admin_suspend_user' post.user.id %}"
+                   onclick="return confirm('Suspend this user?');">
+                   Suspend User
+                </a>
+                {% else %}
+                <a class="admin-btn restore"
+                   href="{% url 'admin_restore_user' post.user.id %}">
+                   Restore User
+                </a>
+                {% endif %}
+
+            </div>
+
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
-</div>
 </div>
 
 </body>

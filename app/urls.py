@@ -79,9 +79,6 @@ urlpatterns = [
     # After login: promote moderators to staff & send to dashboard
     path("after-login/", views.post_login_redirect, name="post_login_redirect"),
 
-    # Admin profile page
-    path("admin-panel/profile/", views.admin_profile, name="admin_profile"),
-
     # Suspended user page
     path("suspended/", views.suspended_page_view, name="suspended_page"),
 ]

@@ -400,14 +400,6 @@ def is_admin(user):
 
 
 @admin_only
-def admin_profile(request):
-    user = request.user
-    return render(request, "admin/admin_profile.html", {
-        "user": user,
-    })
-
-
-@admin_only
 def admin_dashboard(request):
     posts = Post.objects.all().order_by("-created_at")
     flags = PostFlag.objects.select_related("post", "flagged_by").order_by("-created_at")
