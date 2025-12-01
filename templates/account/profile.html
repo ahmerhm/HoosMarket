@@ -10,10 +10,54 @@
     body {
       font-family: system-ui, sans-serif;
       background:#fafafa;
-      display:grid;
-      place-items:center;
-      height:100vh;
       margin:0;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #082d52;
+      color: white;
+      padding: 0.75rem 2rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .site-name {
+      font-size: 1.5rem;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+
+    .site-name a {
+      color: white;
+      text-decoration: none;
+    }
+
+    .site-name a:hover {
+      color: #29b1f0;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: color 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: #29b1f0;
+    }
+
+    .page-container {
+      display:flex;
+      justify-content:center;
+      padding:32px 16px;
     }
 
     .card {
@@ -24,6 +68,27 @@
       padding:32px;
       width:420px;
       box-shadow:0 2px 8px rgba(0,0,0,.05);
+    }
+
+    .card-topbar {
+      display:flex;
+      justify-content:flex-end;
+      margin-bottom:8px;
+    }
+
+    .logout-btn {
+      background:#e53e3e;
+      color:#fff;
+      border:none;
+      padding:8px 14px;
+      border-radius:8px;
+      text-decoration:none;
+      font-size:0.9rem;
+      cursor:pointer;
+    }
+
+    .logout-btn:hover {
+      background:#c53030;
     }
 
     h1 { margin-bottom:12px; font-size:22px; text-align:center; }
@@ -93,21 +158,6 @@
 
     .btn-row { margin-top:18px; display:flex; gap:.6rem; justify-content:center; }
 
-    .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom: 8px; }
-
-    .logout-btn {
-      background:#e53e3e; color:#fff; border:none;
-      padding:8px 14px; border-radius:8px; text-decoration:none;
-    }
-    .logout-btn:hover { background:#c53030; }
-    
-    .back-btn {
-      background:#f1f5f9; color:#111; border:1px solid #e2e8f0;
-      padding:8px 12px; border-radius:999px; text-decoration:none;
-      display:inline-flex; align-items:center; gap:6px;
-    }
-    .back-btn:hover { background:#e2e8f0; }
-
     .edit-link { margin-left:8px; font-size:.9rem; color:#2563eb; text-decoration:none; }
     .edit-link:hover { text-decoration:underline; }
 
@@ -121,155 +171,171 @@
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="topbar">
-      <a href="/" class="back-btn">← Back</a>
-      <a href="{% url 'account_logout' %}" class="logout-btn">Log Out</a>
-    </div>
 
-    <div class="avatar-upload">
-      <form method="post" enctype="multipart/form-data" action="{% url 'profile' %}">
-        {% csrf_token %}
-        <input type="file" name="image" id="avatar-input" accept="image/*" style="display:none;">
-        
-        <label for="avatar-input" class="avatar-preview" id="avatarPreview"
-          {% if profile.avatar %}
-          style="background-image: url('{{ profile.avatar.url }}');">
-          {% else %}
-          style="background-image: none;">
-          <span style="font-size: 3rem; opacity: 0.5;">📷</span>
-          {% endif %}
-          <span class="avatar-text" id="avatarText">
+  <nav>
+    <div class="site-name">
+      <a href="/" class="site-link">Hoos Market</a>
+    </div>
+    <div class="nav-links">
+      <a href="{% url 'newpost' %}">New Post</a>
+      <a href="{% url 'messaging:inbox' %}">Messages</a>
+      <a href="/myaccount/">My Account</a>
+      {% if user.is_staff %}
+        <a href="{% url 'admin_dashboard' %}">Review content</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <div class="page-container">
+    <div class="card">
+
+      <div class="card-topbar">
+        <a href="{% url 'account_logout' %}" class="logout-btn">Log Out</a>
+      </div>
+
+      <div class="avatar-upload">
+        <form method="post" enctype="multipart/form-data" action="{% url 'profile' %}">
+          {% csrf_token %}
+          <input type="file" name="image" id="avatar-input" accept="image/*" style="display:none;">
+          
+          <label for="avatar-input" class="avatar-preview" id="avatarPreview"
             {% if profile.avatar %}
-              Change Picture
+            style="background-image: url('{{ profile.avatar.url }}');">
             {% else %}
-              Select Picture
+            style="background-image: none;">
+            <span style="font-size: 3rem; opacity: 0.5;">📷</span>
             {% endif %}
-          </span>
-        </label>
-        
-        <button class="btn" type="submit" id="uploadBtn" style="display:none;">Upload</button>
-      </form>
-    </div>
+            <span class="avatar-text" id="avatarText">
+              {% if profile.avatar %}
+                Change Picture
+              {% else %}
+                Select Picture
+              {% endif %}
+            </span>
+          </label>
+          
+          <button class="btn" type="submit" id="uploadBtn" style="display:none;">Upload</button>
+        </form>
+      </div>
 
-    <h1>
-      Hello,
-      {% if profile.nickname %}
-        {{ profile.nickname }}
-      {% elif user.get_full_name %}
-        {{ user.get_full_name }}
-      {% else %}
-        {{ user.username }}
-      {% endif %}!
-    </h1>
-
-    <p>
-      <strong>Display name (nickname):</strong>
-      <span id="name-text">
+      <h1>
+        Hello,
         {% if profile.nickname %}
           {{ profile.nickname }}
         {% elif user.get_full_name %}
           {{ user.get_full_name }}
         {% else %}
           {{ user.username }}
-        {% endif %}
-      </span>
-      <a href="#" id="name-edit-toggle" class="edit-link">Edit</a>
-    </p>
-    <div id="name-edit-row" class="edit-row">
-      <input
-        type="text"
-        id="name-input"
-        value="{% if profile.nickname %}{{ profile.nickname }}{% elif user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}"
-        placeholder="Nickname / handle (optional)"
-        maxlength="64" />
-      <small class="muted">Max 64 characters.</small>
-      <div class="inline-actions">
-        <button class="btn" id="name-save">Save</button>
-        <button class="btn" id="name-cancel" type="button">Cancel</button>
+        {% endif %}!
+      </h1>
+
+      <p>
+        <strong>Display name (nickname):</strong>
+        <span id="name-text">
+          {% if profile.nickname %}
+            {{ profile.nickname }}
+          {% elif user.get_full_name %}
+            {{ user.get_full_name }}
+          {% else %}
+            {{ user.username }}
+          {% endif %}
+        </span>
+        <a href="#" id="name-edit-toggle" class="edit-link">Edit</a>
+      </p>
+      <div id="name-edit-row" class="edit-row">
+        <input
+          type="text"
+          id="name-input"
+          value="{% if profile.nickname %}{{ profile.nickname }}{% elif user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}"
+          placeholder="Nickname / handle (optional)"
+          maxlength="64" />
+        <small class="muted">Max 64 characters.</small>
+        <div class="inline-actions">
+          <button class="btn" id="name-save">Save</button>
+          <button class="btn" id="name-cancel" type="button">Cancel</button>
+        </div>
       </div>
-    </div>
 
-    <p><strong>Email:</strong> {{ user.email }}</p>
+      <p><strong>Email:</strong> {{ user.email }}</p>
 
-    <p>
-      <strong>Bio:</strong>
-      <span id="bio-text">
-        {% if profile and profile.bio %}
-          {{ profile.bio }}
+      <p>
+        <strong>Bio:</strong>
+        <span id="bio-text">
+          {% if profile and profile.bio %}
+            {{ profile.bio }}
+          {% else %}
+            <span class="muted">Add a short bio</span>
+          {% endif %}
+        </span>
+        <a href="#" id="bio-edit-toggle" class="edit-link">Edit</a>
+      </p>
+      <div id="bio-edit-row" class="edit-row">
+        <textarea id="bio-input" rows="3" placeholder="Write something about yourself…">{% if profile and profile.bio %}{{ profile.bio }}{% endif %}</textarea>
+        <div class="inline-actions">
+          <button class="btn" id="bio-save">Save</button>
+          <button class="btn" id="bio-cancel" type="button">Cancel</button>
+        </div>
+      </div>
+
+      <p>
+        <strong>Sustainability interests:</strong>
+        {% if profile.sustainability_interests %}
+          <ul style="margin:6px 0 0 18px; padding:0;">
+            {% for key, label in SUSTAINABILITY_CHOICES %}
+              {% if key in profile.sustainability_interests %}
+                <li>{{ label }}</li>
+              {% endif %}
+            {% endfor %}
+          </ul>
         {% else %}
-          <span class="muted">Add a short bio</span>
+          <span class="muted">Add interests to help match you with relevant activities.</span>
         {% endif %}
-      </span>
-      <a href="#" id="bio-edit-toggle" class="edit-link">Edit</a>
-    </p>
-    <div id="bio-edit-row" class="edit-row">
-      <textarea id="bio-input" rows="3" placeholder="Write something about yourself…">{% if profile and profile.bio %}{{ profile.bio }}{% endif %}</textarea>
-      <div class="inline-actions">
-        <button class="btn" id="bio-save">Save</button>
-        <button class="btn" id="bio-cancel" type="button">Cancel</button>
-      </div>
-    </div>
+      </p>
 
-    <p>
-      <strong>Sustainability interests:</strong>
-      {% if profile.sustainability_interests %}
-        <ul style="margin:6px 0 0 18px; padding:0;">
-          {% for key, label in SUSTAINABILITY_CHOICES %}
-            {% if key in profile.sustainability_interests %}
-              <li>{{ label }}</li>
-            {% endif %}
-          {% endfor %}
-        </ul>
-      {% else %}
-        <span class="muted">Add interests to help match you with relevant activities.</span>
-      {% endif %}
-    </p>
-
-    <form method="post" action="{% url 'profile' %}" style="margin-top:8px;">
-      {% csrf_token %}
-      <input type="hidden" name="action" value="update_interests">
-      <div style="display:flex; flex-direction:column; gap:4px; font-size:0.9rem; margin-bottom:8px;">
-        {% for key, label in SUSTAINABILITY_CHOICES %}
-          <label>
-            <input
-              type="checkbox"
-              name="interests"
-              value="{{ key }}"
-              {% if profile.sustainability_interests and key in profile.sustainability_interests %}checked{% endif %}
-            >
-            {{ label }}
-          </label>
-        {% endfor %}
-      </div>
-      <button type="submit" class="btn">Save interests</button>
-    </form>
-
-    <p>
-      <strong>Status:</strong>
-      {% if user.is_staff %}
-        Admin
-      {% else %}
-        Member
-      {% endif %}
-    </p>
-
-
-    <div class="btn-row">
-      <a class="btn" href="{% url 'messaging:inbox' %}">Messages</a>
-      <a class="btn" href="/myposts/">My Posts</a>
-      <form method="post" action="{% url 'delete_account' %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.')">
+      <form method="post" action="{% url 'profile' %}" style="margin-top:8px;">
         {% csrf_token %}
-        <button type="submit" class="btn" style="background:#e53e3e; color:#fff; border:none;">Delete Account</button>
+        <input type="hidden" name="action" value="update_interests">
+        <div style="display:flex; flex-direction:column; gap:4px; font-size:0.9rem; margin-bottom:8px;">
+          {% for key, label in SUSTAINABILITY_CHOICES %}
+            <label>
+              <input
+                type="checkbox"
+                name="interests"
+                value="{{ key }}"
+                {% if profile.sustainability_interests and key in profile.sustainability_interests %}checked{% endif %}
+              >
+              {{ label }}
+            </label>
+          {% endfor %}
+        </div>
+        <button type="submit" class="btn">Save interests</button>
+      </form>
+
+      <p>
+        <strong>Status:</strong>
+        {% if user.is_staff %}
+          Admin
+        {% else %}
+          Member
+        {% endif %}
+      </p>
+
+      <div class="btn-row">
+        <a class="btn" href="{% url 'messaging:inbox' %}">Messages</a>
+        <a class="btn" href="/myposts/">My Posts</a>
+        <form method="post" action="{% url 'delete_account' %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.')">
+          {% csrf_token %}
+          <button type="submit" class="btn" style="background:#e53e3e; color:#fff; border:none;">Delete Account</button>
+        </form>
+      </div>
+
+      <form id="profile-form" method="post" action="{% url 'profile' %}" style="display:none">
+        {% csrf_token %}
+        <input type="hidden" name="action" id="action-field">
+        <input type="hidden" name="nickname" id="nickname-field">
+        <textarea name="bio" id="bio-field"></textarea>
       </form>
     </div>
-
-    <form id="profile-form" method="post" action="{% url 'profile' %}" style="display:none">
-      {% csrf_token %}
-      <input type="hidden" name="action" id="action-field">
-      <input type="hidden" name="nickname" id="nickname-field">
-      <textarea name="bio" id="bio-field"></textarea>
-    </form>
   </div>
 
   <script>
@@ -313,7 +379,6 @@
     nameSave.addEventListener('click', (e) => {
       e.preventDefault();
       actionFld.value   = 'update_nickname';
-      // Hard cap at 64 chars before sending to server
       nicknameFld.value = nameInput.value.trim().slice(0, 64);
       form.submit();
     });
