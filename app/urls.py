@@ -5,7 +5,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 
-from . import views   # <-- single import from views
+from . import views   
 
 
 def root(request):
@@ -15,11 +15,8 @@ def root(request):
 
 
 urlpatterns = [
-    # --- REAL Django admin ---
     path("admin/", admin.site.urls),
 
-    # --- Custom Admin Dashboard (your admin panel) ---
-    # Accessed only by staff users; visible via "Review Content" link in the navbar.
     path("admin-panel/", views.admin_dashboard, name="admin_dashboard"),
 
     path(
@@ -38,13 +35,10 @@ urlpatterns = [
         name="admin_restore_user",
     ),
 
-    # Root -> dashboard or login
     path("", root),
 
-    # Allauth (login, signup, etc.)
     path("accounts/", include("allauth.urls")),
 
-    # Main app views
     path("dashboard/", views.dashboard, name="dashboard"),
     path("setup/", views.onboarding, name="onboarding"),
     path("myaccount/", views.profile, name="profile"),
@@ -66,7 +60,6 @@ urlpatterns = [
         name="admin_flag_post",
     ),
 
-    # Logout
     path(
         "logout/",
         auth_views.LogoutView.as_view(
@@ -75,11 +68,14 @@ urlpatterns = [
         ),
         name="logout",
     ),
+    path(
+        "admin-panel/edit-post/<int:post_id>/",
+        views.admin_edit_post,
+        name="admin_edit_post",
+    ),
 
-    # After login: promote moderators to staff & send to dashboard
     path("after-login/", views.post_login_redirect, name="post_login_redirect"),
 
-    # Suspended user page
     path("suspended/", views.suspended_page_view, name="suspended_page"),
 ]
 
