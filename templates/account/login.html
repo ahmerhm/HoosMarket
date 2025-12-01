@@ -31,38 +31,6 @@
     h1 { margin:0 0 4px; font-size:24px; }
     p.sub { margin:0 0 20px; color:var(--muted); font-size:14px; }
 
-    .field { margin:16px 0; }
-    .label { font-weight:600; display:block; margin-bottom:8px; }
-
-    .roles {
-      display:flex;
-      gap:10px;
-    }
-    .role {
-      flex:1;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      padding:10px 12px;
-      border:1px solid var(--border);
-      border-radius:10px;
-      cursor:pointer;
-      transition:border-color .15s ease, background .15s ease, box-shadow .15s ease;
-    }
-    .role input {
-      accent-color:var(--accent);
-    }
-    .role span {
-      font-weight:500;
-    }
-    .role.selected {
-      border-color:var(--accent);
-      background:#f9fafb;
-      box-shadow:0 0 0 1px rgba(15,23,42,0.04);
-    }
-
-    .muted { color:var(--muted); font-size:13px; margin-top:6px; }
-
     .btn {
       display:flex;
       align-items:center;
@@ -89,33 +57,11 @@
   <div class="wrap">
     <div class="card">
       <h1>Welcome back</h1>
-      <p class="sub">Choose your role and continue with Google.</p>
-
-      <div class="field">
-        <span class="label">Sign in as</span>
-        <div class="roles" id="roleChoices">
-          <label class="role selected">
-            <input type="radio" name="role" value="member" checked />
-            <span>Member</span>
-          </label>
-          <label class="role">
-            <input type="radio" name="role" value="admin" />
-            <span>Admin / Moderator</span>
-          </label>
-        </div>
-        <p class="muted">
-          Members go to the regular site. Admins / moderators go to the admin panel after signing in.
-        </p>
-      </div>
+      <p class="sub">Sign in with your UVA Google account to continue.</p>
 
       {% provider_login_url 'google' process='login' as google_login_url %}
-      {% url 'admin_login' as admin_login_url %}
 
-      <a id="googleBtn"
-         class="btn"
-         href="{{ google_login_url }}"
-         data-member-url="{{ google_login_url }}"
-         data-admin-url="{{ admin_login_url }}">
+      <a class="btn" href="{{ google_login_url }}">
         <svg aria-hidden="true" width="18" height="18" viewBox="0 0 533.5 544.3">
           <path d="M533.5 278.4c0-18.5-1.7-37.1-5.3-55H272v104h147.3c-6.3 34-25.7 62.8-54.6 82.1v68h88.5c51.8-47.7 80.3-118 80.3-199.1z" fill="#4285F4"/>
           <path d="M272 544.3c73.7 0 135.5-24.4 180.6-66.1l-88.5-68c-24.6 16.5-56.2 26.2-92.1 26.2-70.8 0-130.8-47.8-152.3-111.9H28.8v70.2C73.5 497.9 167.5 544.3 272 544.3z" fill="#34A853"/>
@@ -126,28 +72,5 @@
       </a>
     </div>
   </div>
-
-  <script>
-    const roleLabels = document.querySelectorAll('#roleChoices .role');
-    roleLabels.forEach(label => {
-      label.addEventListener('click', () => {
-        roleLabels.forEach(l => l.classList.remove('selected'));
-        label.classList.add('selected');
-      });
-    });
-
-    const googleBtn = document.getElementById('googleBtn');
-    googleBtn.addEventListener('click', function (e) {
-      e.preventDefault();
-      const selected = document.querySelector('input[name="role"]:checked');
-      const role = selected ? selected.value : 'member';
-
-      const memberUrl = this.dataset.memberUrl;
-      const adminUrl  = this.dataset.adminUrl;
-
-      const target = role === 'admin' ? adminUrl : memberUrl;
-      window.location.href = target;
-    });
-  </script>
 </body>
 </html>

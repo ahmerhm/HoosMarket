@@ -34,6 +34,15 @@
             letter-spacing: 0.5px;
         }
 
+        .site-name a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .site-name a:hover {
+            color: #29b1f0;
+        }
+
         .nav-links {
             display: flex;
             gap: 1.5rem;
@@ -208,11 +217,16 @@
 <body>
 
     <nav>
-        <div class="site-name">Hoos Market</div>
+        <div class="site-name">
+            <a href="/" class="site-link">Hoos Market</a>
+        </div>
         <div class="nav-links">
             <a href="{% url 'newpost' %}">New Post</a>
             <a href="{% url 'messaging:inbox' %}">Messages</a>
             <a href="/myaccount/">My Account</a>
+            {% if user.is_staff %}
+                <a href="{% url 'admin_dashboard' %}">Review content</a>
+            {% endif %}
         </div>
     </nav>
 

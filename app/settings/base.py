@@ -161,7 +161,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MODERATOR_EMAILS = [
     e.strip().lower()
-    for e in os.environ.get("MODERATOR_EMAILS", "").split(",")
+    for e in config("MODERATOR_EMAILS", default="").split(",")
     if e.strip()
 ]
 

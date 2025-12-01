@@ -1,4 +1,5 @@
 from .base import *
+import os
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-c56)3yn9)i#+^i7p)a49e+pphfiw9rogzys=@bx)_jpis1n%9n"
