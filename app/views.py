@@ -403,7 +403,8 @@ def admin_edit_post(request, post_id):
 def admin_resolve_flag(request, flag_id):
     flag = get_object_or_404(PostFlag, id=flag_id)
     flag.resolved = True
-    flag.save()
+    flag.save(update_fields=["resolved"])
+    messages.success(request, "Flag has been marked as resolved.")
     return redirect("admin_dashboard")
 
 
@@ -430,18 +431,24 @@ def is_admin(user):
 @admin_only
 def admin_dashboard(request):
     posts = Post.objects.all().order_by("-created_at")
-    flags = PostFlag.objects.select_related("post", "flagged_by").order_by("-created_at")
+
+    unresolved_flags = (
+        PostFlag.objects
+        .filter(resolved=False)
+        .select_related("post", "flagged_by")
+        .order_by("-created_at")
+    )
 
     total_users = User.objects.count()
     suspended_users = User.objects.filter(profile__status="Suspended").count()
     total_posts = Post.objects.count()
-    flagged_posts = flags.count()
+    flagged_posts = unresolved_flags.count() 
 
     suspended_user_list = User.objects.filter(profile__status="Suspended")
 
     return render(request, "admin/admin_dashboard.html", {
         "posts": posts,
-        "flags": flags,
+        "flags": unresolved_flags,         
         "total_users": total_users,
         "suspended_users": suspended_users,
         "total_posts": total_posts,
