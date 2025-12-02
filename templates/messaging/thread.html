@@ -141,11 +141,25 @@
              · {{ m.created_at|date:"M j, H:i" }}
           </div>
           <div>{{ m.text|linebreaksbr }}</div>
+
+          {% if m.sender_id != request.user.id %}
+            <form method="post"
+                  action="{% url 'messaging:flag_message' m.id %}"
+                  style="margin-top:.3rem;text-align:right;">
+              {% csrf_token %}
+              <button type="submit"
+                      style="border:none;background:none;color:#d9534f;font-size:.8rem;cursor:pointer;"
+                      onclick="return confirm('Flag this message as inappropriate?');">
+                🚩 Flag
+              </button>
+            </form>
+          {% endif %}
         </div>
       {% empty %}
         <p>No messages yet. Say hi!</p>
       {% endfor %}
     </div>
+
 
     <form method="post">{% csrf_token %}
       {{ form.text }}

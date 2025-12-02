@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Message</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; background:#f8f9fa; margin:0; }
+    nav {
+      display:flex;align-items:center;justify-content:space-between;
+      background:#082d52;color:#fff;padding:.75rem 2rem;
+      box-shadow:0 2px 5px rgba(0,0,0,.2);
+    }
+    .site-name a { color:#fff; text-decoration:none; font-weight:bold; font-size:1.3rem; }
+    .content { max-width:800px; margin:2rem auto; background:#fff; padding:1.5rem; border-radius:6px; border:1px solid #ddd; }
+    label { display:block; font-weight:bold; margin-bottom:.35rem; }
+    textarea { width:100%; min-height:120px; padding:.5rem; border:1px solid #ccc; border-radius:4px; }
+    button { margin-top:1rem; background:#082d52; color:#fff; border:none; border-radius:4px; padding:.5rem 1rem; cursor:pointer; }
+    button:hover { background:#0a3a6d; }
+    .meta { font-size:.9rem; color:#666; margin-bottom:.75rem; }
+  </style>
+</head>
+<body>
+<nav>
+  <div class="site-name">
+    <a href="/" class="site-link">Hoos Market</a>
+  </div>
+  <div>
+    <a href="{% url 'admin_dashboard' %}" style="color:#fff;text-decoration:none;">← Back to Admin Dashboard</a>
+  </div>
+</nav>
+
+<div class="content">
+  <h2>Edit Message</h2>
+
+  <p class="meta">
+    <strong>Sender:</strong>
+    {% if message.sender %}
+      {{ message.sender.profile.display_name }} ({{ message.sender.username }})
+    {% else %}
+      [deleted user]
+    {% endif %}
+    <br>
+    <strong>Sent at:</strong> {{ message.created_at }}
+  </p>
+
+  <form method="post">
+    {% csrf_token %}
+    <label for="id_text">Message text</label>
+    <textarea id="id_text" name="text">{{ message.text }}</textarea>
+    <button type="submit">Save</button>
+  </form>
+</div>
+</body>
+</html>
