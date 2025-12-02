@@ -212,6 +212,17 @@
             display: flex;
             flex-direction: column;
         }
+
+        .post,
+        .post p,
+        .post h3,
+        .post span,
+        .post-category {
+            overflow-wrap: anywhere;
+            word-wrap: break-word;
+            word-break: break-word;
+            white-space: normal;
+        }
     </style>
 </head>
 <body>
@@ -231,7 +242,6 @@
     </nav>
 
 <div class="content">
-    <!-- One form handles BOTH search + category filter -->
     <form method="get" id="filterForm">
         <div class="filters-row">
             <div class="field">
