@@ -91,7 +91,15 @@
       background:#c53030;
     }
 
-    h1 { margin-bottom:12px; font-size:22px; text-align:center; }
+    h1 {
+      margin-bottom:12px;
+      font-size:22px;
+      text-align:center;
+      overflow-wrap:anywhere;
+      word-wrap:break-word;
+      word-break:break-word;
+    }
+
     p  { margin:10px 0; }
 
     .avatar {
@@ -168,6 +176,15 @@
     }
     .muted { color:#666; }
     .inline-actions { display:flex; gap:8px; margin-top:8px; }
+
+    #name-text{
+      display:inline-block;
+      max-width:100%;
+      overflow-wrap:anywhere;
+      word-wrap:break-word;
+      word-break:break-word;
+      white-space:normal;
+    }
 
     #bio-text{
       display:inline-block;
