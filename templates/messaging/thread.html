@@ -48,11 +48,14 @@
 </head>
 <body>
   <nav>
-    <a href="/dashboard/" class="site-name">Hoos Market</a>
+    <a href="/" class="site-name">Hoos Market</a>
     <div class="nav-links">
-      <a href="/posts/">Posts</a>
+      <a href="{% url 'newpost' %}">New Post</a>
       <a href="{% url 'messaging:inbox' %}">Messages</a>
       <a href="/myaccount/">My Account</a>
+      {% if user.is_staff %}
+        <a href="{% url 'admin_dashboard' %}">Review content</a>
+      {% endif %}
     </div>
   </nav>
 
@@ -159,7 +162,6 @@
         <p>No messages yet. Say hi!</p>
       {% endfor %}
     </div>
-
 
     <form method="post">{% csrf_token %}
       {{ form.text }}
