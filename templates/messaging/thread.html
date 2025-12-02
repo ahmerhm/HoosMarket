@@ -26,6 +26,14 @@
     .me{background:#e8f4ff;margin-left:auto}
     .them{background:#f3f4f6;margin-right:auto}
     .meta{font-size:.78rem;color:#667085;margin-bottom:.3rem}
+
+    .bubble-text{
+      overflow-wrap:anywhere;
+      word-wrap:break-word;
+      word-break:break-word;
+      white-space:pre-wrap;
+    }
+
     form{display:flex;gap:.5rem;padding:.75rem;border-top:1px solid #eef2f7;background:#fff}
     textarea{flex:1;padding:.6rem;border:1px solid #e5e7eb;border-radius:10px;resize:vertical}
     button[type="submit"]{background:var(--ink);color:#fff;border:none;border-radius:10px;padding:.6rem .9rem;cursor:pointer}
@@ -48,16 +56,18 @@
 </head>
 <body>
   <nav>
-    <a href="/dashboard/" class="site-name">Hoos Market</a>
+    <a href="/" class="site-name">Hoos Market</a>
     <div class="nav-links">
-      <a href="/posts/">Posts</a>
+      <a href="{% url 'newpost' %}">New Post</a>
       <a href="{% url 'messaging:inbox' %}">Messages</a>
       <a href="/myaccount/">My Account</a>
+      {% if user.is_staff %}
+        <a href="{% url 'admin_dashboard' %}">Review content</a>
+      {% endif %}
     </div>
   </nav>
 
   <div class="chat">
-    <!-- Conversation header -->
     <div class="chat-head">
       <a class="back" href="{% url 'messaging:inbox' %}">← Inbox</a>
       <div class="avatar">
@@ -140,7 +150,20 @@
             {% endif %}
              · {{ m.created_at|date:"M j, H:i" }}
           </div>
-          <div>{{ m.text|linebreaksbr }}</div>
+          <div class="bubble-text">{{ m.text|linebreaksbr }}</div>
+
+          {% if m.sender_id != request.user.id %}
+            <form method="post"
+                  action="{% url 'messaging:flag_message' m.id %}"
+                  style="margin-top:.3rem;text-align:right;">
+              {% csrf_token %}
+              <button type="submit"
+                      style="border:none;background:none;color:#d9534f;font-size:.8rem;cursor:pointer;"
+                      onclick="return confirm('Flag this message as inappropriate?');">
+                🚩 Flag
+              </button>
+            </form>
+          {% endif %}
         </div>
       {% empty %}
         <p>No messages yet. Say hi!</p>

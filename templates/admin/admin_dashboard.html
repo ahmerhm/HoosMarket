@@ -73,6 +73,20 @@
             border-radius:6px;
         }
 
+        .post-card,
+        .post-card p,
+        .post-card h3,
+        .post-card span,
+        .flag-card,
+        .flag-card p,
+        .flag-card h3,
+        .flag-card span {
+            overflow-wrap: anywhere;
+            word-wrap: break-word;
+            word-break: break-word;
+            white-space: normal;
+        }
+
         .post-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -199,6 +213,11 @@
             <h3>Flagged Posts</h3>
             <p style="font-size:1.2rem; font-weight:bold;">{{ flagged_posts }}</p>
         </div>
+
+        <div style="background:white; padding:1rem 1.5rem; border-radius:6px; border:1px solid #ddd;">
+            <h3>Flagged Messages</h3>
+            <p style="font-size:1.2rem; font-weight:bold;">{{ flagged_message_count }}</p>
+        </div>
     </div>
     <h2 class="section-title">Flagged Posts</h2>
 
@@ -276,6 +295,100 @@
 
     <hr style="margin:2rem 0;">
 
+    <h2 class="section-title">Flagged Messages</h2>
+
+    {% if message_flags %}
+      <div class="flag-grid">
+        {% for mflag in message_flags %}
+          <div class="flag-card">
+            <div class="flag-label">🚩 Message</div>
+
+            <p style="font-size:.9rem; margin-bottom:.3rem;">
+              <strong>Sender:</strong>
+              {% if mflag.message.sender %}
+                {% with prof=mflag.message.sender.profile %}
+                  {% if prof.nickname %}
+                    {{ prof.nickname }}
+                  {% elif mflag.message.sender.get_full_name %}
+                    {{ mflag.message.sender.get_full_name }}
+                  {% else %}
+                    {{ mflag.message.sender.username }}
+                  {% endif %}
+                {% endwith %}
+              {% else %}
+                (user deleted)
+              {% endif %}
+            </p>
+
+            <p style="font-size:.9rem; margin-bottom:.3rem;">
+              <strong>Thread:</strong>
+              {% if mflag.message.thread.is_group %}
+                Group: {{ mflag.message.thread.name|default:"(unnamed group)" }}
+              {% else %}
+                Direct message thread #{{ mflag.message.thread.id }}
+              {% endif %}
+            </p>
+
+            <p style="font-size:.9rem; margin-bottom:.4rem;">
+              <strong>Message:</strong><br>
+              {{ mflag.message.text|linebreaksbr }}
+            </p>
+
+            <p style="font-size:.9rem; margin-bottom:.3rem;">
+              <strong>Flagged by:</strong> {{ mflag.flagged_by.username }}
+            </p>
+
+            <p style="font-size:.9rem; margin-bottom:.3rem;">
+              <strong>Reason:</strong> {{ mflag.reason|default:"User flagged this message" }}
+            </p>
+
+            <p style="font-size:.85rem; color:#666;">
+              {{ mflag.created_at }}
+            </p>
+
+            <div class="admin-controls" style="margin-top:1rem; display:flex; flex-wrap:wrap; gap:0.4rem;">
+              <a class="admin-btn"
+                 style="background:#5bc0de;"
+                 href="{% url 'messaging:admin_edit_message' mflag.message.id %}">
+                Edit Message
+              </a>
+
+              <a class="admin-btn delete"
+                 href="{% url 'messaging:admin_delete_message' mflag.message.id %}"
+                 onclick="return confirm('Delete this message?');">
+                Delete Message
+              </a>
+
+              {% if mflag.message.sender %}
+                {% if mflag.message.sender.profile.status != 'Suspended' %}
+                  <a class="admin-btn suspend"
+                     href="{% url 'admin_suspend_user' mflag.message.sender.id %}"
+                     onclick="return confirm('Suspend this user?');">
+                    Suspend User
+                  </a>
+                {% else %}
+                  <a class="admin-btn restore"
+                     href="{% url 'admin_restore_user' mflag.message.sender.id %}">
+                    Restore User
+                  </a>
+                {% endif %}
+              {% endif %}
+
+              <a class="admin-btn resolve"
+                 href="{% url 'messaging:admin_resolve_message_flag' mflag.id %}">
+                Mark Resolved
+              </a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>No flagged messages.</p>
+    {% endif %}
+
+
+    <hr style="margin:2rem 0;">
+
     <h2 class="section-title">Suspended Users</h2>
 
     {% if suspended_user_list %}
@@ -289,10 +402,6 @@
             </h3>
 
             <p style="font-size:.9rem; margin-bottom:.4rem;">
-                <strong>Username:</strong> {{ user.username }}
-            </p>
-
-            <p style="font-size:.9rem; margin-bottom:.4rem;">
                 <strong>Email:</strong> {{ user.email }}
             </p>
 
@@ -302,7 +411,7 @@
 
             <div class="admin-controls" style="margin-top:1rem;">
                 <a class="admin-btn restore"
-                   href="{% url 'admin_restore_user' user.id %}">
+                href="{% url 'admin_restore_user' user.id %}">
                     Restore User
                 </a>
             </div>
