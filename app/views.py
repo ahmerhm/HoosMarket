@@ -475,42 +475,42 @@ def is_admin(user):
 def admin_dashboard(request):
     posts = Post.objects.all().order_by("-created_at")
 
-    flagged_posts_qs = (
-        Post.objects
-        .filter(flags__resolved=False)
-        .distinct()
-        .prefetch_related(
-            "images",
-            "flags__flagged_by__profile",
-            "user__profile",
-        )
-        .order_by("-flags__created_at")
+    unresolved_flags_qs = (
+        PostFlag.objects
+        .filter(resolved=False)
+        .select_related("post", "post__user__profile", "flagged_by__profile")
+        .order_by("-created_at")
     )
 
-    flagged_posts_list = []
-    for post in flagged_posts_qs:
-        unresolved_flags = [f for f in post.flags.all() if not f.resolved]
-        if not unresolved_flags:
-            continue
+    flagged_posts_by_id = {}
 
-        flaggers = []
-        seen = set()
-        for f in unresolved_flags:
-            u = f.flagged_by
-            display = getattr(getattr(u, "profile", None), "display_name", None) or u.username
-            if display not in seen:
-                seen.add(display)
-                flaggers.append(display)
+    for flag in unresolved_flags_qs:
+        post = flag.post
 
-        latest_flag = max(unresolved_flags, key=lambda f: f.created_at)
+        display = (
+            getattr(getattr(flag.flagged_by, "profile", None), "display_name", None)
+            or flag.flagged_by.username
+        )
 
-        flagged_posts_list.append({
-            "post": post,
-            "flaggers": flaggers,
-            "reason": latest_flag.reason,
-            "latest_flag": latest_flag,
-            "first_flag_id": unresolved_flags[0].id,  
-        })
+        if post.id not in flagged_posts_by_id:
+            flagged_posts_by_id[post.id] = {
+                "post": post,
+                "flaggers": [],
+                "reason": flag.reason,
+                "latest_flag": flag,
+                "first_flag_id": flag.id,  
+            }
+
+        entry = flagged_posts_by_id[post.id]
+
+        if display not in entry["flaggers"]:
+            entry["flaggers"].append(display)
+
+        if flag.created_at > entry["latest_flag"].created_at:
+            entry["latest_flag"] = flag
+
+    flagged_posts_list = list(flagged_posts_by_id.values())
+
     unresolved_message_flags = (
         MessageFlag.objects
         .filter(resolved=False)
@@ -538,7 +538,7 @@ def admin_dashboard(request):
         "total_users": total_users,
         "suspended_users": suspended_users,
         "total_posts": total_posts,
-        "flagged_posts": flagged_posts_count,
+        "flagged_posts": flagged_posts_count,    
         "flagged_message_count": flagged_message_count,
         "suspended_user_list": suspended_user_list,
     })
