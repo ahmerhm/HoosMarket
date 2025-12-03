@@ -54,7 +54,6 @@ def is_moderator_email(email: str) -> bool:
     return email.strip().lower() in allowed
 
 
-
 SUSTAINABILITY_CHOICES = [
     ("zero_waste", "Zero-waste & circular economy"),
     ("food", "Sustainable food & agriculture"),
@@ -325,7 +324,6 @@ def post_login_redirect(request):
     return redirect("dashboard")
 
 
-
 @login_required
 def flag_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
@@ -459,12 +457,11 @@ def admin_delete_message(request, message_id):
 @admin_only
 def admin_resolve_message_flag(request, flag_id):
     """
-    Mark a message flag as resolved (message may still remain).
+    Mark all unresolved flags for the same message as resolved.
     """
     flag = get_object_or_404(MessageFlag, id=flag_id)
-    flag.resolved = True
-    flag.save(update_fields=["resolved"])
-    messages.success(request, "Message flag has been marked as resolved.")
+    MessageFlag.objects.filter(message=flag.message, resolved=False).update(resolved=True)
+    messages.success(request, "All flags for this message have been marked as resolved.")
     return redirect("admin_dashboard")
 
 def is_admin(user):
@@ -498,7 +495,7 @@ def admin_dashboard(request):
                 "flaggers": [],
                 "reason": flag.reason,
                 "latest_flag": flag,
-                "first_flag_id": flag.id,  
+                "first_flag_id": flag.id,
             }
 
         entry = flagged_posts_by_id[post.id]
@@ -508,41 +505,71 @@ def admin_dashboard(request):
 
         if flag.created_at > entry["latest_flag"].created_at:
             entry["latest_flag"] = flag
+            entry["reason"] = flag.reason
 
     flagged_posts_list = list(flagged_posts_by_id.values())
 
-    unresolved_message_flags = (
+    unresolved_message_flags_qs = (
         MessageFlag.objects
         .filter(resolved=False)
         .select_related(
             "message",
-            "message__sender",
+            "message__sender__profile",
             "message__thread",
-            "flagged_by",
+            "flagged_by__profile",
         )
         .order_by("-created_at")
     )
+
+    message_flags_by_message = {}
+
+    for flag in unresolved_message_flags_qs:
+        msg = flag.message
+
+        display = (
+            getattr(getattr(flag.flagged_by, "profile", None), "display_name", None)
+            or flag.flagged_by.username
+        )
+
+        if msg.id not in message_flags_by_message:
+            message_flags_by_message[msg.id] = {
+                "message": msg,
+                "flaggers": [],
+                "reason": flag.reason,
+                "latest_flag": flag,
+                "first_flag_id": flag.id,
+            }
+
+        entry = message_flags_by_message[msg.id]
+
+        if display not in entry["flaggers"]:
+            entry["flaggers"].append(display)
+
+        if flag.created_at > entry["latest_flag"].created_at:
+            entry["latest_flag"] = flag
+            entry["reason"] = flag.reason
+
+    message_flags_list = list(message_flags_by_message.values())
 
     total_users = User.objects.count()
     suspended_users = User.objects.filter(profile__status="Suspended").count()
     total_posts = Post.objects.count()
     flagged_posts_count = len(flagged_posts_list)
-    flagged_message_count = unresolved_message_flags.count()
+    flagged_message_count = len(message_flags_list)
 
     suspended_user_list = User.objects.filter(profile__status="Suspended")
 
     return render(request, "admin/admin_dashboard.html", {
         "posts": posts,
         "flagged_posts_list": flagged_posts_list,
-        "message_flags": unresolved_message_flags,
+        "message_flags_list": message_flags_list,
         "total_users": total_users,
         "suspended_users": suspended_users,
         "total_posts": total_posts,
-        "flagged_posts": flagged_posts_count,    
+        "flagged_posts": flagged_posts_count,
         "flagged_message_count": flagged_message_count,
         "suspended_user_list": suspended_user_list,
     })
-
 
 
 def suspended_page_view(request):
