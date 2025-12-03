@@ -107,6 +107,24 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Msg {self.pk} by {self.sender}"
+    
+class MessageFlag(models.Model):
+    message = models.ForeignKey(
+        Message,
+        on_delete=models.CASCADE,
+        related_name="flags",
+    )
+    flagged_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="message_flags",
+    )
+    reason = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+    resolved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Flag on msg {self.message_id} by {self.flagged_by}"
 
 
 class ThreadRead(models.Model):

@@ -4,6 +4,7 @@ from django.shortcuts import redirect
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+from app import views as app_views
 
 from . import views   
 
@@ -48,6 +49,9 @@ urlpatterns = [
     path("myposts/", views.my_posts, name="myposts"),
     path("deletepost/", views.delete_post, name="delete_post"),
     path("flagpost/<int:post_id>/", views.flag_post, name="flag_post"),
+    path("admin/messages/<int:message_id>/edit/", app_views.admin_edit_message, name="admin_edit_message"),
+    path("admin/messages/<int:message_id>/delete/", app_views.admin_delete_message, name="admin_delete_message"),
+    path("admin/messages/flags/<int:flag_id>/resolve/", app_views.admin_resolve_message_flag, name="admin_resolve_message_flag"),
 
     path(
         "admin-panel/resolve-flag/<int:flag_id>/",

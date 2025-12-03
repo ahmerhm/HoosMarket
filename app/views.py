@@ -21,6 +21,7 @@ except Exception:
 from .models import Profile, Post, PostImages, PostFlag
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import get_user_model
+from messaging.models import Message, MessageFlag
 
 User = get_user_model()
 
@@ -426,6 +427,45 @@ def admin_flag_post(request, post_id):
     )
     return redirect("admin_dashboard")
 
+@admin_only
+def admin_edit_message(request, message_id):
+    """
+    Admin can edit the text of a flagged (or any) message.
+    """
+    message = get_object_or_404(Message, id=message_id)
+
+    if request.method == "POST":
+        text = (request.POST.get("text") or "").strip()
+        if not text:
+            messages.error(request, "Message text cannot be empty.")
+        else:
+            message.text = text
+            message.save(update_fields=["text"])
+            messages.success(request, "Message updated successfully.")
+            return redirect("admin_dashboard")
+
+    return render(request, "admin/edit_message.html", {"message": message})
+
+@admin_only
+def admin_delete_message(request, message_id):
+    """
+    Admins can delete a message from the admin panel.
+    """
+    message = get_object_or_404(Message, id=message_id)
+    message.delete()
+    messages.success(request, "Message deleted.")
+    return redirect("admin_dashboard")
+
+@admin_only
+def admin_resolve_message_flag(request, flag_id):
+    """
+    Mark a message flag as resolved (message may still remain).
+    """
+    flag = get_object_or_404(MessageFlag, id=flag_id)
+    flag.resolved = True
+    flag.save(update_fields=["resolved"])
+    messages.success(request, "Message flag has been marked as resolved.")
+    return redirect("admin_dashboard")
 
 def is_admin(user):
     return user.is_staff or user.is_superuser
@@ -471,11 +511,24 @@ def admin_dashboard(request):
             "latest_flag": latest_flag,
             "first_flag_id": unresolved_flags[0].id,  
         })
+    unresolved_message_flags = (
+        MessageFlag.objects
+        .filter(resolved=False)
+        .select_related(
+            "message",
+            "message__sender",
+            "message__thread",
+            "flagged_by",
+        )
+        .order_by("-created_at")
+    )
 
     total_users = User.objects.count()
     suspended_users = User.objects.filter(profile__status="Suspended").count()
     total_posts = Post.objects.count()
     flagged_posts_count = len(flagged_posts_list)  
+    flagged_posts = unresolved_flags.count()
+    flagged_message_count = unresolved_message_flags.count()
 
     suspended_user_list = User.objects.filter(profile__status="Suspended")
 
@@ -486,8 +539,16 @@ def admin_dashboard(request):
         "suspended_users": suspended_users,
         "total_posts": total_posts,
         "flagged_posts": flagged_posts_count,     
+        "flags": unresolved_flags,
+        "message_flags": unresolved_message_flags, 
+        "total_users": total_users,
+        "suspended_users": suspended_users,
+        "total_posts": total_posts,
+        "flagged_posts": flagged_posts,
+        "flagged_message_count": flagged_message_count,
         "suspended_user_list": suspended_user_list,
     })
+
 
 
 def suspended_page_view(request):

@@ -4,9 +4,13 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.http import Http404
 from django.views.decorators.http import require_POST
 from django.utils import timezone
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib import messages as django_messages
 
 from .models import Thread, Message, ThreadRead
+from .models import MessageFlag
 from .forms import MessageForm, GroupCreateForm  
+from app.models import Profile
 
 User = get_user_model()
 
@@ -191,3 +195,84 @@ def thread_detail(request, thread_id):
         'other': other,
         'title': page_title,
     })
+
+@login_required
+@require_POST
+def flag_message(request, message_id):
+    """
+    Regular users (participants in the thread) can flag a specific message.
+    """
+    message = get_object_or_404(
+        Message.objects.select_related("thread", "sender"),
+        pk=message_id,
+    )
+
+    # Only participants in the thread can flag
+    if not message.thread.participants.filter(pk=request.user.pk).exists():
+        raise Http404()
+
+    # Don't let users flag their own messages (optional, mirroring posts)
+    if message.sender_id == request.user.id:
+        return redirect("messaging:thread", thread_id=message.thread_id)
+
+    existing = MessageFlag.objects.filter(
+        message=message,
+        flagged_by=request.user,
+        resolved=False,
+    )
+    if existing.exists():
+        return redirect("messaging:thread", thread_id=message.thread_id)
+
+    reason = (request.POST.get("reason") or "User flagged this message").strip()
+    MessageFlag.objects.create(
+        message=message,
+        flagged_by=request.user,
+        reason=reason,
+    )
+    return redirect("messaging:thread", thread_id=message.thread_id)
+
+
+@staff_member_required
+def admin_edit_message(request, message_id):
+    """
+    Admin view to edit the text of a message.
+    """
+    message = get_object_or_404(
+        Message.objects.select_related("thread", "sender"),
+        pk=message_id,
+    )
+
+    if request.method == "POST":
+        new_text = (request.POST.get("text") or "").strip()
+        if not new_text:
+            django_messages.error(request, "Message text cannot be empty.")
+        else:
+            message.text = new_text
+            message.save(update_fields=["text"])
+            django_messages.success(request, "Message updated successfully.")
+            return redirect("admin_dashboard")
+
+    return render(request, "admin/edit_message.html", {"message": message})
+
+
+@staff_member_required
+def admin_delete_message(request, message_id):
+    """
+    Admin view to delete a message.
+    """
+    message = get_object_or_404(Message, pk=message_id)
+    message.delete()
+    django_messages.success(request, "Message deleted.")
+    return redirect("admin_dashboard")
+
+
+@staff_member_required
+def admin_resolve_message_flag(request, flag_id):
+    """
+    Mark a MessageFlag as resolved.
+    """
+    flag = get_object_or_404(MessageFlag, pk=flag_id)
+    flag.resolved = True
+    flag.save(update_fields=["resolved"])
+    django_messages.success(request, "Message flag marked as resolved.")
+    return redirect("admin_dashboard")
