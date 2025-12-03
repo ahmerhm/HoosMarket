@@ -526,25 +526,19 @@ def admin_dashboard(request):
     total_users = User.objects.count()
     suspended_users = User.objects.filter(profile__status="Suspended").count()
     total_posts = Post.objects.count()
-    flagged_posts_count = len(flagged_posts_list)  
-    flagged_posts = unresolved_flags.count()
+    flagged_posts_count = len(flagged_posts_list)
     flagged_message_count = unresolved_message_flags.count()
 
     suspended_user_list = User.objects.filter(profile__status="Suspended")
 
     return render(request, "admin/admin_dashboard.html", {
         "posts": posts,
-        "flagged_posts_list": flagged_posts_list,  
+        "flagged_posts_list": flagged_posts_list,
+        "message_flags": unresolved_message_flags,
         "total_users": total_users,
         "suspended_users": suspended_users,
         "total_posts": total_posts,
-        "flagged_posts": flagged_posts_count,     
-        "flags": unresolved_flags,
-        "message_flags": unresolved_message_flags, 
-        "total_users": total_users,
-        "suspended_users": suspended_users,
-        "total_posts": total_posts,
-        "flagged_posts": flagged_posts,
+        "flagged_posts": flagged_posts_count,
         "flagged_message_count": flagged_message_count,
         "suspended_user_list": suspended_user_list,
     })
