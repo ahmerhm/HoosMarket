@@ -1,4 +1,4 @@
-{% load static %}
+{% load static tz %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -226,73 +226,86 @@
         {% for item in flagged_posts_list %}
         {% with post=item.post %}
         <div class="flag-card">
-            <div class="flag-label">🚩</div>
-
-            {% if post.images.first %}
-                <img class="flag-thumb"
-                     src="{{ post.images.first.image.url }}"
-                     alt="Flagged Image">
-            {% endif %}
+            <div class="flag-label">🚩 Flagged Post</div>
 
             <h3 style="margin:0 0 .5rem 0;">
-                <a href="/post/{{ post.id }}/"
-                   style="color:#c9302c; text-decoration:none;">
-                    {{ post.title }}
-                </a>
+            ${{ post.price }} — {{ post.title }}
             </h3>
 
-            <p style="font-size:.9rem; margin-bottom:.4rem;">
-                <strong>Flagged by:</strong>
-                {{ item.flaggers|join:", " }}
+            <p>{{ post.description }}</p>
+
+            <p><strong>Category:</strong> {{ post.get_category_display }}</p>
+
+            {% if post.images.all %}
+            <div style="margin:0.5rem 0;">
+                {% for img in post.images.all %}
+                <img src="{{ img.image.url }}"
+                    width="100" height="100"
+                    style="object-fit:contain; border-radius:4px; margin-right:5px; background:#f0f0f0;">
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <p>
+            <strong>Posted by:</strong>
+            {{ post.user.profile.display_name }}
+            (<em>Status: {{ post.user.profile.status }}</em>)
             </p>
 
             <p style="font-size:.9rem; margin-bottom:.4rem;">
-                <strong>Reason:</strong> {{ item.reason }}
+            <strong>Flagged by:</strong>
+            {{ item.flaggers|join:", " }}
+            </p>
+
+            <p style="font-size:.9rem; margin-bottom:.4rem;">
+            <strong>Reason:</strong> {{ item.reason }}
             </p>
 
             <p style="font-size:.85rem; color:#666;">
-                {{ item.latest_flag.created_at }}
+            {% localtime on %}
+                {{ item.latest_flag.created_at|date:"M j, Y, H:i" }}
+            {% endlocaltime %}
             </p>
 
-            <div class="admin-controls" style="margin-top:1rem; display:flex; flex-wrap:wrap; gap:0.4rem;">
+            <div class="admin-controls"
+                style="margin-top:1rem; display:flex; flex-wrap:wrap; gap:0.4rem;">
 
-                <a class="admin-btn"
-                   style="background:#5bc0de;"
-                   href="{% url 'admin_edit_post' post.id %}">
-                    Edit Post
+            <a class="admin-btn"
+                style="background:#5bc0de;"
+                href="{% url 'admin_edit_post' post.id %}">
+                Edit Post
+            </a>
+
+            <a class="admin-btn delete"
+                href="{% url 'admin_delete_post' post.id %}"
+                onclick="return confirm('Delete this flagged post?');">
+                Delete Post
+            </a>
+
+            {% if post.user.profile.status != 'Suspended' %}
+                <a class="admin-btn suspend"
+                href="{% url 'admin_suspend_user' post.user.id %}"
+                onclick="return confirm('Suspend this user?');">
+                Suspend User
                 </a>
-
-                <a class="admin-btn delete"
-                   href="{% url 'admin_delete_post' post.id %}"
-                   onclick="return confirm('Delete this flagged post?');">
-                    Delete Post
+            {% else %}
+                <a class="admin-btn restore"
+                href="{% url 'admin_restore_user' post.user.id %}">
+                Restore User
                 </a>
+            {% endif %}
 
-                {% if post.user.profile.status != 'Suspended' %}
-                    <a class="admin-btn suspend"
-                       href="{% url 'admin_suspend_user' post.user.id %}"
-                       onclick="return confirm('Suspend this user?');">
-                        Suspend User
-                    </a>
-                {% else %}
-                    <a class="admin-btn restore"
-                       href="{% url 'admin_restore_user' post.user.id %}">
-                        Restore User
-                    </a>
-                {% endif %}
-
-                {# Mark Resolved uses first_flag_id; view will resolve all flags for this post #}
-                <a class="admin-btn resolve"
-                   href="{% url 'admin_resolve_flag' item.first_flag_id %}">
-                    Mark Resolved
-                </a>
+            <a class="admin-btn resolve"
+                href="{% url 'admin_resolve_flag' item.first_flag_id %}">
+                Mark Resolved
+            </a>
             </div>
         </div>
         {% endwith %}
         {% endfor %}
     </div>
     {% else %}
-        <p>No flagged posts.</p>
+    <p>No flagged posts.</p>
     {% endif %}
 
     <hr style="margin:2rem 0;">
@@ -347,7 +360,9 @@
             </p>
 
             <p style="font-size:.85rem; color:#666;">
-                {{ item.latest_flag.created_at }}
+                {% localtime on %}
+                {{ item.latest_flag.created_at|date:"M j, Y, H:i" }}
+                {% endlocaltime %}
             </p>
 
             <div class="admin-controls" style="margin-top:1rem; display:flex; flex-wrap:wrap; gap:0.4rem;">
