@@ -402,10 +402,13 @@ def admin_edit_post(request, post_id):
 
 @admin_only
 def admin_resolve_flag(request, flag_id):
+    """
+    Mark all unresolved flags for the same post as resolved.
+    (Called with any single flag_id from that post.)
+    """
     flag = get_object_or_404(PostFlag, id=flag_id)
-    flag.resolved = True
-    flag.save(update_fields=["resolved"])
-    messages.success(request, "Flag has been marked as resolved.")
+    PostFlag.objects.filter(post=flag.post, resolved=False).update(resolved=True)
+    messages.success(request, "All flags for this post have been marked as resolved.")
     return redirect("admin_dashboard")
 
 
@@ -472,13 +475,42 @@ def is_admin(user):
 def admin_dashboard(request):
     posts = Post.objects.all().order_by("-created_at")
 
-    unresolved_flags = (
-        PostFlag.objects
-        .filter(resolved=False)
-        .select_related("post", "flagged_by")
-        .order_by("-created_at")
+    flagged_posts_qs = (
+        Post.objects
+        .filter(flags__resolved=False)
+        .distinct()
+        .prefetch_related(
+            "images",
+            "flags__flagged_by__profile",
+            "user__profile",
+        )
+        .order_by("-flags__created_at")
     )
 
+    flagged_posts_list = []
+    for post in flagged_posts_qs:
+        unresolved_flags = [f for f in post.flags.all() if not f.resolved]
+        if not unresolved_flags:
+            continue
+
+        flaggers = []
+        seen = set()
+        for f in unresolved_flags:
+            u = f.flagged_by
+            display = getattr(getattr(u, "profile", None), "display_name", None) or u.username
+            if display not in seen:
+                seen.add(display)
+                flaggers.append(display)
+
+        latest_flag = max(unresolved_flags, key=lambda f: f.created_at)
+
+        flagged_posts_list.append({
+            "post": post,
+            "flaggers": flaggers,
+            "reason": latest_flag.reason,
+            "latest_flag": latest_flag,
+            "first_flag_id": unresolved_flags[0].id,  
+        })
     unresolved_message_flags = (
         MessageFlag.objects
         .filter(resolved=False)
@@ -494,6 +526,7 @@ def admin_dashboard(request):
     total_users = User.objects.count()
     suspended_users = User.objects.filter(profile__status="Suspended").count()
     total_posts = Post.objects.count()
+    flagged_posts_count = len(flagged_posts_list)  
     flagged_posts = unresolved_flags.count()
     flagged_message_count = unresolved_message_flags.count()
 
@@ -501,6 +534,11 @@ def admin_dashboard(request):
 
     return render(request, "admin/admin_dashboard.html", {
         "posts": posts,
+        "flagged_posts_list": flagged_posts_list,  
+        "total_users": total_users,
+        "suspended_users": suspended_users,
+        "total_posts": total_posts,
+        "flagged_posts": flagged_posts_count,     
         "flags": unresolved_flags,
         "message_flags": unresolved_message_flags, 
         "total_users": total_users,

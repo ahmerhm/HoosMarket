@@ -221,72 +221,74 @@
     </div>
     <h2 class="section-title">Flagged Posts</h2>
 
-    {% if flags %}
+    {% if flagged_posts_list %}
     <div class="flag-grid">
-        {% for flag in flags %}
+        {% for item in flagged_posts_list %}
+        {% with post=item.post %}
         <div class="flag-card">
             <div class="flag-label">🚩</div>
 
-            {% if flag.post.images.first %}
+            {% if post.images.first %}
                 <img class="flag-thumb"
-                     src="{{ flag.post.images.first.image.url }}"
+                     src="{{ post.images.first.image.url }}"
                      alt="Flagged Image">
             {% endif %}
 
             <h3 style="margin:0 0 .5rem 0;">
-                <a href="/post/{{ flag.post.id }}/"
+                <a href="/post/{{ post.id }}/"
                    style="color:#c9302c; text-decoration:none;">
-                    {{ flag.post.title }}
+                    {{ post.title }}
                 </a>
             </h3>
 
             <p style="font-size:.9rem; margin-bottom:.4rem;">
-                <strong>Flagged by:</strong> {{ flag.flagged_by.username }}
+                <strong>Flagged by:</strong>
+                {{ item.flaggers|join:", " }}
             </p>
 
             <p style="font-size:.9rem; margin-bottom:.4rem;">
-                <strong>Reason:</strong> {{ flag.reason }}
+                <strong>Reason:</strong> {{ item.reason }}
             </p>
 
             <p style="font-size:.85rem; color:#666;">
-                {{ flag.created_at }}
+                {{ item.latest_flag.created_at }}
             </p>
 
             <div class="admin-controls" style="margin-top:1rem; display:flex; flex-wrap:wrap; gap:0.4rem;">
 
                 <a class="admin-btn"
-                style="background:#5bc0de;"
-                href="{% url 'admin_edit_post' flag.post.id %}">
+                   style="background:#5bc0de;"
+                   href="{% url 'admin_edit_post' post.id %}">
                     Edit Post
                 </a>
 
                 <a class="admin-btn delete"
-                href="{% url 'admin_delete_post' flag.post.id %}"
-                onclick="return confirm('Delete this flagged post?');">
+                   href="{% url 'admin_delete_post' post.id %}"
+                   onclick="return confirm('Delete this flagged post?');">
                     Delete Post
                 </a>
 
-                {% if flag.post.user.profile.status != 'Suspended' %}
+                {% if post.user.profile.status != 'Suspended' %}
                     <a class="admin-btn suspend"
-                    href="{% url 'admin_suspend_user' flag.post.user.id %}"
-                    onclick="return confirm('Suspend this user?');">
+                       href="{% url 'admin_suspend_user' post.user.id %}"
+                       onclick="return confirm('Suspend this user?');">
                         Suspend User
                     </a>
                 {% else %}
                     <a class="admin-btn restore"
-                    href="{% url 'admin_restore_user' flag.post.user.id %}">
+                       href="{% url 'admin_restore_user' post.user.id %}">
                         Restore User
                     </a>
                 {% endif %}
 
+                {# Mark Resolved uses first_flag_id; view will resolve all flags for this post #}
                 <a class="admin-btn resolve"
-                href="{% url 'admin_resolve_flag' flag.id %}">
+                   href="{% url 'admin_resolve_flag' item.first_flag_id %}">
                     Mark Resolved
                 </a>
             </div>
-
-
         </div>
+        {% endwith %}
         {% endfor %}
     </div>
     {% else %}
