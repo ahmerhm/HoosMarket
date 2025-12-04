@@ -247,6 +247,55 @@
         </div>
     </form>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
 
+<script>
+    const imageInput = document.getElementById('new_images');
+
+    imageInput.addEventListener('change', async function (event) {
+        // Collect files from the input
+        const files = Array.from(imageInput.files);
+        
+        // We will store the final list of "clean" files here
+        const dataTransfer = new DataTransfer();
+
+        const processedFiles = await Promise.all(
+            files.map(async (file) => {
+                // Check if it is HEIC
+                if (file.type === "image/heic" || file.name.toLowerCase().endsWith(".heic")) {
+                    try {
+                        // Convert to JPEG
+                        const convertedBlob = await heic2any({
+                            blob: file,
+                            toType: "image/jpeg",
+                            quality: 0.8
+                        });
+                        
+                        // Swap the extension for the name
+                        const newName = file.name.replace(/\.heic$/i, ".jpg");
+                        
+                        // Return the new JPEG file
+                        return new File([convertedBlob], newName, { type: "image/jpeg" });
+
+                    } catch (err) {
+                        console.error("HEIC conversion failed:", err);
+                        alert(`Could not convert ${file.name}. Please upload a PNG or JPG instead.`);
+                        return null; // Return null so we can filter this out
+                    }
+                }
+                // If it's not HEIC, keep it
+                return file;
+            })
+        );
+
+        // Add valid files to our new list
+        processedFiles.forEach(file => {
+            if (file) dataTransfer.items.add(file);
+        });
+
+        // Update the input with the new cleaned list
+        imageInput.files = dataTransfer.files;
+    });
+</script>
 </body>
 </html>
