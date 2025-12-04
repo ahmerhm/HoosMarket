@@ -392,10 +392,22 @@ def admin_edit_post(request, post_id):
             post.title = title
             post.description = description
             post.save(update_fields=["title", "description"])
+            delete_ids = request.POST.getlist('delete_images')
+            if delete_ids:
+                post.images.filter(id__in=delete_ids).delete()
+
+            
+            files = request.FILES.getlist('new_images') 
+            for f in files:
+                PostImages.objects.create(post=post, image=f)
+
             messages.success(request, "Post updated successfully.")
             return redirect("admin_dashboard")
 
-    return render(request, "admin/edit_post.html", {"post": post})
+    return render(request, "admin/edit_post.html", {
+        "post": post,   
+        "existing_images": post.images.all() 
+    })
 
 
 @admin_only

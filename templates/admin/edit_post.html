@@ -135,6 +135,28 @@
             color:#155724;
             border:1px solid #c3e6cb;
         }
+        .image-grid {
+    display: flex;
+    flex-wrap: wrap;    
+    gap: 15px;          
+    margin-bottom: 15px;
+}
+
+
+.image-item {
+    width: 120px;       
+    text-align: center;
+}
+
+.image-item img {
+    width: 120px;      
+    height: 120px;     
+    object-fit: cover;  
+    border-radius: 6px; 
+    border: 1px solid #ccc;
+    display: block;
+    margin-bottom: 5px;
+}
     </style>
 </head>
 <body>
@@ -150,7 +172,7 @@
         {% if user.is_staff %}
             <a href="{% url 'admin_dashboard' %}">Review content</a>
         {% endif %}
-    </div>
+    </div>  
 </nav>
 
 <div class="content">
@@ -164,7 +186,7 @@
         {% endfor %}
     {% endif %}
 
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div class="field">
@@ -187,7 +209,38 @@
                 rows="5"
             >{{ post.description }}</textarea>
         </div>
+    <div class="field">
+        <label>Manage Existing Images</label>
+        
+        {% if existing_images %}
+            <div class="image-grid">
+                {% for img in existing_images %}
+                    <div class="image-item">
+                        <img src="{{ img.image.url }}" alt="Post Image">
+                        
+                        <label style="font-size: 0.85rem; color: #dc3545; cursor: pointer;">
+                            <input type="checkbox" name="delete_images" value="{{ img.id }}">
+                            Delete
+                        </label>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="color: #666; font-style: italic;">No images attached to this post.</p>
+        {% endif %}
+    </div>
 
+        <div class="field">
+            <label for="new_images">Add New Images</label>
+            <input 
+                type="file" 
+                id="new_images" 
+                name="new_images" 
+                multiple
+                accept="image/*"
+            >
+            
+        </div>
         <div class="btn-row">
             <button type="submit" class="btn">Save Changes</button>
             <a href="{% url 'admin_dashboard' %}" class="btn secondary">Cancel</a>
