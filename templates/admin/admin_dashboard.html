@@ -282,18 +282,21 @@
                 Delete Post
             </a>
 
-            {% if post.user.profile.status != 'Suspended' %}
-                <a class="admin-btn suspend"
-                href="{% url 'admin_suspend_user' post.user.id %}"
-                onclick="return confirm('Suspend this user?');">
-                Suspend User
-                </a>
-            {% else %}
-                <a class="admin-btn restore"
-                href="{% url 'admin_restore_user' post.user.id %}">
-                Restore User
-                </a>
+            {% if not post.user.is_staff and not post.user.is_superuser %}
+                {% if post.user.profile.status != 'Suspended' %}
+                    <a class="admin-btn suspend"
+                    href="{% url 'admin_suspend_user' post.user.id %}"
+                    onclick="return confirm('Suspend this user?');">
+                    Suspend User
+                    </a>
+                {% else %}
+                    <a class="admin-btn restore"
+                    href="{% url 'admin_restore_user' post.user.id %}">
+                    Restore User
+                    </a>
+                {% endif %}
             {% endif %}
+
 
             <a class="admin-btn resolve"
                 href="{% url 'admin_resolve_flag' item.first_flag_id %}">
@@ -379,18 +382,20 @@
                 </a>
 
                 {% if msg.sender %}
-                {% if msg.sender.profile.status != 'Suspended' %}
-                    <a class="admin-btn suspend"
-                    href="{% url 'admin_suspend_user' msg.sender.id %}"
-                    onclick="return confirm('Suspend this user?');">
-                    Suspend User
-                    </a>
-                {% else %}
-                    <a class="admin-btn restore"
-                    href="{% url 'admin_restore_user' msg.sender.id %}">
-                    Restore User
-                    </a>
-                {% endif %}
+                    {% if not msg.sender.is_staff and not msg.sender.is_superuser %}
+                        {% if msg.sender.profile.status != 'Suspended' %}
+                            <a class="admin-btn suspend"
+                            href="{% url 'admin_suspend_user' msg.sender.id %}"
+                            onclick="return confirm('Suspend this user?');">
+                            Suspend User
+                            </a>
+                        {% else %}
+                            <a class="admin-btn restore"
+                            href="{% url 'admin_restore_user' msg.sender.id %}">
+                            Restore User
+                            </a>
+                        {% endif %}
+                    {% endif %}
                 {% endif %}
 
                 <a class="admin-btn resolve"
@@ -484,17 +489,19 @@
                    Delete Post
                 </a>
 
-                {% if post.user.profile.status != 'Suspended' %}
-                <a class="admin-btn suspend"
-                   href="{% url 'admin_suspend_user' post.user.id %}"
-                   onclick="return confirm('Suspend this user?');">
-                   Suspend User
-                </a>
-                {% else %}
-                <a class="admin-btn restore"
-                   href="{% url 'admin_restore_user' post.user.id %}">
-                   Restore User
-                </a>
+                {% if post.user and post.user.id and not post.user.is_staff %}
+                    {% if post.user.profile.status != 'Suspended' %}
+                        <a class="admin-btn suspend"
+                        href="{% url 'admin_suspend_user' post.user.id %}"
+                        onclick="return confirm('Suspend this user?');">
+                        Suspend User
+                        </a>
+                    {% else %}
+                        <a class="admin-btn restore"
+                        href="{% url 'admin_restore_user' post.user.id %}">
+                        Restore User
+                        </a>
+                    {% endif %}
                 {% endif %}
 
             </div>
