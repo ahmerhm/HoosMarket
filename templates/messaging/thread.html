@@ -189,7 +189,7 @@
           {% if m.sender_id != request.user.id %}
             <form action="{% url 'messaging:flag_message' m.id %}" method="post" class="flag-form" onclick="return confirmFlag();">
                 {% csrf_token %}
-                <button type="submit" class="flag-btn" title="Flag Post">🚩</button>
+                <button type="submit" class="flag-btn" title="Flag Message">🚩</button>
             </form>
           {% endif %}
         </div>
