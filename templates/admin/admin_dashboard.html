@@ -262,9 +262,9 @@
             </p>
 
             <p style="font-size:.85rem; color:#666;">
-            {% localtime on %}
-                {{ item.latest_flag.created_at|date:"M j, Y, H:i" }}
-            {% endlocaltime %}
+                {% timezone "America/New_York" %}
+                    {{ item.latest_flag.created_at|date:"M j, Y, g:i A" }}
+                {% endtimezone %}
             </p>
 
             <div class="admin-controls"
@@ -363,9 +363,9 @@
             </p>
 
             <p style="font-size:.85rem; color:#666;">
-                {% localtime on %}
-                {{ item.latest_flag.created_at|date:"M j, Y, H:i" }}
-                {% endlocaltime %}
+                {% timezone "America/New_York" %}
+                    {{ item.latest_flag.created_at|date:"M j, Y, g:i A" }}
+                {% endtimezone %}
             </p>
 
             <div class="admin-controls" style="margin-top:1rem; display:flex; flex-wrap:wrap; gap:0.4rem;">
