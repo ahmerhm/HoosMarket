@@ -1,3 +1,4 @@
+{% load tz %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -166,7 +167,8 @@
 
     <div class="messages">
       {% for m in messages %}
-        <div class="bubble {% if m.sender_id == request.user.id %}me{% else %}them{% endif %}" title="{{ m.created_at|date:'D, M j, Y, g:i A' }}">
+        <div class="bubble {% if m.sender_id == request.user.id %}me{% else %}them{% endif %}"
+             title="{% timezone 'America/New_York' %}{{ m.created_at|date:'D, M j, Y, g:i A' }}{% endtimezone %}">
           <div class="meta">
             {% if m.sender %}
               {% with nick=m.sender.profile.nickname full=m.sender.get_full_name %}
@@ -182,7 +184,7 @@
             {% else %}
               user not found
             {% endif %}
-             · {{ m.created_at|date:"M j, H:i" }}
+             · {% timezone "America/New_York" %}{{ m.created_at|date:"M j, g:i A" }}{% endtimezone %}
           </div>
           <div class="bubble-text">{{ m.text|linebreaksbr }}</div>
 
@@ -209,12 +211,11 @@
     if (box) { box.scrollTop = box.scrollHeight; }
   </script>
 
-
-<script>
-function confirmFlag() {
-    return confirm("Confirm that you want to flag this post");
-}
-</script>
+  <script>
+  function confirmFlag() {
+      return confirm("Confirm that you want to flag this post");
+  }
+  </script>
 
 </body>
 </html>
