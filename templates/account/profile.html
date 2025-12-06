@@ -26,33 +26,13 @@
     .site-name {
       font-size: 1.5rem;
       font-weight: bold;
-      letter-spacing: 0.5px;
     }
 
-    .site-name a {
-      color: white;
-      text-decoration: none;
-    }
+    .site-name a { color:white; text-decoration:none; }
+    .site-name a:hover { color:#29b1f0; }
 
-    .site-name a:hover {
-      color: #29b1f0;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 1.5rem;
-    }
-
-    .nav-links a {
-      color: white;
-      text-decoration: none;
-      font-size: 1rem;
-      transition: color 0.3s ease;
-    }
-
-    .nav-links a:hover {
-      color: #29b1f0;
-    }
+    .nav-links { display:flex; gap:1.5rem; }
+    .nav-links a { color:white; text-decoration:none; }
 
     .page-container {
       display:flex;
@@ -68,13 +48,10 @@
       padding:32px;
       width:420px;
       box-shadow:0 2px 8px rgba(0,0,0,.05);
+      text-align:left;
     }
 
-    .card-topbar {
-      display:flex;
-      justify-content:flex-end;
-      margin-bottom:8px;
-    }
+    .card-topbar { display:flex; justify-content:flex-end; margin-bottom:8px; }
 
     .logout-btn {
       background:#e53e3e;
@@ -82,345 +59,331 @@
       border:none;
       padding:8px 14px;
       border-radius:8px;
-      text-decoration:none;
-      font-size:0.9rem;
       cursor:pointer;
     }
 
-    .logout-btn:hover {
-      background:#c53030;
-    }
-
     h1 {
-      margin-bottom:12px;
-      font-size:22px;
       text-align:center;
-      overflow-wrap:anywhere;
-      word-wrap:break-word;
-      word-break:break-word;
+      font-size:22px;
+      margin-bottom:12px;
     }
 
-    p  { margin:10px 0; }
+    p { margin:10px 0; }
 
-    .avatar {
-      width:84px; height:84px; border-radius:50%;
-      background:#eee; margin:0 auto 16px auto;
-    }
-
-    .avatar-upload {
-      display:flex;
-      justify-content:center;
-      margin-bottom:24px;
-    }
+    .avatar-upload { display:flex; justify-content:center; margin-bottom:24px; }
 
     .avatar-preview {
-      width:120px;
-      height:120px;
+      width:120px; height:120px;
       border-radius:50%;
-      background:#e5e7eb;
       border:3px solid #d1d5db;
+      background:#e5e7eb;
+      background-size:cover;
+      background-position:center;
       cursor:pointer;
       display:flex;
       align-items:center;
       justify-content:center;
-      background-size:cover;
-      background-position:center;
       position:relative;
-      transition:all 0.2s ease;
-    }
-
-    .avatar-preview:hover {
-      border-color:#082d52;
-      opacity:0.9;
     }
 
     .avatar-text {
       position:absolute;
-      bottom:0;
-      left:0;
-      right:0;
-      background:rgba(0,0,0,0.7);
+      left:0; right:0; bottom:0;
+      background:rgba(0,0,0,.7);
       color:white;
-      padding:8px;
       text-align:center;
-      font-size:0.85rem;
-      border-radius:0 0 50% 50%;
+      padding:6px 0;
       opacity:0;
-      transition:opacity 0.2s ease;
+      transition:.2s;
+      border-radius:0 0 50% 50%;
     }
-
-    .avatar-preview:hover .avatar-text {
-      opacity:1;
-    }
+    .avatar-preview:hover .avatar-text { opacity:1; }
 
     .btn {
-      display:inline-block;
       padding:.5rem .9rem;
-      border-radius:6px;
       border:1px solid var(--ink);
-      background:#fff;
-      color:#111;
-      text-decoration:none;
+      border-radius:6px;
       cursor:pointer;
+      background:white;
     }
 
-    .btn-row { margin-top:18px; display:flex; gap:.6rem; justify-content:center; }
+    .btn-row { display:flex; gap:.6rem; justify-content:center; margin-top:18px; }
 
-    .edit-link { margin-left:8px; font-size:.9rem; color:#2563eb; text-decoration:none; }
-    .edit-link:hover { text-decoration:underline; }
+    .edit-link { font-size:.9rem; margin-left:6px; }
 
-    .edit-row { margin-top:8px; display:none; gap:6px; }
-    .edit-row input[type="text"], .edit-row textarea {
-      width:100%; padding:.55rem; border:1px solid #ddd; border-radius:8px;
-      font:inherit;
+    .edit-row {
+      margin-top:16px;
+      padding:20px 24px;
+      display:none;
+      flex-direction:column;
+      justify-content:center;
+      background:white;
+      border-radius:10px;
+      box-shadow:0 8px 30px rgba(3,7,18,0.25);
+      position:fixed;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      width: min(94%, 520px);
+      max-height:80vh;
+      overflow:auto;
+      z-index:1001;
+      box-sizing:border-box;
     }
-    .muted { color:#666; }
-    .inline-actions { display:flex; gap:8px; margin-top:8px; }
 
-    #name-text{
-      display:inline-block;
-      max-width:100%;
-      overflow-wrap:anywhere;
-      word-wrap:break-word;
-      word-break:break-word;
-      white-space:normal;
+    .edit-row textarea, .edit-row input {
+      width:100%;
+      padding:11px 13px;
+      border:1px solid #ccc;
+      border-radius:6px;
+      box-sizing:border-box;
     }
 
-    #bio-text{
-      display:inline-block;
-      max-width:100%;
-      overflow-wrap:anywhere;
-      word-wrap:break-word;
-      word-break:break-word;
+    .edit-row textarea {
+      min-height:220px;
+      max-height:60vh;
+      resize:vertical;
+      overflow:auto;
+      background:white;
+    }
+
+    #modal-backdrop {
+      display:none;
+      position:fixed;
+      left:0; top:0; right:0; bottom:0;
+      background:rgba(0,0,0,0.35);
+      z-index:1000;
+    }
+
+    .btn.primary {
+      background:#232d6b;
+      color:#fff;
+      border:none;
+    }
+
+    .interests-form input[type="checkbox"] {
+      accent-color: #232d6b;
+    }
+
+
+    .bio-field {
+      margin-top:0;
+      margin-bottom:10px;
+    }
+
+    .bio-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:4px;
+    }
+
+    #bio-text {
+      margin:0;
+      padding:0;
       white-space:pre-wrap;
+      line-height:1.5;
+      color:#333;
+    }
+
+    .muted {
+      color:#999;
+      font-style:italic;
     }
   </style>
 </head>
+
 <body>
 
-  <nav>
-    <div class="site-name">
-      <a href="/" class="site-link">Hoos Market</a>
-    </div>
-    <div class="nav-links">
-      <a href="{% url 'newpost' %}">New Post</a>
-      <a href="{% url 'messaging:inbox' %}">Messages</a>
-      <a href="/myaccount/">My Account</a>
-      {% if user.is_staff %}
-        <a href="{% url 'admin_dashboard' %}">Review content</a>
-      {% endif %}
-    </div>
-  </nav>
+<nav>
+  <div class="site-name"><a href="/">Hoos Market</a></div>
+  <div class="nav-links">
+    <a href="{% url 'newpost' %}">New Post</a>
+    <a href="{% url 'messaging:inbox' %}">Messages</a>
+    <a href="/myaccount/">My Account</a>
+    {% if user.is_staff %}
+      <a href="{% url 'admin_dashboard' %}">Review content</a>
+    {% endif %}
+  </div>
+</nav>
 
-  <div class="page-container">
-    <div class="card">
+<div class="page-container">
+<div class="card">
 
-      <div class="card-topbar">
-        <a href="{% url 'account_logout' %}" class="logout-btn">Log Out</a>
-      </div>
+  <div class="card-topbar">
+    <a href="{% url 'account_logout' %}" class="logout-btn">Log Out</a>
+  </div>
 
-      <div class="avatar-upload">
-        <form method="post" enctype="multipart/form-data" action="{% url 'profile' %}">
-          {% csrf_token %}
-          <input type="file" name="image" id="avatar-input" accept="image/*" style="display:none;">
-          
-          <label for="avatar-input" class="avatar-preview" id="avatarPreview"
-            {% if profile.avatar %}
-            style="background-image: url('{{ profile.avatar.url }}');">
-            {% else %}
-            style="background-image: none;">
-            <span style="font-size: 3rem; opacity: 0.5;">📷</span>
-            {% endif %}
-            <span class="avatar-text" id="avatarText">
-              {% if profile.avatar %}
-                Change Picture
-              {% else %}
-                Select Picture
-              {% endif %}
-            </span>
-          </label>
-          
-          <button class="btn" type="submit" id="uploadBtn" style="display:none;">Upload</button>
-        </form>
-      </div>
-
-      <h1>
-        Hello,
-        {% if profile.nickname %}
-          {{ profile.nickname }}
-        {% elif user.get_full_name %}
-          {{ user.get_full_name }}
-        {% else %}
-          {{ user.username }}
-        {% endif %}!
-      </h1>
-
-      <p>
-        <strong>Display name (nickname):</strong>
-        <span id="name-text">
-          {% if profile.nickname %}
-            {{ profile.nickname }}
-          {% elif user.get_full_name %}
-            {{ user.get_full_name }}
-          {% else %}
-            {{ user.username }}
-          {% endif %}
-        </span>
-        <a href="#" id="name-edit-toggle" class="edit-link">Edit</a>
-      </p>
-      <div id="name-edit-row" class="edit-row">
-        <input
-          type="text"
-          id="name-input"
-          value="{% if profile.nickname %}{{ profile.nickname }}{% elif user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}"
-          placeholder="Nickname / handle (optional)"
-          maxlength="64" />
-        <small class="muted">Max 64 characters.</small>
-        <div class="inline-actions">
-          <button class="btn" id="name-save">Save</button>
-          <button class="btn" id="name-cancel" type="button">Cancel</button>
-        </div>
-      </div>
-
-      <p><strong>Email:</strong> {{ user.email }}</p>
-
-      <p>
-        <strong>Bio:</strong>
-        <span id="bio-text">
-          {% if profile and profile.bio %}
-            {{ profile.bio }}
-          {% else %}
-            <span class="muted">Add a short bio</span>
-          {% endif %}
-        </span>
-        <a href="#" id="bio-edit-toggle" class="edit-link">Edit</a>
-      </p>
-      <div id="bio-edit-row" class="edit-row">
-        <textarea id="bio-input" rows="3" placeholder="Write something about yourself…">{% if profile and profile.bio %}{{ profile.bio }}{% endif %}</textarea>
-        <div class="inline-actions">
-          <button class="btn" id="bio-save">Save</button>
-          <button class="btn" id="bio-cancel" type="button">Cancel</button>
-        </div>
-      </div>
-
-      <p>
-        <strong>Sustainability interests:</strong>
-        {% if profile.sustainability_interests %}
-          <ul style="margin:6px 0 0 18px; padding:0;">
-            {% for key, label in SUSTAINABILITY_CHOICES %}
-              {% if key in profile.sustainability_interests %}
-                <li>{{ label }}</li>
-              {% endif %}
-            {% endfor %}
-          </ul>
-        {% else %}
-          <span class="muted">Add interests to help match you with relevant activities.</span>
+  <div class="avatar-upload">
+    <form method="post" enctype="multipart/form-data" action="{% url 'profile' %}">
+      {% csrf_token %}
+      <input type="file" name="image" id="avatar-input" accept="image/*" style="display:none;">
+      <label for="avatar-input" class="avatar-preview"
+             {% if profile.avatar %}
+               style="background-image:url('{{ profile.avatar.url }}')"
+             {% endif %}>
+        {% if not profile.avatar %}
+          <span style="font-size:3rem;opacity:.5;">📷</span>
         {% endif %}
-      </p>
+        <span class="avatar-text">
+          {% if profile.avatar %}Change Picture{% else %}Select Picture{% endif %}
+        </span>
+      </label>
+    </form>
+  </div>
 
-      <form method="post" action="{% url 'profile' %}" style="margin-top:8px;">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="update_interests">
-        <div style="display:flex; flex-direction:column; gap:4px; font-size:0.9rem; margin-bottom:8px;">
-          {% for key, label in SUSTAINABILITY_CHOICES %}
-            <label>
-              <input
-                type="checkbox"
-                name="interests"
-                value="{{ key }}"
-                {% if profile.sustainability_interests and key in profile.sustainability_interests %}checked{% endif %}
-              >
-              {{ label }}
-            </label>
-          {% endfor %}
-        </div>
-        <button type="submit" class="btn">Save interests</button>
-      </form>
+  <h1>Hello, {{ profile.nickname|default:user.get_full_name|default:user.username }}!</h1>
 
-      <p>
-        <strong>Status:</strong>
-        {% if user.is_staff %}
-          Admin
-        {% else %}
-          Member
-        {% endif %}
-      </p>
+  <p><strong>Display name (nickname):</strong>
+    <span id="name-text">
+      {{ profile.nickname|default:user.get_full_name|default:user.username }}
+    </span>
+    <a href="#" id="name-edit-toggle" class="edit-link">Edit</a>
+  </p>
 
-      <div class="btn-row">
-        <a class="btn" href="{% url 'messaging:inbox' %}">Messages</a>
-        <a class="btn" href="/myposts/">My Posts</a>
-        <form method="post" action="{% url 'delete_account' %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.')">
-          {% csrf_token %}
-          <button type="submit" class="btn" style="background:#e53e3e; color:#fff; border:none;">Delete Account</button>
-        </form>
-      </div>
-
-      <form id="profile-form" method="post" action="{% url 'profile' %}" style="display:none">
-        {% csrf_token %}
-        <input type="hidden" name="action" id="action-field">
-        <input type="hidden" name="nickname" id="nickname-field">
-        <textarea name="bio" id="bio-field"></textarea>
-      </form>
+    <div id="name-edit-row" class="edit-row">
+    <input type="text" id="name-input"
+      value="{{ profile.nickname|default:user.get_full_name|default:user.username }}">
+    <div class="inline-actions">
+      <button class="btn primary" id="name-save">Save</button>
+      <button class="btn" id="name-cancel" type="button">Cancel</button>
     </div>
   </div>
 
-  <script>
-    function toggle(el, show) { el.style.display = show ? 'block' : 'none'; }
+  <p><strong>Email:</strong> {{ user.email }}</p>
 
-    const nameText    = document.getElementById('name-text');
-    const nameToggle  = document.getElementById('name-edit-toggle');
-    const nameRow     = document.getElementById('name-edit-row');
-    const nameInput   = document.getElementById('name-input');
-    const nameSave    = document.getElementById('name-save');
-    const nameCancel  = document.getElementById('name-cancel');
+  
+  <div class="bio-field">
+    <div class="bio-header">
+      <strong>Bio:</strong>
+      <a href="#" id="bio-edit-toggle" class="edit-link">Edit</a>
+    </div>
+    <p id="bio-text">{% if profile.bio %}{{ profile.bio }}{% else %}<span class="muted">Add a short bio</span>{% endif %}</p>
+  </div>
 
-    const bioText   = document.getElementById('bio-text');
-    const bioToggle = document.getElementById('bio-edit-toggle');
-    const bioRow    = document.getElementById('bio-edit-row');
-    const bioInput  = document.getElementById('bio-input');
-    const bioSave   = document.getElementById('bio-save');
-    const bioCancel = document.getElementById('bio-cancel');
+  <div id="bio-edit-row" class="edit-row">
+    <textarea id="bio-input" maxlength="500">{% if profile.bio %}{{ profile.bio }}{% endif %}</textarea>
+    <div class="inline-actions">
+      <button class="btn primary" id="bio-save">Save</button>
+      <button class="btn" id="bio-cancel" type="button">Cancel</button>
+    </div>
+  </div>
 
-    const form        = document.getElementById('profile-form');
-    const actionFld   = document.getElementById('action-field');
-    const nicknameFld = document.getElementById('nickname-field');
-    const bioFld      = document.getElementById('bio-field');
+  <p><strong>Sustainability interests:</strong></p>
+  {% if profile.sustainability_interests %}
+  <ul>
+    {% for key, label in SUSTAINABILITY_CHOICES %}
+      {% if key in profile.sustainability_interests %}
+      <li>{{ label }}</li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+  {% else %}
+    <span class="muted">Add interests to help match you with relevant activities.</span>
+  {% endif %}
 
-    const avatarInput = document.getElementById('avatar-input');
-    const avatarForm  = avatarInput ? avatarInput.closest('form') : null;
-    if (avatarInput && avatarForm) {
-      avatarInput.addEventListener('change', function() {
-        if (this.files && this.files[0]) {
-          avatarForm.submit();
-        }
-      });
-    }
+  <form method="post" action="{% url 'profile' %}" class="interests-form">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="update_interests">
+    {% for key, label in SUSTAINABILITY_CHOICES %}
+      <label><input type="checkbox" name="interests" value="{{ key }}"
+        {% if key in profile.sustainability_interests %}checked{% endif %}> {{ label }}</label><br>
+    {% endfor %}
+    <button type="submit" class="btn primary">Save interests</button>
+  </form>
 
-    nameToggle.addEventListener('click', (e) => {
-      e.preventDefault();
-      toggle(nameRow, true);
-      nameInput.focus();
-    });
-    nameCancel.addEventListener('click', () => toggle(nameRow, false));
-    nameSave.addEventListener('click', (e) => {
-      e.preventDefault();
-      actionFld.value   = 'update_nickname';
-      nicknameFld.value = nameInput.value.trim().slice(0, 64);
-      form.submit();
-    });
+  <p><strong>Status:</strong> {% if user.is_staff %}Admin{% else %}Member{% endif %}</p>
 
-    bioToggle.addEventListener('click', (e) => {
-      e.preventDefault();
-      toggle(bioRow, true);
-      bioInput.focus();
-    });
-    bioCancel.addEventListener('click', () => toggle(bioRow, false));
-    bioSave.addEventListener('click', (e) => {
-      e.preventDefault();
-      actionFld.value = 'update_bio';
-      bioFld.value    = bioInput.value;
-      form.submit();
-    });
-  </script>
+  <div class="btn-row">
+    <a class="btn" href="{% url 'messaging:inbox' %}">Messages</a>
+    <a class="btn" href="/myposts/">My Posts</a>
+    <form method="post" action="{% url 'delete_account' %}" onsubmit="return confirm('Delete account?')">
+      {% csrf_token %}
+      <button type="submit" class="btn" style="background:#e53e3e;color:white;border:none;">Delete Account</button>
+    </form>
+  </div>
+
+  <form id="profile-form" method="post" action="{% url 'profile' %}" style="display:none;">
+    {% csrf_token %}
+    <input type="hidden" name="action" id="action-field">
+    <input type="hidden" name="nickname" id="nickname-field">
+    <textarea name="bio" id="bio-field"></textarea>
+  </form>
+
+</div>
+</div>
+
+<div id="modal-backdrop"></div>
+
+<script>
+function showModal(el){
+  document.getElementById('modal-backdrop').style.display='block';
+  el.style.display='flex';
+}
+function hideModal(el){
+  document.getElementById('modal-backdrop').style.display='none';
+  el.style.display='none';
+}
+
+function autoResizeTextarea(el){
+  if(!el) return;
+  el.style.height = 'auto';
+  el.style.height = (el.scrollHeight + 2) + 'px';
+}
+
+const nameRow=document.getElementById('name-edit-row');
+const nameToggle=document.getElementById('name-edit-toggle');
+const nameInput=document.getElementById('name-input');
+const nameSave=document.getElementById('name-save');
+const nameCancel=document.getElementById('name-cancel');
+
+const bioRow=document.getElementById('bio-edit-row');
+const bioToggle=document.getElementById('bio-edit-toggle');
+const bioInput=document.getElementById('bio-input');
+const bioSave=document.getElementById('bio-save');
+const bioCancel=document.getElementById('bio-cancel');
+
+const form=document.getElementById('profile-form');
+const actionFld=document.getElementById('action-field');
+const nicknameFld=document.getElementById('nickname-field');
+const bioFld=document.getElementById('bio-field');
+
+nameToggle.onclick=e=>{ e.preventDefault(); showModal(nameRow); };
+nameCancel.onclick=()=>hideModal(nameRow);
+nameSave.onclick=e=>{
+  e.preventDefault();
+  actionFld.value='update_nickname';
+  nicknameFld.value=nameInput.value.trim();
+  form.submit();
+};
+
+bioToggle.onclick=e=>{ e.preventDefault(); showModal(bioRow); };
+bioCancel.onclick=()=>hideModal(bioRow);
+bioSave.onclick=e=>{
+  e.preventDefault();
+  actionFld.value='update_bio';
+  bioFld.value=bioInput.value.trim();
+  form.submit();
+};
+
+bioInput.addEventListener('input', ()=>autoResizeTextarea(bioInput));
+const originalShowModal = showModal;
+showModal = function(el){
+  originalShowModal(el);
+  if(el === bioRow){
+    autoResizeTextarea(bioInput);
+    setTimeout(()=> bioInput.focus(), 50);
+  }
+  if(el === nameRow){
+    setTimeout(()=> nameInput.focus(), 50);
+  }
+};
+
+document.getElementById('modal-backdrop').onclick = function(){
+  document.querySelectorAll('.edit-row').forEach(r=>r.style.display='none');
+  this.style.display='none';
+};
+</script>
+
 </body>
 </html>
