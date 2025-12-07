@@ -235,7 +235,7 @@ def new_post(request):
     if request.method == "POST":
         post_title = request.POST.get("title")
         post_price = request.POST.get("price")
-        post_description = request.POST.get("description")
+        post_description = (request.POST.get("description") or "")[:1000]
         post_category = request.POST.get("category")
         post_images = request.FILES.getlist("images")
 
@@ -384,7 +384,7 @@ def admin_edit_post(request, post_id):
 
     if request.method == "POST":
         title = (request.POST.get("title") or "").strip()
-        description = request.POST.get("description") or ""
+        description = (request.POST.get("description") or "")[:1000]
 
         if not title:
             messages.error(request, "Title is required.")
