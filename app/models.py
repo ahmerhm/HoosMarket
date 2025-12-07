@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.core.validators import MaxLengthValidator
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -17,7 +18,7 @@ class Profile(models.Model):
     )
 
     name = models.CharField(max_length=100, blank=True, default="")
-    bio = models.TextField(blank=True, default="")
+    bio = models.TextField(blank=True, default="", validators=[MaxLengthValidator(1000)])
     interests = models.CharField(max_length=255, blank=True)
     status = models.CharField(max_length=50, default="Member")
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)

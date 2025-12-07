@@ -148,6 +148,7 @@
         <h2>Short bio (optional)</h2>
         <textarea
           name="bio"
+          maxlength="1000"
           placeholder="Tell others a bit about yourself, your interests, or what you’re looking for…">{% if bio %}{{ bio }}{% elif profile.bio %}{{ profile.bio }}{% endif %}</textarea>
       </div>
 

@@ -81,7 +81,7 @@ def onboarding(request):
     if request.method == "POST":
         interests = request.POST.getlist("interests")
         nickname = (request.POST.get("nickname") or "").strip()
-        bio = request.POST.get("bio") or ""
+        bio = (request.POST.get("bio") or "")[:1000]
 
         max_len = Profile._meta.get_field("nickname").max_length or 64
         if nickname:
@@ -107,7 +107,7 @@ def onboarding(request):
         if nickname:
             profile_obj.nickname = nickname
         if bio:
-            profile_obj.bio = bio
+            profile_obj.bio = bio[:1000]
 
         profile_obj.onboarding_complete = True
         profile_obj.save()
@@ -209,7 +209,8 @@ def profile(request):
             return redirect("profile")
 
         elif action == "update_bio":
-            profile_obj.bio = request.POST.get("bio") or ""
+            new_bio = (request.POST.get("bio") or "")[:1000]
+            profile_obj.bio = new_bio
             profile_obj.save(update_fields=["bio"])
             return redirect("profile")
 
