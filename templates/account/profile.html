@@ -66,6 +66,8 @@
       text-align:center;
       font-size:22px;
       margin-bottom:12px;
+      overflow-wrap: break-word;  
+      word-break: break-word;
     }
 
     p { margin:10px 0; }
@@ -165,7 +167,6 @@
       accent-color: #232d6b;
     }
 
-
     .bio-field {
       margin-top:0;
       margin-bottom:10px;
@@ -184,6 +185,13 @@
       white-space:pre-wrap;
       line-height:1.5;
       color:#333;
+      overflow-wrap: break-word;  
+      word-break: break-word;
+    }
+
+    #name-text {
+      overflow-wrap: break-word;  
+      word-break: break-word;
     }
 
     .muted {
@@ -241,8 +249,11 @@
     <a href="#" id="name-edit-toggle" class="edit-link">Edit</a>
   </p>
 
-    <div id="name-edit-row" class="edit-row">
-    <input type="text" id="name-input"
+  <div id="name-edit-row" class="edit-row">
+    <input
+      type="text"
+      id="name-input"
+      maxlength="64"
       value="{{ profile.nickname|default:user.get_full_name|default:user.username }}">
     <div class="inline-actions">
       <button class="btn primary" id="name-save">Save</button>
@@ -252,7 +263,6 @@
 
   <p><strong>Email:</strong> {{ user.email }}</p>
 
-  
   <div class="bio-field">
     <div class="bio-header">
       <strong>Bio:</strong>
@@ -353,7 +363,7 @@ nameCancel.onclick=()=>hideModal(nameRow);
 nameSave.onclick=e=>{
   e.preventDefault();
   actionFld.value='update_nickname';
-  nicknameFld.value=nameInput.value.trim();
+  nicknameFld.value = nameInput.value.trim().slice(0, 64);
   form.submit();
 };
 
