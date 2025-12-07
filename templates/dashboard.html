@@ -278,18 +278,18 @@
 
         <div style="display:flex; align-items:center; margin-bottom:1rem;">
 
-            <div class="avatar"
-                {% if post.user.profile.avatar %}
-                    style="background-image:url('{{ post.user.profile.avatar.url }}');"
-                {% endif %}
-            >
-                {% if not post.user.profile.avatar %}
-                    <span style="font-size:2rem; opacity:0.4;">📷</span>
-                {% endif %}
-            </div>
+            <a href="{% if post.user == request.user %}{% url 'profile' %}{% else %}{% url 'user_profile' post.user.id %}{% endif %}" style="text-decoration: none; display: flex; align-items: center; gap: 1rem;">
+                <div class="avatar"
+                    {% if post.user.profile.avatar %}
+                        style="background-image:url('{{ post.user.profile.avatar.url }}');"
+                    {% endif %}
+                >
+                    {% if not post.user.profile.avatar %}
+                        <span style="font-size:2rem; opacity:0.4;">📷</span>
+                    {% endif %}
+                </div>
 
-            <div>
-                <h3 style="margin:0;">
+                <h3 style="margin:0; color: #082d52; cursor: pointer; transition: color 0.3s ease;">
                     {% if post.user.profile.nickname %}
                         {{ post.user.profile.nickname }}
                     {% elif post.user.get_full_name %}
@@ -298,7 +298,7 @@
                         {{ post.user.username }}
                     {% endif %}
                 </h3>
-            </div>
+            </a>
 
         </div>
 

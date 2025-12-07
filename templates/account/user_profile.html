@@ -1,0 +1,343 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ viewed_profile.display_name }}'s Profile</title>
+  <style>
+    :root { --ink:#082d52; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background:#fafafa;
+      margin:0;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #082d52;
+      color: white;
+      padding: 0.75rem 2rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .site-name {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .site-name a { color:white; text-decoration:none; }
+    .site-name a:hover { color:#29b1f0; }
+
+    .nav-links { display:flex; gap:1.5rem; }
+    .nav-links a { color:white; text-decoration:none; }
+
+    .page-container {
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-start;
+      align-items:center;
+      min-height:calc(100vh - 70px);
+      padding:32px 16px;
+    }
+
+    .content-wrapper {
+      display:flex;
+      gap:24px;
+      width:100%;
+      max-width:1200px;
+    }
+
+    .profile-section {
+      background:white;
+      border:1px solid #ddd;
+      border-radius:14px;
+      padding:32px;
+      width:420px;
+      flex-shrink:0;
+      box-shadow:0 2px 8px rgba(0,0,0,.05);
+      text-align:left;
+      height:fit-content;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 16px;
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 500;
+      width:100%;
+      max-width:1200px;
+    }
+
+    .back-link:hover {
+      color: #29b1f0;
+    }
+
+    h1 {
+      text-align:center;
+      font-size:22px;
+      margin-bottom:12px;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin-top: 24px;
+      margin-bottom: 12px;
+      color: var(--ink);
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 8px;
+    }
+
+    p { margin:10px 0; }
+
+    .avatar-display {
+      display:flex;
+      justify-content:center;
+      margin-bottom:24px;
+    }
+
+    .avatar-preview {
+      width:120px;
+      height:120px;
+      border-radius:50%;
+      border:3px solid #d1d5db;
+      background:#e5e7eb;
+      background-size:cover;
+      background-position:center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .btn {
+      padding:.5rem .9rem;
+      border:1px solid var(--ink);
+      border-radius:6px;
+      cursor:pointer;
+      background:white;
+      text-decoration:none;
+      display:inline-block;
+    }
+
+    .btn:hover {
+      background:#f5f5f5;
+    }
+
+    .btn.primary {
+      background:#232d6b;
+      color:#fff;
+      border:none;
+    }
+
+    .btn.primary:hover {
+      background:#1a2150;
+    }
+
+    .btn-row {
+      display:flex;
+      gap:.6rem;
+      justify-content:center;
+      margin-top:18px;
+    }
+
+    .muted {
+      color:#999;
+      font-style:italic;
+    }
+
+    .bio-text {
+      margin:0;
+      padding:0;
+      white-space:pre-wrap;
+      line-height:1.5;
+      color:#333;
+    }
+
+    .interests-list {
+      list-style: none;
+      padding: 0;
+      margin: 10px 0;
+    }
+
+    .interests-list li {
+      padding: 6px 0;
+      color: #333;
+    }
+
+    .posts-section {
+      background:white;
+      border:1px solid #ddd;
+      border-radius:14px;
+      padding:32px;
+      flex:1;
+      min-width:0;
+      box-shadow:0 2px 8px rgba(0,0,0,.05);
+    }
+
+    @media (max-width: 1024px) {
+      .content-wrapper {
+        flex-direction:column;
+      }
+      .profile-section {
+        width:100%;
+      }
+    }
+
+    .posts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-top: 16px;
+    }
+
+    .post {
+      border: 2px solid #ccc;
+      padding: 1rem;
+      border-radius: 6px;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .post h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 16px;
+    }
+
+    .post p {
+      margin: 6px 0;
+      font-size: 14px;
+    }
+
+    .post-price {
+      font-weight: bold;
+      color: #232d6b;
+      font-size: 18px;
+      margin: 0 0 0.75rem 0;
+    }
+
+    .post-category {
+      font-size: 0.8rem;
+      color: #777777;
+      font-weight: 300;
+    }
+
+    .post-images {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .post-images img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+
+    .no-posts {
+      text-align: center;
+      padding: 24px;
+      color: #999;
+      font-style: italic;
+    }
+  </style>
+</head>
+
+<body>
+
+<nav>
+  <div class="site-name"><a href="/">Hoos Market</a></div>
+  <div class="nav-links">
+    <a href="{% url 'newpost' %}">New Post</a>
+    <a href="{% url 'messaging:inbox' %}">Messages</a>
+    <a href="/myaccount/">My Account</a>
+    {% if user.is_staff %}
+      <a href="{% url 'admin_dashboard' %}">Review content</a>
+    {% endif %}
+  </div>
+</nav>
+
+<div class="page-container">
+  <a href="{% url 'dashboard' %}" class="back-link">← Back to Dashboard</a>
+
+  <div class="content-wrapper">
+    <div class="profile-section">
+    <div class="avatar-display">
+        <div class="avatar-preview"
+             {% if viewed_profile.avatar %}
+               style="background-image:url('{{ viewed_profile.avatar.url }}')"
+             {% endif %}>
+          {% if not viewed_profile.avatar %}
+            <span style="font-size:3rem;opacity:.5;">📷</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <h1>{{ viewed_profile.display_name }}</h1>
+
+      <p><strong>Display name:</strong> {{ viewed_profile.display_name }}</p>
+      <p><strong>Email:</strong> {{ viewed_user.email }}</p>
+
+      <div>
+        <strong>Bio:</strong>
+        <p class="bio-text">{% if viewed_profile.bio %}{{ viewed_profile.bio }}{% else %}<span class="muted">No bio added</span>{% endif %}</p>
+      </div>
+
+      <div>
+        <h2>Sustainability Interests</h2>
+        {% if viewed_profile.sustainability_interests %}
+        <ul class="interests-list">
+          {% for key, label in SUSTAINABILITY_CHOICES %}
+            {% if key in viewed_profile.sustainability_interests %}
+            <li>{{ label }}</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+        {% else %}
+          <span class="muted">No interests added</span>
+        {% endif %}
+      </div>
+
+      <div class="btn-row">
+        <a href="{% url 'messaging:compose' viewed_user.id %}" class="btn primary">Send Message</a>
+      </div>
+      </div>
+
+      <div class="posts-section">
+        <h2>Posts by {{ viewed_profile.display_name }}</h2>
+        
+        {% if posts %}
+        <div class="posts-grid">
+          {% for post in posts %}
+          <div class="post">
+            {% if post.images.all %}
+              <div class="post-images">
+                {% for img in post.images.all %}
+                  <img src="{{ img.image.url }}"
+                    alt="Post image"
+                    style="width:100px; height:100px; object-fit:cover; border-radius:4px;">
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            <h3>{{ post.title }}</h3>
+            <p class="post-price">${{ post.price }}</p>
+            <p>{{ post.description }}</p>
+            <p><span class="post-category">{{ post.get_category_display }}</span></p>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="no-posts">This user hasn't posted anything yet.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

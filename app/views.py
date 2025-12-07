@@ -592,3 +592,25 @@ def suspended_page_view(request):
         else:
             return redirect('dashboard')
     return render(request, 'suspended.html')
+
+
+@login_required
+def user_profile(request, user_id):
+    """
+    Display another user's profile page (read-only).
+    Shows their profile info, posts, and interests.
+    """
+    viewed_user = get_object_or_404(User, id=user_id)
+    viewed_profile = get_object_or_404(Profile, user=viewed_user)
+    
+    # Get user's posts, excluding those hidden from current user
+    user_posts = Post.objects.filter(user=viewed_user).exclude(hidden_from=request.user).order_by('-created_at')
+    
+    context = {
+        "viewed_user": viewed_user,
+        "viewed_profile": viewed_profile,
+        "posts": user_posts,
+        "SUSTAINABILITY_CHOICES": SUSTAINABILITY_CHOICES,
+    }
+    
+    return render(request, "account/user_profile.html", context)

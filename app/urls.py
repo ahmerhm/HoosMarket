@@ -43,6 +43,7 @@ urlpatterns = [
     path("dashboard/", views.dashboard, name="dashboard"),
     path("setup/", views.onboarding, name="onboarding"),
     path("myaccount/", views.profile, name="profile"),
+    path("user/<int:user_id>/", views.user_profile, name="user_profile"),
     path("messages/", include(("messaging.urls", "messaging"), namespace="messaging")),
     path("newpost/", views.new_post, name="newpost"),
     path("delete-account/", views.delete_account, name="delete_account"),
