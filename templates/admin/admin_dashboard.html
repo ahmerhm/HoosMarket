@@ -248,7 +248,9 @@
 
             <p>
             <strong>Posted by:</strong>
-            {{ post.user.profile.display_name }}
+            <a href="{% if post.user == request.user %}{% url 'profile' %}{% else %}{% url 'user_profile' post.user.id %}{% endif %}" style="color: #082d52; text-decoration: none; cursor: pointer;">
+                {{ post.user.profile.display_name }}
+            </a>
             (<em>Status: {{ post.user.profile.status }}</em>)
             </p>
 
@@ -470,7 +472,9 @@
 
             <p>
                 <strong>Posted by:</strong> 
-                {{ post.user.profile.display_name }}
+                <a href="{% if post.user == request.user %}{% url 'profile' %}{% else %}{% url 'user_profile' post.user.id %}{% endif %}" style="color: #082d52; text-decoration: none; cursor: pointer;">
+                    {{ post.user.profile.display_name }}
+                </a>
                 (<em>Status: {{ post.user.profile.status }}</em>)
             </p>
 
