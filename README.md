@@ -1,4 +1,5 @@
-<<<<<<< HEAD
+# Marketplace for UVA Students
+
 # Project B-16 — Social Posts & Messaging Platform
 
 **Project B-16** is a lightweight Django-based social posting and messaging platform designed for rapid development and deployment. It provides user profiles, image-backed posts, threaded messaging, basic moderation tools, and an administrative dashboard — making it ideal for small communities and prototypes.
@@ -73,6 +74,3 @@ python manage.py test
 - `media/` — uploaded avatars and post images
 - `templates/` — site templates and admin views
 
-=======
-# Marketplace for UVA Students
->>>>>>> 37d965937dcbe819837efb56883495ce2cc6975f
