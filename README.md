@@ -1,10 +1,8 @@
 # Marketplace for UVA Students
 
-# Hoos Market — Social Posts & Messaging Platform
+# Hoos Market " Social Posts & Messaging Platform
 
-**Hoos Market** is a lightweight Django-based social posting and messaging platform designed for rapid development and deployment. It provides user profiles, image-backed posts, threaded messaging, basic moderation tools, and an administrative dashboard — making it ideal for small communities and prototypes.
-
----
+**Hoos Market** is a lightweight Django-based social posting and messaging platform designed for rapid development and deployment. It provides user profiles, image-backed posts, threaded messaging, basic moderation tools, and an administrative dashboard making it ideal for small communities and prototypes.
 
 ## Key Features ✅
 
@@ -22,7 +20,7 @@
 - Optional: Postgres, AWS S3 for media, Heroku deployment
 - Key dependencies: `django`, `django-allauth`, `Pillow`, `django-storages`, `boto3`, `gunicorn`
 
-## Quickstart — Local Development 💡
+## Quickstart Local Development 💡
 
 1. Create and activate a virtual environment:
 
