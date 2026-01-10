@@ -1,8 +1,8 @@
 # Marketplace for UVA Students
 
-# Project B-16 — Social Posts & Messaging Platform
+# Hoos Market — Social Posts & Messaging Platform
 
-**Project B-16** is a lightweight Django-based social posting and messaging platform designed for rapid development and deployment. It provides user profiles, image-backed posts, threaded messaging, basic moderation tools, and an administrative dashboard — making it ideal for small communities and prototypes.
+**Hoos Market** is a lightweight Django-based social posting and messaging platform designed for rapid development and deployment. It provides user profiles, image-backed posts, threaded messaging, basic moderation tools, and an administrative dashboard — making it ideal for small communities and prototypes.
 
 ---
 
